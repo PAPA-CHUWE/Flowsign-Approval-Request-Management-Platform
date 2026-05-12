@@ -87,7 +87,7 @@ export function ApprovalPipelineCard({ stats, byType }: ApprovalPipelineCardProp
                   fontFamily: "DM Sans",
                   boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
                 }}
-                formatter={(value: number) => [value, ""]}
+                formatter={(value) => [value, ""]}
               />
             </PieChart>
           </ResponsiveContainer>
