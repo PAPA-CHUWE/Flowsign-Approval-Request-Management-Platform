@@ -224,7 +224,7 @@ function SigningIllustration() {
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-[#FAFAF8] font-dm-sans overflow-hidden">
+    <div className="min-h-screen bg-[#FAFAF8] font-dm-sans overflow-hidden mt-24">
       {/* Hero — 2 columns */}
       <section className="min-h-screen pt-16 grid grid-cols-2 max-w-[1280px] mx-auto px-[clamp(24px,5vw,80px)] gap-10 items-center">
         {/* LEFT: Copy */}

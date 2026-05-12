@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 
 // ─── Nav items ────────────────────────────────────────────────────────────────
 const NAV_LINKS = [
-  { label: "Product",    href: "/product"   },
-  { label: "Pricing",    href: "/pricing"   },
-  { label: "Customers",  href: "/customers" },
-  { label: "Contact Us", href: "/contact"   },
+  {label:"Home",href:""},
+  { label: "Product",    href: "#features"   },
+  { label: "Pricing",    href: "#pricing"   },
+  { label: "Contact Us", href: "#contactus"   },
 ];
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────

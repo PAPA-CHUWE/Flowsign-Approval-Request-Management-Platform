@@ -333,7 +333,7 @@ const PricingPage = () => {
   const [annual, setAnnual] = useState(false);
 
   return (
-    <div className="bg-white min-h-screen font-dm-sans">
+    <div className="bg-white min-h-screen font-dm-sans" id="pricing">
 
       {/* Hero */}
       <div

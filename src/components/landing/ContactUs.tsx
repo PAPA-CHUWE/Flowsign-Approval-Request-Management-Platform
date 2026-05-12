@@ -77,7 +77,7 @@ const ContactUs = () => {
   const valid = form.name.trim() && form.email.includes("@") && form.message.trim();
 
   return (
-    <div className="bg-brand-neutral-pale min-h-screen font-dm-sans">
+    <div className="bg-brand-neutral-pale min-h-screen font-dm-sans" id="contactus">
       <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-[clamp(20px,5vw,80px)] py-[60px]">
         <div className="w-full max-w-[980px] bg-white rounded-[24px] shadow-[0_8px_48px_rgba(0,0,0,0.08),0_2px_12px_rgba(0,0,0,0.04)] overflow-hidden grid grid-cols-2" data-aos="fade-up">
 
