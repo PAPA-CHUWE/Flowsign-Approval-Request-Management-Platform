@@ -1,4 +1,3 @@
-import { DashboardShell } from "@/components/layout/DashboardShell"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { ApprovalQueue } from "@/components/workflow/ApprovalQueue"
 import { REQUEST_TYPE } from "@/constants/requestType.constants"
@@ -19,14 +18,12 @@ const approvalTickets: Ticket[] = [
 
 export default function ApprovalsPage() {
   return (
-    <DashboardShell>
-      <div className="grid gap-6">
-        <PageHeader
-          title="Approvals"
-          description="Approve or reject requests assigned to you."
-        />
-        <ApprovalQueue tickets={approvalTickets} />
-      </div>
-    </DashboardShell>
+    <div className="grid gap-6">
+      <PageHeader
+        title="Approvals"
+        description="Approve or reject requests assigned to you."
+      />
+      <ApprovalQueue tickets={approvalTickets} />
+    </div>
   )
 }

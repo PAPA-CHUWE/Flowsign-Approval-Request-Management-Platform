@@ -5,6 +5,34 @@ import { Menu, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
+function NavLink({ label, href, isActive }: { label: string; href: string; isActive: boolean }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <Link
+      href={href}
+      className={[
+        "relative pb-1 text-[14px] font-medium no-underline transition-colors duration-200",
+        isActive ? "text-[#0F6E56]" : "text-[#5F5E5A] hover:text-[#0F6E56]",
+      ].join(" ")}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {label}
+      <span
+        className={[
+          "absolute bottom-0 left-0 h-[2px] w-full rounded-full origin-left",
+          "bg-gradient-to-r from-[#0F6E56] to-[#1D9E75]",
+          isActive
+            ? "scale-x-100 transition-transform duration-300"
+            : hovered
+              ? "animate-heartbeat-line"
+              : "scale-x-0 transition-transform duration-150",
+        ].join(" ")}
+      />
+    </Link>
+  );
+}
+
 // ─── Nav items ────────────────────────────────────────────────────────────────
 const NAV_LINKS = [
   {label:"Home",href:""},
@@ -15,9 +43,34 @@ const NAV_LINKS = [
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
 export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef                     = useRef<HTMLDivElement>(null);
-  const lastFocusedElementRef       = useRef<HTMLElement | null>(null);
+  const [isMenuOpen, setIsMenuOpen]   = useState(false);
+  const [activeSection, setActiveSection] = useState("");
+  const menuRef                       = useRef<HTMLDivElement>(null);
+  const lastFocusedElementRef         = useRef<HTMLElement | null>(null);
+
+  // ── Active section via IntersectionObserver ────────────────────────────────
+  useEffect(() => {
+    const SECTION_IDS = ["features", "pricing", "contactus"];
+    const visible = new Set<string>();
+
+    const observers = SECTION_IDS.map((id) => {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      const obs = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) visible.add(id);
+          else visible.delete(id);
+          const first = SECTION_IDS.find((s) => visible.has(s));
+          setActiveSection(first ? `#${first}` : "");
+        },
+        { threshold: 0.15 },
+      );
+      obs.observe(el);
+      return obs;
+    });
+
+    return () => observers.forEach((obs) => obs?.disconnect());
+  }, []);
 
   // ── Open ──────────────────────────────────────────────────────────────────
   const openMenu = () => {
@@ -67,6 +120,7 @@ export default function Navbar() {
                    flex items-center justify-between
                    gap-4"
         aria-label="Main navigation"
+        data-aos="fade-down"
       >
 
         {/* ── Logo ── */}
@@ -90,14 +144,7 @@ export default function Navbar() {
         {/* ── Desktop nav links — lg+ ── */}
         <div className="hidden lg:flex items-center gap-8">
           {NAV_LINKS.map(({ label, href }) => (
-            <Link
-              key={label}
-              href={href}
-              className="text-[14px] font-medium text-[#5F5E5A] no-underline
-                         hover:text-[#0F6E56] transition-colors duration-200"
-            >
-              {label}
-            </Link>
+            <NavLink key={label} label={label} href={href} isActive={activeSection === href} />
           ))}
         </div>
 

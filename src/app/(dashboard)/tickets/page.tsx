@@ -1,4 +1,3 @@
-import { DashboardShell } from "@/components/layout/DashboardShell"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { TicketList } from "@/components/tickets/TicketList"
 import { REQUEST_TYPE } from "@/constants/requestType.constants"
@@ -19,14 +18,12 @@ const tickets: Ticket[] = [
 
 export default function TicketsPage() {
   return (
-    <DashboardShell>
-      <div className="grid gap-6">
-        <PageHeader
-          title="Tickets"
-          description="Review all submitted workflow tickets."
-        />
-        <TicketList tickets={tickets} />
-      </div>
-    </DashboardShell>
+    <div className="grid gap-6">
+      <PageHeader
+        title="Tickets"
+        description="Review all submitted workflow tickets."
+      />
+      <TicketList tickets={tickets} />
+    </div>
   )
 }
