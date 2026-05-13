@@ -7,7 +7,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <AppSidebar />
       <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
         <DashboardNavbar />
-        <main className="flex-1 overflow-y-auto p-6 md:p-8">{children}</main>
+        <main data-lenis-prevent className="flex-1 overflow-y-auto p-6 md:p-8">{children}</main>
       </div>
     </div>
   );

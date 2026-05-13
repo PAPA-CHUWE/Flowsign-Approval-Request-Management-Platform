@@ -18,9 +18,9 @@ export function DashboardNavbar() {
       <div className="flex items-center gap-2 shrink-0">
         <button className="relative flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#E8E6DE] bg-[#FAFAF8] hover:bg-brand-teal-pale transition-colors duration-150 cursor-pointer">
           <Bell size={16} color="#5F5E5A" strokeWidth={2} />
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#0F6E56] ring-2 ring-white" />
+          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-brand-teal ring-2 ring-white" />
         </button>
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E1F5EE] text-[12px] font-bold text-[#0F6E56] select-none">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-teal-pale text-[12px] font-bold text-brand-teal select-none">
           AU
         </div>
       </div>

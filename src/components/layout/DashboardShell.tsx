@@ -8,9 +8,9 @@ interface DashboardShellProps {
 
 export function DashboardShell({ children }: DashboardShellProps) {
   return (
-    <div className="flex min-h-svh bg-background">
+    <div className="flex h-svh bg-background">
       <AppSidebar />
-      <main className="min-w-0 flex-1 p-6">{children}</main>
+      <main data-lenis-prevent className="flex-1 overflow-y-auto p-6 md:p-8">{children}</main>
     </div>
   )
 }
