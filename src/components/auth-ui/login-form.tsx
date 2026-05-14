@@ -161,11 +161,11 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="w-screen h-screen bg-[#F1EFE8]
+    <div className="min-h-screen w-full bg-[#F1EFE8]
                     flex items-center justify-center">
 
       {/* ── Two-column card ── */}
-      <div className="w-full h-full
+      <div className="min-h-screen w-full
                       grid grid-cols-1 md:grid-cols-2
                       bg-white overflow-hidden">
 
@@ -173,7 +173,7 @@ const LoginForm = () => {
         <LeftPanel />
 
         {/* ── Right: login form ── */}
-        <div className="px-8 py-10 md:px-10 flex flex-col justify-center">
+        <div className="flex flex-col justify-center overflow-y-auto px-6 py-10 sm:px-8 md:px-10">
 
           {/* Mobile-only logo */}
           <div className="flex md:hidden items-center gap-2.5 mb-8">
@@ -323,7 +323,7 @@ const LoginForm = () => {
 
           {/* Sign up link */}
           <p className="text-center text-[13px] text-[#5F5E5A] mt-6">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               href="/signup"
               className="text-[#0F6E56] font-semibold hover:underline"

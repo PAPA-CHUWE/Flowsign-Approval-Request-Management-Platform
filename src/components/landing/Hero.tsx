@@ -224,11 +224,11 @@ function SigningIllustration() {
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-[#FAFAF8] font-dm-sans overflow-hidden mt-5">
+    <div className="min-h-screen overflow-hidden bg-[#FAFAF8] font-dm-sans">
       {/* Hero — 2 columns */}
-      <section className="min-h-screen pt-16 grid grid-cols-2 max-w-[1280px] mx-auto px-[clamp(24px,5vw,80px)] gap-10 items-center">
+      <section className="mx-auto grid min-h-[calc(100svh-68px)] max-w-[1280px] grid-cols-1 items-center gap-10 px-[clamp(20px,5vw,80px)] pb-12 pt-24 lg:min-h-screen lg:grid-cols-2 lg:pt-20">
         {/* LEFT: Copy */}
-        <div className="animate-fade-slide-up">
+        <div className="animate-fade-slide-up text-center lg:text-left">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-brand-teal-pale border border-brand-teal-light rounded-full px-3.5 py-[5px] mb-7">
             <div className="relative w-2 h-2">
@@ -239,7 +239,7 @@ const Home = () => {
           </div>
 
           {/* Headline */}
-          <h1 className="font-dm-serif text-[clamp(42px,4.5vw,62px)] font-normal leading-[1.08] text-brand-neutral-dark mb-6 tracking-[-0.02em]">
+          <h1 className="font-dm-serif text-[clamp(38px,4.5vw,62px)] font-normal leading-[1.08] text-brand-neutral-dark mb-6 tracking-[-0.02em]">
             Approvals that
             <br />
             <span className="text-brand-teal italic">move</span> at the
@@ -248,14 +248,14 @@ const Home = () => {
           </h1>
 
           {/* Subheading */}
-          <p className="text-[17px] text-brand-neutral-mid leading-[1.65] mb-10 max-w-[440px]">
+          <p className="mx-auto mb-10 max-w-[440px] text-[16px] leading-[1.65] text-brand-neutral-mid sm:text-[17px] lg:mx-0">
             Flowsign routes every request — funds, travel, assets, access —
             through the right approvers, automatically. No chasing, no lost emails,
             full audit trail.
           </p>
 
           {/* CTAs */}
-          <div className="flex gap-3 mb-[52px] flex-wrap">
+          <div className="mb-[52px] flex flex-wrap justify-center gap-3 lg:justify-start">
             <button className="cta-primary flex items-center gap-2 px-7 py-3.5 rounded-[10px] bg-gradient-to-br from-[#0F6E56] to-[#1D9E75] border-none cursor-pointer text-white text-[15px] font-bold shadow-[0_4px_20px_rgba(15,110,86,0.25)] transition-all duration-200">
               Start for free
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -271,7 +271,7 @@ const Home = () => {
           </div>
 
           {/* Stats */}
-          <div className="flex gap-3 flex-wrap">
+          <div className="flex flex-wrap justify-center gap-3 lg:justify-start">
             {[
               { value: "3.2min", label: "Avg. approval time" },
               { value: "98%",    label: "Audit compliance"   },
@@ -288,7 +288,7 @@ const Home = () => {
           </div>
 
           {/* Social proof */}
-          <div className="mt-10 flex items-center gap-4 flex-wrap mb-5">
+          <div className="mb-5 mt-10 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
             <span className="text-[11px] text-[#B4B2A9] font-semibold uppercase tracking-[0.08em]">Trusted by</span>
             {["Acme Corp", "Meridian", "NovaTech", "Vela Group"].map((org) => (
               <div
@@ -302,7 +302,7 @@ const Home = () => {
         </div>
 
         {/* RIGHT: Signing illustration */}
-        <div className="relative h-[clamp(500px,65vh,720px)] animate-fade-in">
+        <div className="relative h-[420px] animate-fade-in sm:h-[520px] lg:h-[clamp(500px,65vh,720px)]">
           {/* Background shape */}
           <div className="absolute top-[5%] left-[5%] right-[5%] bottom-[5%] bg-gradient-to-br from-brand-teal-pale to-[#B5D4F4] rounded-[32px] opacity-35" />
           {/* Dot grid */}

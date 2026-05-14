@@ -78,11 +78,11 @@ const ContactUs = () => {
 
   return (
     <div className="bg-brand-neutral-pale min-h-screen font-dm-sans" id="contactus">
-      <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-[clamp(20px,5vw,80px)] py-[60px]">
-        <div className="w-full max-w-[980px] bg-white rounded-[24px] shadow-[0_8px_48px_rgba(0,0,0,0.08),0_2px_12px_rgba(0,0,0,0.04)] overflow-hidden grid grid-cols-2" data-aos="fade-up">
+      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center px-[clamp(20px,5vw,80px)] py-12 lg:py-[60px]">
+        <div className="grid w-full max-w-[980px] grid-cols-1 overflow-hidden rounded-[24px] bg-white shadow-[0_8px_48px_rgba(0,0,0,0.08),0_2px_12px_rgba(0,0,0,0.04)] lg:grid-cols-2" data-aos="fade-up">
 
           {/* LEFT: Copy + contact info */}
-          <div className="bg-gradient-to-br from-brand-teal to-[#085041] px-11 py-[52px] flex flex-col justify-between relative overflow-hidden">
+          <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-brand-teal to-[#085041] px-6 py-8 sm:px-8 lg:px-11 lg:py-[52px]">
             {/* Decorative circles */}
             <div className="absolute -top-[60px] -right-[60px] w-[220px] h-[220px] rounded-full bg-white/[0.04] pointer-events-none" />
             <div className="absolute -bottom-[80px] -left-[40px] w-[200px] h-[200px] rounded-full bg-white/[0.03] pointer-events-none" />
@@ -114,7 +114,7 @@ const ContactUs = () => {
           </div>
 
           {/* RIGHT: Form */}
-          <div className="px-11 py-[52px] bg-white">
+          <div className="bg-white px-6 py-8 sm:px-8 lg:px-11 lg:py-[52px]">
             {!submitted ? (
               <>
                 <h2 className="font-dm-serif text-[24px] font-normal text-brand-neutral-dark mb-1.5 tracking-[-0.01em]">
@@ -143,7 +143,7 @@ const ContactUs = () => {
                       className={inputCls(focused === "org")} />
                   </Field>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <Field label="Industry">
                       <select value={form.industry} onChange={set("industry")}
                         onFocus={() => setFocused("industry")} onBlur={() => setFocused(null)}

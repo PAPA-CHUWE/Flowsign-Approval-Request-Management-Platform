@@ -47,7 +47,7 @@ export function QuickActionsGrid() {
       </div>
 
       {/* 2×2 Grid */}
-      <div className="grid grid-cols-2 gap-3 p-5">
+      <div className="grid grid-cols-1 gap-3 p-5 sm:grid-cols-2">
         {ACTIONS.map(({ label, Icon, href, iconClass, iconBg, border }) => (
           <Link
             key={label}

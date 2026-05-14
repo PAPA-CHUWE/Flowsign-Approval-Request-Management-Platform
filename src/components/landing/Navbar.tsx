@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 
 function NavLink({ label, href, isActive }: { label: string; href: string; isActive: boolean }) {
   const [hovered, setHovered] = useState(false);
@@ -21,7 +20,7 @@ function NavLink({ label, href, isActive }: { label: string; href: string; isAct
       <span
         className={[
           "absolute bottom-0 left-0 h-[2px] w-full rounded-full origin-left",
-          "bg-gradient-to-r from-[#0F6E56] to-[#1D9E75]",
+          "bg-linear-to-r from-brand-teal to-brand-teal-mid",
           isActive
             ? "scale-x-100 transition-transform duration-300"
             : hovered
@@ -161,15 +160,16 @@ export default function Navbar() {
           </Link>
 
           {/* Get started — always visible md+ */}
-          <Button
-            className="hidden md:inline-flex px-[18px] h-9 rounded-[8px]
+          <Link
+            href="/signup"
+            className="hidden md:inline-flex h-9 items-center rounded-[8px] px-[18px]
                        bg-[#0F6E56] hover:bg-[#1D9E75]
                        text-white text-[14px] font-semibold
                        transition-colors duration-200 cursor-pointer
-                       border-none shadow-none"
+                       border-none shadow-none no-underline"
           >
             Get started free
-          </Button>
+          </Link>
 
           {/* ── Hamburger — below lg only ── */}
           <button
@@ -330,18 +330,19 @@ export default function Navbar() {
 
           {/* Get started — full-width shadcn Button */}
           <li className="mt-2">
-            <Button
+            <Link
+              href="/signup"
               onClick={closeMenu}
-              className="w-full h-12 rounded-xl
+              className="flex h-12 w-full items-center justify-center rounded-xl
                          bg-gradient-to-r from-[#0F6E56] to-[#1D9E75]
                          text-white text-[15px] font-semibold
                          hover:opacity-90 active:opacity-80
                          transition-opacity duration-150
                          cursor-pointer shadow-none border-none
-                         focus-visible:ring-2 focus-visible:ring-[#0F6E56]"
+                         focus-visible:ring-2 focus-visible:ring-[#0F6E56] no-underline"
             >
               Get started free
-            </Button>
+            </Link>
           </li>
         </ul>
       </div>

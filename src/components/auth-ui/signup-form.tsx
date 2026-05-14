@@ -11,18 +11,6 @@ import { Eye, EyeOff, Mail, Lock, User, Building2 } from "lucide-react";
 import { FaGoogle, FaMicrosoft } from "react-icons/fa6";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
-const T = {
-  tealDark:    "#0F6E56",
-  tealMid:     "#1D9E75",
-  tealLight:   "#9FE1CB",
-  tealPale:    "#E1F5EE",
-  neutralDark: "#2C2C2A",
-  neutralMid:  "#5F5E5A",
-  neutralLight:"#D3D1C7",
-  neutralPale: "#F1EFE8",
-  white:       "#FFFFFF",
-} as const;
-
 // ─── Shared input className ───────────────────────────────────────────────────
 const inputCn =
   "h-11 pl-10 rounded-[10px] border-[#D3D1C7] bg-[#F1EFE8] " +
@@ -189,11 +177,11 @@ const SignupForm = () => {
   };
 
   return (
-    <div className="w-screen h-screen bg-[#F1EFE8]
+    <div className="min-h-screen w-full bg-[#F1EFE8]
                     flex items-center justify-center">
 
       {/* ── Two-column card ── */}
-      <div className="w-full h-full
+      <div className="min-h-screen w-full
                       grid grid-cols-1 md:grid-cols-2
                       bg-white overflow-hidden">
 
@@ -201,7 +189,7 @@ const SignupForm = () => {
         <LeftPanel />
 
         {/* ── Right: form ── */}
-        <div className="px-8 py-10 md:px-10 mb-8 flex flex-col justify-center overflow-y-auto">
+        <div className="mb-8 flex flex-col justify-center overflow-y-auto px-6 py-10 sm:px-8 md:px-10">
 
           {/* Logo — visible on mobile only (left panel hidden on mobile) */}
           <div className="flex md:hidden items-center gap-2.5 mb-8">
@@ -331,7 +319,7 @@ const SignupForm = () => {
                 htmlFor="terms"
                 className="text-[12px] text-[#5F5E5A] leading-[1.5] cursor-pointer"
               >
-                I agree to Flowsign's{" "}
+                I agree to Flowsign&apos;s{" "}
                 <Link href="/terms"
                   className="text-[#0F6E56] font-semibold hover:underline">
                   Terms of Service

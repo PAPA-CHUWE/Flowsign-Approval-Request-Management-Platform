@@ -51,11 +51,11 @@ export function PeoplePicker({
           <div className="flex flex-wrap gap-1.5 mb-2">
             {selected.map((p) => (
               <div key={p.id}
-                className="flex items-center gap-1.5 h-7 pl-1.5 pr-2 rounded-full bg-[#E1F5EE] border border-[#9FE1CB]">
+                className="flex h-7 max-w-full items-center gap-1.5 rounded-full border border-[#9FE1CB] bg-[#E1F5EE] pl-1.5 pr-2">
                 <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0F6E56] text-[9px] font-bold text-white shrink-0">
                   {p.initials}
                 </div>
-                <span className="text-[12px] font-medium text-[#0F6E56]">{p.name}</span>
+                <span className="truncate text-[12px] font-medium text-[#0F6E56]">{p.name}</span>
                 {!disabled && (
                   <Button
                     type="button"

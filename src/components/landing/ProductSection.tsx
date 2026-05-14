@@ -203,7 +203,7 @@ function FeatureRow({ feature }: { feature: Feature }) {
   const visualBlock = <div data-aos={reverse ? "fade-right" : "fade-left"} data-aos-delay="100">{visual}</div>;
 
   return (
-    <div className="grid grid-cols-2 gap-16 items-center mb-24">
+    <div className="mb-16 grid grid-cols-1 items-center gap-8 lg:mb-24 lg:grid-cols-2 lg:gap-16">
       {reverse ? <>{visualBlock}{copyBlock}</> : <>{copyBlock}{visualBlock}</>}
     </div>
   );
@@ -267,7 +267,7 @@ const ProductSection = () => {
   ];
 
   return (
-    <section id="features" className="bg-white py-[100px] px-[clamp(24px,6vw,100px)]">
+    <section id="features" className="bg-white px-[clamp(20px,6vw,100px)] py-16 lg:py-[100px]">
       <div className="max-w-[1140px] mx-auto">
         <SectionHeader />
         {features.map((f) => <FeatureRow key={f.tag} feature={f} />)}

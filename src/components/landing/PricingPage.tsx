@@ -5,6 +5,7 @@ import {
   Zap, Rocket, Building2, Users, Check, Minus,
   ArrowRight, Shield, Star, BadgeCheck,
 } from "lucide-react";
+import { Button } from "../ui/button";
 
 interface Plan {
   id: string; name: string; Icon: React.ElementType;
@@ -98,7 +99,7 @@ const COMPARISON = [
 // ─── Billing toggle ───────────────────────────────────────────────────────────
 function Toggle({ annual, onChange }: { annual: boolean; onChange: (v: boolean) => void }) {
   return (
-    <div className="inline-flex bg-brand-neutral-pale rounded-[30px] p-1 gap-1 border border-brand-neutral-light">
+    <div className="inline-flex max-w-full flex-wrap justify-center gap-1 rounded-[30px] border border-brand-neutral-light bg-brand-neutral-pale p-1">
       {(["Monthly", "Annual"] as const).map((label) => {
         const active = (label === "Annual") === annual;
         return (
@@ -106,7 +107,7 @@ function Toggle({ annual, onChange }: { annual: boolean; onChange: (v: boolean) 
             key={label}
             onClick={() => onChange(label === "Annual")}
             className={[
-              "flex items-center gap-2 px-6 py-[9px] rounded-[26px] border-none cursor-pointer text-[13px] font-bold font-dm-sans tracking-[0.05em] transition-all duration-200",
+              "flex items-center gap-2 px-4 py-[9px] rounded-[26px] border-none cursor-pointer text-[13px] font-bold font-dm-sans tracking-[0.05em] transition-all duration-200 sm:px-6",
               active ? "bg-brand-teal text-white" : "bg-transparent text-brand-neutral-mid",
             ].join(" ")}
           >
@@ -248,8 +249,8 @@ function PlanCard({ plan, annual }: { plan: Plan; annual: boolean }) {
 // ─── Comparison table ─────────────────────────────────────────────────────────
 function ComparisonTable() {
   return (
-    <div className="rounded-[16px] border border-brand-neutral-light overflow-hidden">
-      <div className="grid grid-cols-[2fr_repeat(4,1fr)] bg-brand-teal px-6 py-3.5">
+    <div className="overflow-x-auto rounded-[16px] border border-brand-neutral-light">
+      <div className="grid min-w-[720px] grid-cols-[2fr_repeat(4,1fr)] bg-brand-teal px-6 py-3.5">
         <span className="text-[12px] text-white/60 font-semibold font-dm-sans">Feature</span>
         {PLANS.map((p) => (
           <span key={p.id} className="text-[12px] font-bold text-center font-dm-sans" style={{ color: p.featured ? "#9FE1CB" : "rgba(255,255,255,0.75)" }}>
@@ -260,7 +261,7 @@ function ComparisonTable() {
       {COMPARISON.map((row, i) => (
         <div
           key={row.label}
-          className={["grid grid-cols-[2fr_repeat(4,1fr)] px-6 py-[13px]", i < COMPARISON.length - 1 ? "border-b border-brand-neutral-pale" : "", i % 2 === 0 ? "bg-white" : "bg-brand-neutral-pale"].join(" ")}
+          className={["grid min-w-[720px] grid-cols-[2fr_repeat(4,1fr)] px-6 py-[13px]", i < COMPARISON.length - 1 ? "border-b border-brand-neutral-pale" : "", i % 2 === 0 ? "bg-white" : "bg-brand-neutral-pale"].join(" ")}
         >
           <span className="text-[13px] text-brand-neutral-mid font-dm-sans">{row.label}</span>
           {row.values.map((v, vi) => (
@@ -356,7 +357,7 @@ const PricingPage = () => {
       </div>
 
       {/* Cards */}
-      <div className="max-w-[1180px] mx-auto px-[clamp(24px,5vw,60px)] pt-[60px] pb-20 grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-5 items-center">
+      <div className="mx-auto grid max-w-[1180px] grid-cols-[repeat(auto-fit,minmax(min(240px,100%),1fr))] items-stretch gap-5 px-[clamp(20px,5vw,60px)] pb-20 pt-[60px]">
         {PLANS.map((plan, i) => (
           <div key={plan.id} data-aos="fade-up" data-aos-delay={i * 75}>
             <PlanCard plan={plan} annual={annual} />
@@ -403,24 +404,24 @@ const PricingPage = () => {
       </div>
 
       {/* CTA band */}
-      <div className="bg-gradient-to-br from-brand-teal to-[#085041] px-[clamp(24px,6vw,100px)] py-20 text-center relative overflow-hidden" data-aos="fade-up">
-        <div className="absolute -top-[60px] -right-[40px] w-[260px] h-[260px] rounded-full bg-white/[0.04] pointer-events-none" />
-        <div className="absolute -bottom-[80px] -left-[50px] w-[220px] h-[220px] rounded-full bg-white/[0.03] pointer-events-none" />
+      <div className="bg-linear-to-br from-brand-teal to-[#085041] px-[clamp(24px,6vw,100px)] py-20 text-center relative overflow-hidden" data-aos="fade-up">
+        <div className="absolute top-[-60px] right-[-40px] w-[260px] h-[260px] rounded-full bg-white/4 pointer-events-none" />
+        <div className="absolute bottom-[-80px] left-[-50px] w-[220px] h-[220px] rounded-full bg-white/3 pointer-events-none" />
         <h2 className="font-dm-serif text-[clamp(28px,3.5vw,46px)] font-normal text-white mb-4 tracking-[-0.02em]">
         Ready to stop chasing signatures and start hitting deadlines?
         </h2>
         <p className="text-[16px] text-white/65 mb-9 font-dm-sans">
           14-day free trial. No credit card. Setup in 10 minutes.
         </p>
-        <div className="flex gap-3 justify-center flex-wrap">
-          <button className="flex items-center gap-2 px-8 py-3.5 rounded-xl bg-white border-none cursor-pointer text-brand-teal text-[15px] font-bold font-dm-sans">
-            <Rocket size={16} color="#0F6E56" strokeWidth={2} />
+        <div className="flex flex-col justify-center gap-3 sm:flex-row sm:flex-wrap">
+          <Button size={"lg"} className="flex w-full items-center gap-2 rounded-xl bg-white px-8 py-6.5 font-dm-sans text-[15px] font-bold text-brand-teal border-none cursor-pointer sm:w-auto">
+            <Rocket size={24} color="#0F6E56" strokeWidth={2} />
             Start free trial
-          </button>
-          <button className="flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white/10 border border-white/25 cursor-pointer text-white text-[15px] font-semibold font-dm-sans">
-            <Users size={16} color="white" strokeWidth={2} />
+          </Button>
+          <Button className="flex w-full items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-7 py-6.5 font-dm-sans text-[15px] font-semibold text-white cursor-pointer sm:w-auto">
+            <Users size={24} color="white" strokeWidth={2} />
             Talk to sales
-          </button>
+          </Button>
         </div>
       </div>
 

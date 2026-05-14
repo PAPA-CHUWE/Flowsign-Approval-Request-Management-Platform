@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 
-import { AppSidebar } from "./AppSidebar"
+import { AppSidebar, MobileDashboardNav } from "./AppSidebar"
 
 interface DashboardShellProps {
   children: ReactNode
@@ -8,9 +8,10 @@ interface DashboardShellProps {
 
 export function DashboardShell({ children }: DashboardShellProps) {
   return (
-    <div className="flex h-svh bg-background">
-      <AppSidebar />
-      <main data-lenis-prevent className="flex-1 overflow-y-auto p-6 md:p-8">{children}</main>
+    <div className="flex min-h-svh bg-background md:h-svh md:overflow-hidden">
+      <AppSidebar className="hidden md:flex" />
+      <main data-lenis-prevent className="flex-1 overflow-y-auto p-4 pb-24 sm:p-6 sm:pb-24 md:p-8">{children}</main>
+      <MobileDashboardNav />
     </div>
   )
 }

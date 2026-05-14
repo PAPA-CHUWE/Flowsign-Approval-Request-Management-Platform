@@ -89,7 +89,7 @@ export function TicketList({ tickets }: TicketListProps) {
     <div className="flex flex-col gap-4 w-full">
 
       {/* ── Filter + search bar ── */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
 
         <div className="flex items-center gap-2 flex-wrap">
           {FILTERS.map((f) => (
@@ -107,10 +107,10 @@ export function TicketList({ tickets }: TicketListProps) {
       </div>
 
       {/* ── Table ── */}
-      <div className="w-full bg-white border border-[#E8E6DE] rounded-[12px] overflow-hidden shadow-[0_1px_6px_rgba(0,0,0,0.04)]">
+      <div className="w-full overflow-x-auto rounded-[12px] border border-[#E8E6DE] bg-white shadow-[0_1px_6px_rgba(0,0,0,0.04)]">
 
         {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-[#E8E6DE] bg-[#FAFAF8]">
+        <div className="flex min-w-[940px] items-center gap-3 border-b border-[#E8E6DE] bg-[#FAFAF8] px-4 py-3">
           {COLS.map((col) => (
             <div
               key={col.label}
@@ -141,7 +141,7 @@ export function TicketList({ tickets }: TicketListProps) {
             <div
               key={ticket.id}
               className={cn(
-                "flex items-center gap-3 px-4 py-3 transition-colors duration-100",
+                "flex min-w-[940px] items-center gap-3 px-4 py-3 transition-colors duration-100",
                 "border-b border-brand-neutral-pale last:border-0",
                 idx % 2 === 0 ? "bg-white" : "bg-[#FAFAF8]",
                 "hover:bg-[#F5FBF8] cursor-pointer"

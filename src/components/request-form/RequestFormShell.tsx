@@ -192,8 +192,8 @@ export function RequestFormShell() {
       {/* ══════════════════════════════════════════
           STICKY FOOTER
       ══════════════════════════════════════════ */}
-      <div className="shrink-0 flex items-center justify-between px-6 md:px-8 py-4 border-t border-[#E8E6DE] bg-white">
-        <div className="flex items-center gap-2">
+      <div className="flex shrink-0 flex-col gap-3 border-t border-[#E8E6DE] bg-white px-6 py-4 sm:flex-row sm:items-center sm:justify-between md:px-8">
+        <div className="flex flex-wrap items-center gap-2">
           <Button type="button" variant="ghost" disabled={isSubmitting}
             className="h-9 px-4 rounded-[8px] text-[13px] text-[#888780] hover:bg-brand-neutral-pale">
             Save draft
@@ -207,7 +207,7 @@ export function RequestFormShell() {
           type="submit"
           disabled={!valid || isSubmitting}
           className={cn(
-            "h-9 px-6 rounded-[8px] text-[13px] font-semibold",
+            "h-9 w-full px-6 rounded-[8px] text-[13px] font-semibold sm:w-auto",
             "border-none transition-all duration-200",
             valid && !isSubmitting
               ? "bg-linear-to-r from-brand-teal to-brand-teal-mid text-white " +

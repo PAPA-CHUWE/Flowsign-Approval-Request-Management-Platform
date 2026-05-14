@@ -11,6 +11,7 @@ import {
   Settings,
 } from "lucide-react";
 
+import { cn } from "@/lib/utils";
 import { USER_ROLE, type UserRole } from "@/constants/role.constants";
 import { navigationItems } from "@/config/navigation.config";
 
@@ -24,14 +25,15 @@ const NAV_ICONS: Record<string, React.ElementType> = {
 
 interface AppSidebarProps {
   role?: UserRole;
+  className?: string;
 }
 
-export function AppSidebar({ role = USER_ROLE.EMPLOYEE }: AppSidebarProps) {
+export function AppSidebar({ role = USER_ROLE.EMPLOYEE, className }: AppSidebarProps) {
   const pathname = usePathname();
   const items = navigationItems.filter((item) => item.roles.includes(role));
 
   return (
-    <aside className="flex w-[220px] shrink-0 flex-col border-r border-[#E8E6DE] bg-white">
+    <aside className={cn("flex w-[220px] shrink-0 flex-col border-r border-[#E8E6DE] bg-white", className)}>
       {/* Logo */}
       <div className="flex h-16 items-center gap-2.5 border-b border-[#E8E6DE] px-5">
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] bg-gradient-to-br from-[#0F6E56] to-[#1D9E75]">
@@ -80,5 +82,40 @@ export function AppSidebar({ role = USER_ROLE.EMPLOYEE }: AppSidebarProps) {
         </div>
       </div>
     </aside>
+  );
+}
+
+export function MobileDashboardNav({ role = USER_ROLE.EMPLOYEE }: AppSidebarProps) {
+  const pathname = usePathname();
+  const items = navigationItems.filter((item) => item.roles.includes(role));
+
+  return (
+    <nav
+      aria-label="Dashboard navigation"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-[#E8E6DE] bg-white/95 px-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_24px_rgba(0,0,0,0.06)] backdrop-blur md:hidden"
+    >
+      <div className="mx-auto grid max-w-md auto-cols-fr grid-flow-col gap-1 overflow-x-auto">
+        {items.map((item) => {
+          const Icon = NAV_ICONS[item.href];
+          const active = pathname === item.href;
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex min-h-12 flex-col items-center justify-center gap-1 rounded-[10px] px-2 text-[11px] font-semibold no-underline transition-colors",
+                active
+                  ? "bg-[#E1F5EE] text-[#0F6E56]"
+                  : "text-[#5F5E5A] hover:bg-[#F1EFE8] hover:text-[#2C2C2A]",
+              )}
+            >
+              {Icon && <Icon size={17} strokeWidth={active ? 2.5 : 2} />}
+              <span className="max-w-full truncate">{item.title}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
   );
 }

@@ -101,7 +101,7 @@ export function ApprovalPipelineCard({ stats, byType }: ApprovalPipelineCardProp
         </div>
 
         {/* Legend */}
-        <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2.5">
+        <div className="mt-4 grid grid-cols-1 gap-x-4 gap-y-2.5 sm:grid-cols-2">
           {pieData.map((item) => (
             <div key={item.name} className="flex items-center justify-between">
               <div className="flex items-center gap-2">

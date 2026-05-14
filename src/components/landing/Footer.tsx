@@ -38,8 +38,8 @@ const NAV = [
   {
     heading: "Legal",
     links: [
-      { label: "Privacy policy", href: "#" },
-      { label: "Terms of use",   href: "#" },
+      { label: "Privacy policy", href: "/privacy" },
+      { label: "Terms of use",   href: "/terms" },
       { label: "Security",       href: "#" },
       { label: "Cookies",        href: "#" },
       { label: "Compliance",     href: "#" },
@@ -70,12 +70,12 @@ const Footer = () => {
 
   return (
     <div className="bg-brand-neutral-pale px-[clamp(20px,5vw,60px)] pt-10 pb-8">
-      <div className="bg-gradient-to-br from-brand-neutral-dark to-[#085041] rounded-[20px] overflow-hidden max-w-[1180px] mx-auto" data-aos="fade-up">
+      <div className="mx-auto max-w-[1180px] overflow-hidden rounded-[20px] bg-gradient-to-br from-brand-neutral-dark to-[#085041]" data-aos="fade-up">
 
         {/* Top section */}
-        <div className="px-11 pt-11 pb-9 grid grid-cols-[220px_repeat(4,1fr)] gap-8 border-b border-brand-card-border">
+        <div className="grid grid-cols-1 gap-8 border-b border-brand-card-border px-6 pb-9 pt-9 sm:grid-cols-2 sm:px-8 lg:grid-cols-[220px_repeat(4,1fr)] lg:px-11 lg:pt-11">
           {/* Brand */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-[9px]">
               <div className="w-8 h-8 rounded-[9px] bg-gradient-to-br from-brand-teal to-brand-teal-mid flex items-center justify-center shrink-0">
                 <BadgeCheck size={16} color="#ffffff" strokeWidth={2.5} />
@@ -123,7 +123,7 @@ const Footer = () => {
         </div>
 
         {/* Trust + newsletter strip */}
-        <div className="px-11 py-5 border-b border-brand-card-border flex items-center justify-between gap-5 flex-wrap">
+        <div className="flex flex-col items-stretch justify-between gap-5 border-b border-brand-card-border px-6 py-5 sm:px-8 lg:flex-row lg:items-center lg:px-11">
           <div className="flex gap-2.5 flex-wrap">
             {TRUST_BADGES.map(({ Icon, text }) => (
               <div
@@ -136,7 +136,7 @@ const Footer = () => {
             ))}
           </div>
 
-          <div className="flex gap-2 items-center min-w-[300px] flex-[0_1_380px]">
+          <div className="flex w-full min-w-0 flex-col gap-2 sm:flex-row lg:flex-[0_1_380px]">
             {!subscribed ? (
               <>
                 <input
@@ -164,7 +164,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom bar */}
-        <div className="px-11 py-4 flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex flex-col items-start justify-between gap-4 px-6 py-4 sm:px-8 lg:flex-row lg:items-center lg:px-11">
           <p className="text-[12px] text-brand-card-text font-dm-sans m-0 flex items-center gap-[5px]">
             © {new Date().getFullYear()} Flowsign. Made with
             <Heart size={11} color="#9FE1CB" strokeWidth={0} fill="#9FE1CB" />

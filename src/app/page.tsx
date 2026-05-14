@@ -8,7 +8,7 @@ import Footer from '@/components/landing/Footer'
 
 const Home = () => {
   return (
-    <main className='w-screen overflow-x-hidden overflow-y-auto scroll-smooth'>
+    <main className='w-full overflow-x-hidden overflow-y-auto scroll-smooth'>
       <Navbar />
       <Hero />
       <ProductSection />

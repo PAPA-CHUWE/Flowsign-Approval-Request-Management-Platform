@@ -69,11 +69,11 @@ export function AttachmentsSection({ files, onChange, disabled }: AttachmentsSec
         <div className="flex flex-col gap-1.5">
           {files.map((f) => (
             <div key={f.id}
-              className="flex items-center justify-between h-9 px-3 rounded-[8px] bg-[#F1EFE8] border border-[#E8E6DE]">
-              <div className="flex items-center gap-2">
+              className="flex h-auto min-h-9 items-center justify-between gap-2 rounded-[8px] border border-[#E8E6DE] bg-[#F1EFE8] px-3 py-2">
+              <div className="flex min-w-0 items-center gap-2">
                 <Paperclip size={12} color="#888780" strokeWidth={2} />
-                <span className="text-[12px] font-medium text-[#2C2C2A]">{f.name}</span>
-                <span className="text-[11px] text-[#B4B2A9]">{f.size}</span>
+                <span className="truncate text-[12px] font-medium text-[#2C2C2A]">{f.name}</span>
+                <span className="shrink-0 text-[11px] text-[#B4B2A9]">{f.size}</span>
               </div>
               {!disabled && (
                 <Button

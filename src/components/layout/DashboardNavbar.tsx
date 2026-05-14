@@ -4,23 +4,21 @@ import { Bell, Search } from "lucide-react";
 
 export function DashboardNavbar() {
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b border-[#E8E6DE] bg-white px-6 gap-4">
-      {/* Search */}
-      <div className="flex items-center gap-2 rounded-[10px] border border-[#E8E6DE] bg-[#FAFAF8] px-3 h-9 w-full max-w-[320px]">
+    <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-[#E8E6DE] bg-white px-4 sm:px-6">
+      <div className="flex h-9 w-full max-w-[320px] items-center gap-2 rounded-[10px] border border-[#E8E6DE] bg-[#FAFAF8] px-3">
         <Search size={14} color="#888780" strokeWidth={2} />
         <input
-          className="flex-1 bg-transparent text-[13px] text-brand-neutral-dark placeholder:text-[#B4B2A9] outline-none font-dm-sans"
-          placeholder="Search…"
+          className="min-w-0 flex-1 bg-transparent font-dm-sans text-[13px] text-brand-neutral-dark outline-none placeholder:text-[#B4B2A9]"
+          placeholder="Search..."
         />
       </div>
 
-      {/* Right */}
-      <div className="flex items-center gap-2 shrink-0">
-        <button className="relative flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#E8E6DE] bg-[#FAFAF8] hover:bg-brand-teal-pale transition-colors duration-150 cursor-pointer">
+      <div className="flex shrink-0 items-center gap-2">
+        <button className="relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-[10px] border border-[#E8E6DE] bg-[#FAFAF8] transition-colors duration-150 hover:bg-brand-teal-pale">
           <Bell size={16} color="#5F5E5A" strokeWidth={2} />
           <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-brand-teal ring-2 ring-white" />
         </button>
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-teal-pale text-[12px] font-bold text-brand-teal select-none">
+        <div className="flex h-9 w-9 select-none items-center justify-center rounded-full bg-brand-teal-pale text-[12px] font-bold text-brand-teal">
           AU
         </div>
       </div>

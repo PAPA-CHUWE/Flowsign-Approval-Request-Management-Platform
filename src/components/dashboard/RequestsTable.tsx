@@ -43,7 +43,7 @@ export function RequestsTable({ requests }: { requests: DashboardRequest[] }) {
   return (
     <div className="flex flex-col overflow-hidden rounded-[16px] border border-[#E8E6DE] bg-white">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-[#E8E6DE] px-5 pb-4 pt-5">
+      <div className="flex flex-col gap-3 border-b border-[#E8E6DE] px-5 pb-4 pt-5 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="font-dm-sans text-[15px] font-semibold text-brand-neutral-dark">
           My Requests
         </h2>
@@ -57,7 +57,7 @@ export function RequestsTable({ requests }: { requests: DashboardRequest[] }) {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-[#E8E6DE] px-5">
+      <div className="flex overflow-x-auto border-b border-[#E8E6DE] px-5">
         {TABS.map((tab) => (
           <button
             key={tab}
