@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "aos/dist/aos.css";
 import "lenis/dist/lenis.css";
+import { ButtonToTop } from "@/components/layout/ButtonToTop";
 import { ScrollAnimations } from "@/components/layout/ScrollAnimations";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import "./globals.css";
@@ -40,6 +41,7 @@ export default function RootLayout({
             {children}
           </ScrollAnimations>
         </SmoothScroll>
+        <ButtonToTop />
 
 
       </body>
