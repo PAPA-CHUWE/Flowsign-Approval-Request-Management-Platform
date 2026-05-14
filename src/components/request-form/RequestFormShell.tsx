@@ -20,7 +20,6 @@ import { AttachmentsSection }  from "./AttachmentsSection"
 import type { Attachment }     from "./AttachmentsSection"
 import { VisibilityPicker }    from "./VisibilityPicker"
 import type { Visibility }     from "./VisibilityPicker"
-
 import { AccessRequestFields }  from "./fields/AccessRequestFields"
 import { FinanceRequestFields } from "./fields/FinanceRequestFields"
 import { GeneralRequestFields } from "./fields/GeneralRequestFields"
@@ -112,7 +111,7 @@ export function RequestFormShell() {
                 className={cn(
                   "rounded-[8px] border-[#E8E6DE] bg-[#FAFAF8]",
                   "text-[13px] text-brand-neutral-dark placeholder:text-[#B4B2A9]",
-                  "focus-visible:border-[#1D9E75] focus-visible:ring-[2px]",
+                  "focus-visible:border-brand-teal-mid focus-visible:ring-2",
                   "focus-visible:ring-brand-teal-pale focus-visible:bg-white",
                   "resize-y min-h-[120px] leading-relaxed transition-all duration-150"
                 )}
@@ -130,7 +129,7 @@ export function RequestFormShell() {
           <div className="flex flex-col gap-3">
             <SectionHeading title="Approvers" />
             <p className="text-[12px] text-[#888780] -mt-1">
-              Add the people who need to approve this request. They'll be notified immediately.
+              Add the people who need to approve this request. They&apos;ll be notified immediately.
             </p>
             <PeoplePicker
               label="Add approvers" required
@@ -196,11 +195,11 @@ export function RequestFormShell() {
       <div className="shrink-0 flex items-center justify-between px-6 md:px-8 py-4 border-t border-[#E8E6DE] bg-white">
         <div className="flex items-center gap-2">
           <Button type="button" variant="ghost" disabled={isSubmitting}
-            className="h-9 px-4 rounded-[8px] text-[13px] text-[#888780] hover:bg-[#F1EFE8]">
+            className="h-9 px-4 rounded-[8px] text-[13px] text-[#888780] hover:bg-brand-neutral-pale">
             Save draft
           </Button>
           <p className="text-[11px] text-[#B4B2A9] ml-1">
-            <span className="text-[#0F6E56]">*</span> Required fields
+            <span className="text-brand-teal">*</span> Required fields
           </p>
         </div>
 
@@ -211,9 +210,9 @@ export function RequestFormShell() {
             "h-9 px-6 rounded-[8px] text-[13px] font-semibold",
             "border-none transition-all duration-200",
             valid && !isSubmitting
-              ? "bg-gradient-to-r from-[#0F6E56] to-[#1D9E75] text-white " +
+              ? "bg-linear-to-r from-brand-teal to-brand-teal-mid text-white " +
                 "hover:opacity-90 shadow-[0_4px_16px_rgba(15,110,86,0.2)] cursor-pointer"
-              : "bg-[#D3D1C7] text-[#5F5E5A] cursor-not-allowed"
+              : "bg-brand-neutral-light text-brand-neutral-mid cursor-not-allowed"
           )}
         >
           {isSubmitting ? "Submitting…" : "Submit request"}

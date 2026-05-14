@@ -224,7 +224,7 @@ function SigningIllustration() {
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-[#FAFAF8] font-dm-sans overflow-hidden ">
+    <div className="min-h-screen bg-[#FAFAF8] font-dm-sans overflow-hidden mt-5">
       {/* Hero — 2 columns */}
       <section className="min-h-screen pt-16 grid grid-cols-2 max-w-[1280px] mx-auto px-[clamp(24px,5vw,80px)] gap-10 items-center">
         {/* LEFT: Copy */}
@@ -288,7 +288,7 @@ const Home = () => {
           </div>
 
           {/* Social proof */}
-          <div className="mt-10 flex items-center gap-4 flex-wrap">
+          <div className="mt-10 flex items-center gap-4 flex-wrap mb-5">
             <span className="text-[11px] text-[#B4B2A9] font-semibold uppercase tracking-[0.08em]">Trusted by</span>
             {["Acme Corp", "Meridian", "NovaTech", "Vela Group"].map((org) => (
               <div
