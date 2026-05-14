@@ -407,7 +407,7 @@ const PricingPage = () => {
         <div className="absolute -top-[60px] -right-[40px] w-[260px] h-[260px] rounded-full bg-white/[0.04] pointer-events-none" />
         <div className="absolute -bottom-[80px] -left-[50px] w-[220px] h-[220px] rounded-full bg-white/[0.03] pointer-events-none" />
         <h2 className="font-dm-serif text-[clamp(28px,3.5vw,46px)] font-normal text-white mb-4 tracking-[-0.02em]">
-          Ready to move approvals at the speed of work?
+        Ready to stop chasing signatures and start hitting deadlines?
         </h2>
         <p className="text-[16px] text-white/65 mb-9 font-dm-sans">
           14-day free trial. No credit card. Setup in 10 minutes.
