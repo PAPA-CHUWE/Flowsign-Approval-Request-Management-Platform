@@ -29,7 +29,7 @@ export function SettingsShell() {
       {/* Top bar */}
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="text-[22px] font-bold tracking-[-0.02em] text-[#2C2C2A]">
+          <h1 className="text-[22px] font-bold tracking-[-0.02em] text-brand-neutral-dark">
             Settings
           </h1>
           <p className="mt-0.5 text-[13px] text-[#888780]">
@@ -40,13 +40,13 @@ export function SettingsShell() {
           <Button
             variant="outline"
             size="sm"
-            className="h-8 rounded-[8px] border-[#E8E6DE] px-4 text-[12px] font-semibold text-[#5F5E5A] hover:bg-[#F6F4EF]"
+            className="h-8 rounded-[8px] border-[#E8E6DE] px-4 text-[12px] font-semibold text-brand-neutral-mid hover:bg-[#F6F4EF]"
           >
             Cancel
           </Button>
           <Button
             size="sm"
-            className="h-8 rounded-[8px] bg-[#0F6E56] px-5 text-[12px] font-semibold text-white hover:bg-[#0c5e49]"
+            className="h-8 rounded-[8px] bg-brand-teal px-5 text-[12px] font-semibold text-white hover:bg-[#0c5e49]"
           >
             Save changes
           </Button>

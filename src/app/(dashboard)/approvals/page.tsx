@@ -3,14 +3,14 @@ import { ApprovalQueue } from "@/components/workflow/ApprovalQueue"
 import { MOCK_TICKETS } from "@/constants/mockTickets.constants"
 import { TICKET_STATUS } from "@/constants/ticketStatus.constants"
 
-const ACTIONABLE_STATUSES = new Set([
+const ACTIONABLE_STATUSES: string[] = [
   TICKET_STATUS.PENDING,
   TICKET_STATUS.IN_REVIEW,
   TICKET_STATUS.OPEN,
-])
+]
 
 const approvalTickets = MOCK_TICKETS.filter((t) =>
-  ACTIONABLE_STATUSES.has(t.status as typeof TICKET_STATUS[keyof typeof TICKET_STATUS])
+  ACTIONABLE_STATUSES.includes(t.status)
 )
 
 export default function ApprovalsPage() {
