@@ -1,10 +1,5 @@
-import { PageHeader } from "@/components/layout/PageHeader"
+import { SettingsShell } from "@/components/settings/SettingsShell";
 
 export default function SettingsPage() {
-  return (
-    <PageHeader
-      title="Settings"
-      description="Manage workspace and workflow configuration."
-    />
-  )
+  return <SettingsShell />;
 }

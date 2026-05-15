@@ -28,7 +28,7 @@ interface AppSidebarProps {
   className?: string;
 }
 
-export function AppSidebar({ role = USER_ROLE.EMPLOYEE, className }: AppSidebarProps) {
+export function AppSidebar({ role = USER_ROLE.ADMIN, className }: AppSidebarProps) {
   const pathname = usePathname();
   const items = navigationItems.filter((item) => item.roles.includes(role));
 
