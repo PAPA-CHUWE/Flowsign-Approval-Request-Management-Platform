@@ -48,7 +48,7 @@ export function PreferencesTab() {
               Choose your preferred language.
             </p>
           </div>
-          <Select value={language} onValueChange={setLanguage}>
+          <Select value={language} onValueChange={(v) => v && setLanguage(v)}>
             <SelectTrigger className="h-9 w-[140px] rounded-[8px] border-[#E8E6DE] text-[13px] text-[#2C2C2A] focus:ring-[#0F6E56]">
               <SelectValue />
             </SelectTrigger>
