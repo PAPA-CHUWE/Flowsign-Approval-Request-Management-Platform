@@ -1,4 +1,6 @@
-import Link from "next/link";
+"use client";
+
+import { useRouter } from "next/navigation";
 import { DollarSign, Plane, Package, Users, ArrowRight } from "lucide-react";
 
 const ACTIONS = [
@@ -6,6 +8,7 @@ const ACTIONS = [
     label: "New funds request",
     Icon: DollarSign,
     href: "/requests",
+    typeKey: "funds",
     iconClass: "text-brand-teal",
     iconBg: "bg-brand-teal-pale",
     border: "hover:border-brand-teal-light",
@@ -14,6 +17,7 @@ const ACTIONS = [
     label: "New travel request",
     Icon: Plane,
     href: "/requests",
+    typeKey: "travel",
     iconClass: "text-brand-blue",
     iconBg: "bg-brand-blue-pale",
     border: "hover:border-brand-blue",
@@ -22,6 +26,7 @@ const ACTIONS = [
     label: "New asset request",
     Icon: Package,
     href: "/requests",
+    typeKey: "assets",
     iconClass: "text-brand-purple",
     iconBg: "bg-brand-purple-pale",
     border: "hover:border-brand-purple",
@@ -30,13 +35,20 @@ const ACTIONS = [
     label: "New HR request",
     Icon: Users,
     href: "/requests",
+    typeKey: "hr",
     iconClass: "text-brand-amber",
     iconBg: "bg-brand-amber-pale",
     border: "hover:border-brand-amber",
   },
 ] as const;
 
-export function QuickActionsGrid() {
+interface QuickActionsGridProps {
+  onCreateRequest?: (typeKey: string) => void;
+}
+
+export function QuickActionsGrid({ onCreateRequest }: QuickActionsGridProps) {
+  const router = useRouter();
+
   return (
     <div className="flex flex-col overflow-hidden rounded-[16px] border border-[#E8E6DE] bg-white">
       {/* Header */}
@@ -48,19 +60,18 @@ export function QuickActionsGrid() {
 
       {/* 2×2 Grid */}
       <div className="grid grid-cols-1 gap-3 p-5 sm:grid-cols-2">
-        {ACTIONS.map(({ label, Icon, href, iconClass, iconBg, border }) => (
-          <Link
+        {ACTIONS.map(({ label, Icon, href, typeKey, iconClass, iconBg, border }) => (
+          <button
             key={label}
-            href={href}
+            type="button"
+            onClick={() => onCreateRequest ? onCreateRequest(typeKey) : router.push(href)}
             className={[
-              "group flex flex-col items-start gap-3 rounded-[12px] border border-[#E8E6DE] p-4 no-underline",
+              "group flex flex-col items-start gap-3 rounded-[12px] border border-[#E8E6DE] p-4 text-left cursor-pointer",
               "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)]",
               border,
             ].join(" ")}
           >
-            <div
-              className={`flex h-9 w-9 items-center justify-center rounded-[10px] ${iconBg}`}
-            >
+            <div className={`flex h-9 w-9 items-center justify-center rounded-[10px] ${iconBg}`}>
               <Icon size={17} className={iconClass} strokeWidth={2} />
             </div>
             <div className="flex w-full items-center justify-between">
@@ -73,7 +84,7 @@ export function QuickActionsGrid() {
                 strokeWidth={2}
               />
             </div>
-          </Link>
+          </button>
         ))}
       </div>
     </div>

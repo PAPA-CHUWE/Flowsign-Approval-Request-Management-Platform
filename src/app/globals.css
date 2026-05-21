@@ -198,3 +198,139 @@
 .animate-heartbeat-line {
   animation: heartbeat-line 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
+
+.flowsign-loader {
+  --loader-color-one: #9FE1CB;
+  --loader-color-two: #0F6E56;
+  --loader-color-three: rgb(159 225 203 / 50%);
+  --loader-color-four: rgb(15 110 86 / 50%);
+  --loader-color-five: rgb(159 225 203 / 25%);
+  --loader-time-animation: 2s;
+  position: relative;
+  height: 100px;
+  width: 100px;
+  flex: none;
+  border-radius: 9999px;
+  transform-origin: center;
+  box-shadow:
+    0 0 25px 0 var(--loader-color-three),
+    0 20px 50px 0 var(--loader-color-four);
+  animation: flowsign-loader-colorize calc(var(--loader-time-animation) * 3) ease-in-out infinite;
+}
+
+.flowsign-loader::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border-top: solid 1px var(--loader-color-one);
+  border-bottom: solid 1px var(--loader-color-two);
+  background: linear-gradient(180deg, var(--loader-color-five), var(--loader-color-four));
+  box-shadow:
+    inset 0 10px 10px 0 var(--loader-color-three),
+    inset 0 -10px 10px 0 var(--loader-color-four);
+}
+
+.flowsign-loader svg {
+  position: absolute;
+  inset: 0;
+}
+
+.flowsign-loader svg mask {
+  filter: contrast(15);
+  animation: flowsign-loader-roundness calc(var(--loader-time-animation) / 2) linear infinite;
+}
+
+.flowsign-loader svg mask polygon {
+  filter: blur(7px);
+}
+
+.flowsign-loader svg mask polygon:nth-child(1) {
+  transform-origin: 75% 25%;
+  transform: rotate(90deg);
+}
+
+.flowsign-loader svg mask polygon:nth-child(2) {
+  transform-origin: 50% 50%;
+  animation: flowsign-loader-rotation var(--loader-time-animation) linear infinite reverse;
+}
+
+.flowsign-loader svg mask polygon:nth-child(3) {
+  transform-origin: 50% 60%;
+  animation: flowsign-loader-rotation var(--loader-time-animation) linear infinite;
+  animation-delay: calc(var(--loader-time-animation) / -3);
+}
+
+.flowsign-loader svg mask polygon:nth-child(4) {
+  transform-origin: 40% 40%;
+  animation: flowsign-loader-rotation var(--loader-time-animation) linear infinite reverse;
+}
+
+.flowsign-loader svg mask polygon:nth-child(5) {
+  transform-origin: 40% 40%;
+  animation: flowsign-loader-rotation var(--loader-time-animation) linear infinite reverse;
+  animation-delay: calc(var(--loader-time-animation) / -2);
+}
+
+.flowsign-loader svg mask polygon:nth-child(6) {
+  transform-origin: 60% 40%;
+  animation: flowsign-loader-rotation var(--loader-time-animation) linear infinite;
+}
+
+.flowsign-loader svg mask polygon:nth-child(7) {
+  transform-origin: 60% 40%;
+  animation: flowsign-loader-rotation var(--loader-time-animation) linear infinite;
+  animation-delay: calc(var(--loader-time-animation) / -1.5);
+}
+
+.flowsign-loader-box {
+  height: 100px;
+  width: 100px;
+  background: linear-gradient(
+    180deg,
+    var(--loader-color-one) 30%,
+    var(--loader-color-two) 70%
+  );
+}
+
+@keyframes flowsign-loader-rotation {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes flowsign-loader-roundness {
+  0%,
+  60%,
+  100% {
+    filter: contrast(15);
+  }
+
+  20%,
+  40% {
+    filter: contrast(3);
+  }
+}
+
+@keyframes flowsign-loader-colorize {
+  0%,
+  100% {
+    filter: hue-rotate(0deg);
+  }
+
+  20% {
+    filter: hue-rotate(-12deg);
+  }
+
+  40% {
+    filter: hue-rotate(-24deg);
+  }
+
+  60% {
+    filter: hue-rotate(-36deg);
+  }
+
+  80% {
+    filter: hue-rotate(-18deg);
+  }
+}

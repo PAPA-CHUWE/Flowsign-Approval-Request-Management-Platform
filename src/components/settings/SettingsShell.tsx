@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SettingsSidebar } from "./SettingsSidebar";
 import { GeneralTab } from "./tabs/GeneralTab";
@@ -27,7 +26,7 @@ export function SettingsShell() {
   return (
     <div className="flex h-full flex-col">
       {/* Top bar */}
-      <div className="mb-6 flex items-start justify-between">
+      <div className="mb-6">
         <div>
           <h1 className="text-[22px] font-bold tracking-[-0.02em] text-brand-neutral-dark">
             Settings
@@ -35,21 +34,6 @@ export function SettingsShell() {
           <p className="mt-0.5 text-[13px] text-[#888780]">
             Manage your account, preferences, and workspace configuration.
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8 rounded-[8px] border-[#E8E6DE] px-4 text-[12px] font-semibold text-brand-neutral-mid hover:bg-[#F6F4EF]"
-          >
-            Cancel
-          </Button>
-          <Button
-            size="sm"
-            className="h-8 rounded-[8px] bg-brand-teal px-5 text-[12px] font-semibold text-white hover:bg-[#0c5e49]"
-          >
-            Save changes
-          </Button>
         </div>
       </div>
 

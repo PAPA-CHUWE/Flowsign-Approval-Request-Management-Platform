@@ -1,8 +1,11 @@
 "use client";
 
 import { Bell, Search } from "lucide-react";
+import { getUserInitials, useCurrentUser } from "@/hooks/use-current-user";
 
 export function DashboardNavbar() {
+  const { user } = useCurrentUser();
+
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-[#E8E6DE] bg-white px-4 sm:px-6">
       <div className="flex h-9 w-full max-w-[320px] items-center gap-2 rounded-[10px] border border-[#E8E6DE] bg-[#FAFAF8] px-3">
@@ -19,7 +22,7 @@ export function DashboardNavbar() {
           <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-brand-teal ring-2 ring-white" />
         </button>
         <div className="flex h-9 w-9 select-none items-center justify-center rounded-full bg-brand-teal-pale text-[12px] font-bold text-brand-teal">
-          AU
+          {getUserInitials(user)}
         </div>
       </div>
     </header>

@@ -1,11 +1,10 @@
-import type { RequestType } from "@/constants/requestType.constants"
-
 export interface RequestFormValues {
-  type: RequestType
+  type: string
   requesterName: string
   requesterEmail: string
   summary: string
   details: string
+  data?: Record<string, string>
 }
 
 export interface RequestFieldProps {

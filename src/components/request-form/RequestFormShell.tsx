@@ -1,62 +1,227 @@
 "use client"
 
 import { useState } from "react"
+import { Plus } from "lucide-react"
+import { toast } from "sonner"
 import { Button }   from "@/components/ui/button"
 import { Input }    from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { REQUEST_TYPE, type RequestType } from "@/constants/requestType.constants"
+import { REQUEST_TYPE } from "@/constants/requestType.constants"
 import { useCreateRequest } from "@/hooks/requests/useCreateRequest"
+import { useRequestTypes } from "@/hooks/requests/useRequestTypes"
+import { Loader } from "@/components/loader-ui/loader"
 
 import { inputCn }             from "./inputCn"
 import { SectionHeading }      from "./SectionHeading"
 import { FormDivider }         from "./FormDivider"
 import { FormField }           from "./FormField"
 import { RequestTypeSelector } from "./RequestTypeSelector"
-import { RequestKeyField, generateRequestKey } from "./RequestKeyField"
+import { CreateRequestTypeDialog } from "./CreateRequestTypeDialog"
 import { PeoplePicker }        from "./PeoplePicker"
 import type { Person }         from "./PeoplePicker"
 import { AttachmentsSection }  from "./AttachmentsSection"
 import type { Attachment }     from "./AttachmentsSection"
 import { VisibilityPicker }    from "./VisibilityPicker"
 import type { Visibility }     from "./VisibilityPicker"
-import { AccessRequestFields }  from "./fields/AccessRequestFields"
-import { FinanceRequestFields } from "./fields/FinanceRequestFields"
-import { GeneralRequestFields } from "./fields/GeneralRequestFields"
-import { RequesterDetailsStep } from "./steps/RequesterDetailsStep"
+import { DynamicRequestFields } from "./DynamicRequestFields"
 
-export function RequestFormShell() {
-  const { isSubmitting } = useCreateRequest()
+interface RequestFormShellProps {
+  onRequestCreated?: () => void
+  initialType?: string
+}
 
-  const [type,         setType]         = useState<RequestType>(REQUEST_TYPE.GENERAL)
+export function RequestFormShell({ onRequestCreated, initialType }: RequestFormShellProps) {
+  const { submit, isSubmitting } = useCreateRequest()
+  const {
+    requestTypes,
+    isLoading: isLoadingRequestTypes,
+    error: requestTypesError,
+    isLoadingDetails,
+    detailsError,
+    addRequestType,
+    loadRequestTypeDetails,
+  } = useRequestTypes()
+
+  const [type,         setType]         = useState<string>(initialType ?? REQUEST_TYPE.GENERAL)
   const [title,        setTitle]        = useState("")
-  const [requestKey,   setRequestKey]   = useState(() => generateRequestKey())
+  const [department,   setDepartment]   = useState("")
   const [description,  setDescription]  = useState("")
+  const [requestData,  setRequestData]  = useState<Record<string, string>>({})
   const [approvers,    setApprovers]    = useState<Person[]>([])
   const [implementors, setImplementors] = useState<Person[]>([])
   const [attachments,  setAttachments]  = useState<Attachment[]>([])
   const [visibility,   setVisibility]   = useState<Visibility>("approvers")
+  const [createTypeOpen, setCreateTypeOpen] = useState(false)
 
-  const regenerateKey = () => setRequestKey(generateRequestKey())
+  const selectedRequestType = requestTypes.find((requestType) => requestType.key === type)
+  const dynamicFields = selectedRequestType?.fields ?? []
+  const requiredDynamicFields = dynamicFields.filter((field) => field.required)
 
   const valid =
     title.trim().length > 0 &&
     description.trim().length > 0 &&
-    approvers.length > 0
+    approvers.length > 0 &&
+    requiredDynamicFields.every((field) => {
+      const value = requestData[field.key]
+
+      return typeof value === "string" && value.trim().length > 0
+    })
+
+  async function handleTypeChange(nextType: string) {
+    setType(nextType)
+    setRequestData({})
+
+    try {
+      await loadRequestTypeDetails(nextType)
+    } catch {
+      // The list payload remains usable when the detail refresh fails.
+    }
+  }
+
+  function setRequestField(key: string, value: string) {
+    setRequestData((current) => ({ ...current, [key]: value }))
+  }
+
+  function handleRequestTypeCreated(requestType: (typeof requestTypes)[number]) {
+    addRequestType(requestType)
+    setType(requestType.key)
+    setRequestData({})
+  }
+
+  function normalizedData() {
+    return Object.fromEntries(
+      Object.entries(requestData).map(([key, value]) => {
+        const field = dynamicFields.find((item) => item.key === key)
+
+        return [
+          key,
+          field?.type === "number" && value.trim() !== "" ? Number(value) : value,
+        ]
+      })
+    ) as Record<string, string | number>
+  }
+
+  function requestPayload(submitRequest: boolean) {
+    const data = normalizedData()
+    const amountValue = data.amount
+    const amount = typeof amountValue === "number" ? amountValue : undefined
+
+    return {
+      requestTypeKey: type,
+      type: selectedRequestType?.category ?? type,
+      title: title.trim(),
+      summary: title.trim(),
+      description: description.trim(),
+      details: description.trim(),
+      data,
+      amount,
+      department: department.trim() || undefined,
+      urgency: "normal",
+      priority: "normal",
+      visibility,
+      approverPublicIds: approvers.map((person) => person.id),
+      implementorPublicIds: implementors.map((person) => person.id),
+      submit: submitRequest,
+    }
+  }
+
+  async function handleSaveDraft() {
+    if (!valid || isSubmitting) return
+
+    try {
+      await submit(requestPayload(false))
+      toast.success("Draft saved", {
+        description: "Your request draft was created successfully.",
+      })
+      onRequestCreated?.()
+    } catch (reason) {
+      const message =
+        reason instanceof Error ? reason.message : "Could not save request draft."
+
+      toast.error("Draft not saved", { description: message })
+    }
+  }
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    if (!valid || isSubmitting) return
+
+    try {
+      await submit(requestPayload(true))
+      toast.success("Request submitted", {
+        description: "Your approval request was created successfully.",
+      })
+      onRequestCreated?.()
+    } catch (reason) {
+      const message =
+        reason instanceof Error ? reason.message : "Could not submit request."
+
+      toast.error("Request not submitted", { description: message })
+    }
+  }
 
   return (
-    <form className="w-full flex flex-col">
+    <>
+    <form data-lenis-prevent onSubmit={handleSubmit} className="flex min-h-full w-full flex-col">
 
       {/* ══════════════════════════════════════════
           SCROLLABLE BODY
       ══════════════════════════════════════════ */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1">
         <div className="w-full px-6 md:px-8 py-6 flex flex-col gap-8">
 
           {/* ── 1. Request type ── */}
           <div>
-            <SectionHeading title="Request type" />
-            <RequestTypeSelector value={type} onChange={setType} disabled={isSubmitting} />
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <SectionHeading title="Request type" />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setCreateTypeOpen(true)}
+                className="h-8 rounded-[8px] border-[#E8E6DE] px-3 text-[12px] font-semibold text-[#2C2C2A] hover:bg-[#F6F4EF]"
+              >
+                <Plus size={14} />
+                New type
+              </Button>
+            </div>
+            {requestTypesError && (
+              <p className="mb-3 text-[12px] font-medium text-brand-danger-text">
+                {requestTypesError}
+              </p>
+            )}
+            {detailsError && (
+              <p className="mb-3 text-[12px] font-medium text-brand-danger-text">
+                {detailsError}
+              </p>
+            )}
+            {isLoadingRequestTypes && (
+              <Loader
+                label="Loading request types"
+                size="sm"
+                className="mb-3 min-h-16 justify-start"
+              />
+            )}
+            {isLoadingDetails && (
+              <Loader
+                label="Loading selected request type"
+                size="sm"
+                className="mb-3 min-h-16 justify-start"
+              />
+            )}
+            <RequestTypeSelector
+              value={type}
+              onChange={handleTypeChange}
+              requestTypes={requestTypes}
+              disabled={isSubmitting || isLoadingRequestTypes || isLoadingDetails}
+            />
+            {selectedRequestType?.description && (
+              <p className="mt-3 max-w-2xl text-[12px] text-[#888780]">
+                {selectedRequestType.description}
+              </p>
+            )}
           </div>
 
           <FormDivider />
@@ -64,31 +229,26 @@ export function RequestFormShell() {
           {/* ── 2. Basic details ── */}
           <div className="flex flex-col gap-4">
             <SectionHeading title="Basic details" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField label="Request title" required hint="Give this request a clear, specific title">
-                <Input
-                  name="title"
-                  placeholder="e.g. Q4 office equipment procurement"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  disabled={isSubmitting}
-                  className={inputCn}
-                />
-              </FormField>
-              <RequestKeyField
-                value={requestKey}
-                onRegenerate={regenerateKey}
+            <FormField label="Request title" required hint="Give this request a clear, specific title">
+              <Input
+                name="title"
+                placeholder="e.g. Q4 office equipment procurement"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
                 disabled={isSubmitting}
+                className={inputCn}
               />
-            </div>
-          </div>
-
-          <FormDivider />
-
-          {/* ── 3. Requester details ── */}
-          <div className="flex flex-col gap-4">
-            <SectionHeading title="Requester details" />
-            <RequesterDetailsStep disabled={isSubmitting} />
+            </FormField>
+            <FormField label="Department" hint="Optional department or team for this request">
+              <Input
+                name="department"
+                placeholder="e.g. Finance"
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                disabled={isSubmitting}
+                className={inputCn}
+              />
+            </FormField>
           </div>
 
           <FormDivider />
@@ -118,9 +278,12 @@ export function RequestFormShell() {
               />
             </FormField>
 
-            {type === REQUEST_TYPE.ACCESS  && <AccessRequestFields  disabled={isSubmitting} />}
-            {type === REQUEST_TYPE.FINANCE && <FinanceRequestFields disabled={isSubmitting} />}
-            {type === REQUEST_TYPE.GENERAL && <GeneralRequestFields disabled={isSubmitting} />}
+            <DynamicRequestFields
+              fields={dynamicFields}
+              values={requestData}
+              onChange={setRequestField}
+              disabled={isSubmitting}
+            />
           </div>
 
           <FormDivider />
@@ -195,6 +358,7 @@ export function RequestFormShell() {
       <div className="flex shrink-0 flex-col gap-3 border-t border-[#E8E6DE] bg-white px-6 py-4 sm:flex-row sm:items-center sm:justify-between md:px-8">
         <div className="flex flex-wrap items-center gap-2">
           <Button type="button" variant="ghost" disabled={isSubmitting}
+            onClick={handleSaveDraft}
             className="h-9 px-4 rounded-[8px] text-[13px] text-[#888780] hover:bg-brand-neutral-pale">
             Save draft
           </Button>
@@ -219,5 +383,11 @@ export function RequestFormShell() {
         </Button>
       </div>
     </form>
+    <CreateRequestTypeDialog
+      open={createTypeOpen}
+      onOpenChange={setCreateTypeOpen}
+      onCreated={handleRequestTypeCreated}
+    />
+    </>
   )
 }

@@ -17,7 +17,7 @@ interface DashboardStatCardProps {
 export function DashboardStatCard({ Icon, label, value, trend }: DashboardStatCardProps) {
   const up = trend.direction === "up";
   return (
-    <div className="flex flex-col gap-4 rounded-[16px] border border-[#E8E6DE] bg-white px-5 py-5">
+    <div className="flex flex-col gap-4 rounded-[16px] border border-[#E8E6DE] bg-white px-5 py-5 shadow-[0_1px_4px_rgba(0,0,0,0.05)] transition-shadow duration-200 hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
       <div className="flex items-center justify-between">
         <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-brand-teal-pale">
           <Icon size={18} className="text-brand-teal" strokeWidth={2} />
@@ -38,7 +38,7 @@ export function DashboardStatCard({ Icon, label, value, trend }: DashboardStatCa
       </div>
 
       <div>
-        <p className="font-dm-sans text-[28px] font-bold leading-none text-brand-neutral-dark mb-1">
+        <p className="font-dm-sans text-[28px] font-bold leading-none text-brand-neutral-dark mb-1 tabular-nums">
           {value}
         </p>
         <p className="font-dm-sans text-[13px] text-brand-neutral-mid">{label}</p>

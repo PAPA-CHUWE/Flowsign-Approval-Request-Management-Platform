@@ -7,6 +7,7 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuItem,
   DropdownMenuSeparator,
@@ -75,26 +76,28 @@ export function StatusDropdown({ value, onChange, disabled }: StatusDropdownProp
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="min-w-36">
-        <DropdownMenuLabel>Select status</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {(Object.keys(STATUS_CONFIG) as StatusKey[]).map((s) => {
-          const c = STATUS_CONFIG[s]
-          const sel = s === value
-          return (
-            <DropdownMenuItem
-              key={s}
-              onClick={() => onChange(s)}
-              className={cn(
-                "text-[12px] font-medium cursor-pointer",
-                sel && "text-white! focus:text-white!",
-              )}
-              style={sel ? { background: c.color } : {}}
-            >
-              <c.Icon size={12} strokeWidth={2.5} color={sel ? "#fff" : c.color} />
-              {c.label}
-            </DropdownMenuItem>
-          )
-        })}
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Select status</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {(Object.keys(STATUS_CONFIG) as StatusKey[]).map((s) => {
+            const c = STATUS_CONFIG[s]
+            const sel = s === value
+            return (
+              <DropdownMenuItem
+                key={s}
+                onClick={() => onChange(s)}
+                className={cn(
+                  "text-[12px] font-medium cursor-pointer",
+                  sel && "text-white! focus:text-white!",
+                )}
+                style={sel ? { background: c.color } : {}}
+              >
+                <c.Icon size={12} strokeWidth={2.5} color={sel ? "#fff" : c.color} />
+                {c.label}
+              </DropdownMenuItem>
+            )
+          })}
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   )

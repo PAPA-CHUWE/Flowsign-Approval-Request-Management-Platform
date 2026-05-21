@@ -14,17 +14,18 @@ export interface SettingsNavItem {
   icon: ElementType;
 }
 
-export type NotifChannel = "push" | "email" | "sms";
+export type NotifChannel = "inApp" | "email" | "sms";
 
 export type NotifKey =
   | "approvals"
   | "mentions"
   | "reminders"
   | "statusUpdates"
-  | "comments";
+  | "comments"
+  | "escalations";
 
 export interface NotifSetting {
-  push: boolean;
+  inApp: boolean;
   email: boolean;
   sms: boolean;
 }

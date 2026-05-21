@@ -82,7 +82,7 @@ const ContactUs = () => {
         <div className="grid w-full max-w-[980px] grid-cols-1 overflow-hidden rounded-[24px] bg-white shadow-[0_8px_48px_rgba(0,0,0,0.08),0_2px_12px_rgba(0,0,0,0.04)] lg:grid-cols-2" data-aos="fade-up">
 
           {/* LEFT: Copy + contact info */}
-          <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-brand-teal to-[#085041] px-6 py-8 sm:px-8 lg:px-11 lg:py-[52px]">
+          <div className="relative flex flex-col justify-between overflow-hidden bg-linear-to-br from-brand-card-muted to-[#085041] px-6 py-8 sm:px-8 lg:px-11 lg:py-[52px]">
             {/* Decorative circles */}
             <div className="absolute -top-[60px] -right-[60px] w-[220px] h-[220px] rounded-full bg-white/[0.04] pointer-events-none" />
             <div className="absolute -bottom-[80px] -left-[40px] w-[200px] h-[200px] rounded-full bg-white/[0.03] pointer-events-none" />

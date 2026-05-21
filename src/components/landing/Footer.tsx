@@ -149,7 +149,7 @@ const Footer = () => {
                 />
                 <button
                   onClick={handleSubscribe}
-                  className="px-[18px] py-2.5 rounded-[9px] bg-brand-teal border-none cursor-pointer text-white text-[13px] font-bold font-dm-sans flex items-center gap-1.5 whitespace-nowrap transition-colors duration-150 hover:bg-brand-teal-mid shrink-0"
+                  className="px-[18px] py-2.5 rounded-[9px] bg-brand-teal-mid border-none cursor-pointer text-white text-[13px] font-bold font-dm-sans flex items-center gap-1.5 whitespace-nowrap transition-colors duration-150 hover:bg-brand-teal-mid shrink-0"
                 >
                   Subscribe <ArrowRight size={13} strokeWidth={2.5} />
                 </button>

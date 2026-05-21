@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button }   from "@/components/ui/button";
 import { Input }    from "@/components/ui/input";
 import { Label }    from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { Eye, EyeOff, Mail, Lock, User, Building2 } from "lucide-react";
+import { ApiError } from "@/lib/api/client";
+import { signup as signupUser, storeAuthSession } from "@/lib/api/auth";
+import { AlertCircle, Eye, EyeOff, Loader2, Mail, Lock, User, Building2 } from "lucide-react";
 import { FaGoogle, FaMicrosoft } from "react-icons/fa6";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -27,7 +30,7 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label className="text-[12px] font-semibold text-[#5F5E5A] tracking-wide">
+      <Label className="text-[12px] font-semibold text-brand-neutral-mid tracking-wide">
         {label}
       </Label>
       {children}
@@ -153,27 +156,94 @@ function LeftPanel() {
 }
 
 // ─── SignupForm ───────────────────────────────────────────────────────────────
+function slugify(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function splitName(fullName: string) {
+  const parts = fullName.trim().split(/\s+/);
+  const firstName = parts.shift() ?? "";
+  const lastName = parts.join(" ") || firstName;
+
+  return { firstName, lastName };
+}
+
+function getSignupErrorMessage(error: unknown) {
+  if (error instanceof ApiError) {
+    return error.message;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Could not create your account. Please try again.";
+}
+
 const SignupForm = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword]   = useState(false);
   const [agreed, setAgreed]               = useState(false);
+  const [orgSlugEdited, setOrgSlugEdited] = useState(false);
+  const [isSubmitting, setIsSubmitting]   = useState(false);
+  const [error, setError]                 = useState("");
   const [form, setForm]                   = useState({
-    name: "", org: "", email: "", password: "",
+    name: "", org: "", orgSlug: "", email: "", password: "",
   });
 
   const set = (key: keyof typeof form) =>
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      setForm((p) => ({ ...p, [key]: e.target.value }));
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = key === "orgSlug" ? slugify(e.target.value) : e.target.value;
+
+      if (key === "orgSlug") {
+        setOrgSlugEdited(true);
+      }
+
+      setForm((p) => ({
+        ...p,
+        [key]: value,
+        ...(key === "org" && !orgSlugEdited ? { orgSlug: slugify(value) } : {}),
+      }));
+    };
 
   const valid =
     form.name.trim() &&
+    form.org.trim() &&
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.orgSlug) &&
     form.email.includes("@") &&
     form.password.length >= 8 &&
     agreed;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!valid) return;
-    // TODO: wire up to auth
+    if (!valid || isSubmitting) return;
+
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      const { firstName, lastName } = splitName(form.name);
+      const response = await signupUser({
+        organizationName: form.org.trim(),
+        organizationSlug: form.orgSlug,
+        firstName,
+        lastName,
+        email: form.email.trim().toLowerCase(),
+        password: form.password,
+      });
+
+      storeAuthSession(response);
+      router.push("/dashboard");
+      router.refresh();
+    } catch (reason) {
+      setError(getSignupErrorMessage(reason));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -220,6 +290,12 @@ const SignupForm = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {error && (
+              <div className="flex items-start gap-2.5 rounded-[10px] border border-[#F5C6C6] bg-[#FCEBEB] px-4 py-3 text-[13px] font-medium text-[#A32D2D]">
+                <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
 
             {/* Full name */}
             <Field label="Full name">
@@ -232,6 +308,7 @@ const SignupForm = () => {
                   placeholder="Jane Smith"
                   value={form.name}
                   onChange={set("name")}
+                  autoComplete="name"
                   className={inputCn}
                 />
               </div>
@@ -250,6 +327,7 @@ const SignupForm = () => {
                       placeholder="Meridian Capital"
                       value={form.org}
                       onChange={set("org")}
+                      autoComplete="organization"
                       className={inputCn}
                     />
                   </div>
@@ -257,23 +335,40 @@ const SignupForm = () => {
               </div>
 
               <div className="flex-1">
-                <Field label="Work email">
+                <Field label="Organisation slug">
                   <div className="relative">
-                    <Mail
+                    <Building2
                       size={15} color="#B4B2A9" strokeWidth={2}
                       className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
                     />
                     <Input
-                      type="email"
-                      placeholder="jane@organisation.com"
-                      value={form.email}
-                      onChange={set("email")}
+                      placeholder="meridian-capital"
+                      value={form.orgSlug}
+                      onChange={set("orgSlug")}
                       className={inputCn}
                     />
                   </div>
                 </Field>
               </div>
             </div>
+
+            {/* Work email */}
+            <Field label="Work email">
+              <div className="relative">
+                <Mail
+                  size={15} color="#B4B2A9" strokeWidth={2}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                />
+                <Input
+                  type="email"
+                  placeholder="jane@organisation.com"
+                  value={form.email}
+                  onChange={set("email")}
+                  autoComplete="email"
+                  className={inputCn}
+                />
+              </div>
+            </Field>
 
             {/* Password */}
             <Field label="Password">
@@ -287,6 +382,7 @@ const SignupForm = () => {
                   placeholder="Min. 8 characters"
                   value={form.password}
                   onChange={set("password")}
+                  autoComplete="new-password"
                   className={cn(inputCn, "pr-10")}
                 />
                 <button
@@ -335,17 +431,24 @@ const SignupForm = () => {
             {/* Submit */}
             <Button
               type="submit"
-              disabled={!valid}
+              disabled={!valid || isSubmitting}
               className={cn(
                 "w-full h-11 rounded-[10px] mt-1",
                 "text-[14px] font-bold transition-all duration-200",
-                valid
+                valid && !isSubmitting
                   ? "bg-gradient-to-r from-[#0F6E56] to-[#1D9E75] text-white " +
                     "hover:opacity-90 shadow-[0_4px_20px_rgba(15,110,86,0.25)] cursor-pointer"
                   : "bg-[#D3D1C7] text-[#5F5E5A] cursor-not-allowed",
               )}
             >
-              Create account
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Creating account
+                </>
+              ) : (
+                "Create account"
+              )}
             </Button>
           </form>
 

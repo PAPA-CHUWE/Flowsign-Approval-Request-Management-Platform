@@ -1,14 +1,5 @@
-import { PageHeader } from "@/components/layout/PageHeader"
-import { RequestFormShell } from "@/components/request-form/RequestFormShell"
+import { RequestsPageContent } from "@/components/requests/RequestsPageContent"
 
 export default function RequestsPage() {
-  return (
-    <div className="grid gap-6">
-      <PageHeader
-        title="Requests"
-        description="Create and submit a new workflow request."
-      />
-      <RequestFormShell />
-    </div>
-  )
+  return <RequestsPageContent />
 }

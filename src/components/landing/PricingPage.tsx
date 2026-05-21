@@ -148,7 +148,7 @@ function PlanCard({ plan, annual }: { plan: Plan; annual: boolean }) {
       }}
     >
       {plan.badge && (
-        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10 bg-gradient-to-r from-brand-teal to-brand-teal-mid text-white text-[10px] font-bold px-4 py-[5px] rounded-full font-dm-sans tracking-[0.08em] whitespace-nowrap shadow-[0_4px_12px_rgba(15,110,86,0.3)]">
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10 bg-gradient-to-r from-brand-card-muted  to-brand-teal-mid text-white text-[10px] font-bold px-4 py-[5px] rounded-full font-dm-sans tracking-[0.08em] whitespace-nowrap shadow-[0_4px_12px_rgba(15,110,86,0.3)]">
           ★ {plan.badge}
         </div>
       )}

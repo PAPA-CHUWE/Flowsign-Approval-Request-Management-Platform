@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button }   from "@/components/ui/button";
 import { Input }    from "@/components/ui/input";
 import { Label }    from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { ApiError } from "@/lib/api/client";
+import { login as loginUser, storeAuthSession } from "@/lib/api/auth";
+import { AlertCircle, Building2, Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
 import { FaGoogle, FaMicrosoft } from "react-icons/fa6";
 
 // ─── Shared input className ───────────────────────────────────────────────────
@@ -141,23 +144,72 @@ function LeftPanel() {
 }
 
 // ─── LoginForm ────────────────────────────────────────────────────────────────
+function slugify(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function getLoginErrorMessage(error: unknown) {
+  if (error instanceof ApiError) {
+    return error.message;
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Could not sign you in. Please try again.";
+}
+
 const LoginForm = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember]         = useState(false);
-  const [form, setForm]                 = useState({ email: "", password: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [form, setForm]                 = useState({
+    organizationSlug: "", email: "", password: "",
+  });
   const [error, setError]               = useState("");
 
   const set = (key: keyof typeof form) =>
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      setForm((p) => ({ ...p, [key]: e.target.value }));
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = key === "organizationSlug"
+        ? slugify(e.target.value)
+        : e.target.value;
 
-  const valid = form.email.includes("@") && form.password.length >= 6;
+      setForm((p) => ({ ...p, [key]: value }));
+    };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const valid =
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.organizationSlug) &&
+    form.email.includes("@") &&
+    form.password.length >= 6;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!valid) return;
+    if (!valid || isSubmitting) return;
+
     setError("");
-    // TODO: wire up to auth
+    setIsSubmitting(true);
+
+    try {
+      const response = await loginUser({
+        organizationSlug: form.organizationSlug,
+        email: form.email.trim().toLowerCase(),
+        password: form.password,
+      });
+
+      storeAuthSession(response);
+      router.push("/dashboard");
+      router.refresh();
+    } catch (reason) {
+      setError(getLoginErrorMessage(reason));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -207,12 +259,28 @@ const LoginForm = () => {
 
             {/* Error banner */}
             {error && (
-              <div className="px-4 py-3 rounded-[10px] bg-[#FCEBEB]
-                              border border-[#F5C6C6]
-                              text-[13px] text-[#A32D2D] font-medium">
-                {error}
+              <div className="flex items-start gap-2.5 rounded-[10px] border border-[#F5C6C6] bg-[#FCEBEB] px-4 py-3 text-[13px] font-medium text-[#A32D2D]">
+                <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                <span>{error}</span>
               </div>
             )}
+
+            {/* Organisation slug */}
+            <Field label="Organisation slug">
+              <div className="relative">
+                <Building2
+                  size={15} color="#B4B2A9" strokeWidth={2}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                />
+                <Input
+                  placeholder="solvify-technologies"
+                  value={form.organizationSlug}
+                  onChange={set("organizationSlug")}
+                  autoComplete="organization"
+                  className={inputCn}
+                />
+              </div>
+            </Field>
 
             {/* Email */}
             <Field label="Email">
@@ -294,17 +362,24 @@ const LoginForm = () => {
             {/* Submit */}
             <Button
               type="submit"
-              disabled={!valid}
+              disabled={!valid || isSubmitting}
               className={cn(
                 "w-full h-11 rounded-[10px] mt-1",
                 "text-[14px] font-bold transition-all duration-200 border-none",
-                valid
+                valid && !isSubmitting
                   ? "bg-gradient-to-r from-[#0F6E56] to-[#1D9E75] text-white " +
                     "hover:opacity-90 shadow-[0_4px_20px_rgba(15,110,86,0.25)] cursor-pointer"
                   : "bg-[#D3D1C7] text-[#5F5E5A] cursor-not-allowed",
               )}
             >
-              Login
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Signing in
+                </>
+              ) : (
+                "Login"
+              )}
             </Button>
           </form>
 

@@ -62,15 +62,15 @@ export function ApprovalPipelineCard({ stats, byType }: ApprovalPipelineCardProp
 
       <div className="px-5 py-4">
         {/* Donut chart */}
-        <div className="relative flex items-center justify-center">
-          <ResponsiveContainer width={160} height={160}>
+        <div className="relative h-[180px]">
+          <ResponsiveContainer width="100%" height={180}>
             <PieChart>
               <Pie
                 data={pieData}
                 cx="50%"
                 cy="50%"
-                innerRadius={50}
-                outerRadius={72}
+                innerRadius={54}
+                outerRadius={80}
                 paddingAngle={3}
                 dataKey="value"
                 strokeWidth={0}
@@ -91,26 +91,37 @@ export function ApprovalPipelineCard({ stats, byType }: ApprovalPipelineCardProp
               />
             </PieChart>
           </ResponsiveContainer>
-          {/* Centre label — absolutely positioned inside the ResponsiveContainer parent */}
+          {/* Centre label */}
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-            <span className="font-dm-sans text-[22px] font-bold leading-none text-brand-neutral-dark">
+            <span className="font-dm-sans text-[22px] font-bold leading-none text-brand-neutral-dark tabular-nums">
               {total}
             </span>
             <span className="font-dm-sans text-[11px] text-brand-neutral-mid mt-0.5">total</span>
           </div>
         </div>
 
-        {/* Legend */}
-        <div className="mt-4 grid grid-cols-1 gap-x-4 gap-y-2.5 sm:grid-cols-2">
+        {/* Legend with proportional progress bars */}
+        <div className="mt-4 flex flex-col gap-3">
           {pieData.map((item) => (
-            <div key={item.name} className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className={`h-2.5 w-2.5 shrink-0 rounded-full ${item.dotClass}`} />
-                <span className="font-dm-sans text-[12px] text-brand-neutral-mid">{item.name}</span>
+            <div key={item.name} className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className={`h-2 w-2 shrink-0 rounded-full ${item.dotClass}`} />
+                  <span className="font-dm-sans text-[12px] text-brand-neutral-mid">{item.name}</span>
+                </div>
+                <span className="font-dm-sans text-[12px] font-semibold text-brand-neutral-dark tabular-nums">
+                  {item.value}
+                </span>
               </div>
-              <span className="font-dm-sans text-[12px] font-semibold text-brand-neutral-dark">
-                {item.value}
-              </span>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#F1EFE8]">
+                <div
+                  className="h-full rounded-full transition-[width] duration-700 ease-out"
+                  style={{
+                    width: `${total > 0 ? Math.round((item.value / total) * 100) : 0}%`,
+                    backgroundColor: item.color,
+                  }}
+                />
+              </div>
             </div>
           ))}
         </div>

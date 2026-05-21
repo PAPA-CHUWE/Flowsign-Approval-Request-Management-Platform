@@ -23,6 +23,11 @@ export const navigationItems = [
     roles: [USER_ROLE.MANAGER, USER_ROLE.ADMIN],
   },
   {
+    title: "Users",
+    href: "/users",
+    roles: [USER_ROLE.ADMIN],
+  },
+  {
     title: "Settings",
     href: "/settings",
     roles: [USER_ROLE.ADMIN],
