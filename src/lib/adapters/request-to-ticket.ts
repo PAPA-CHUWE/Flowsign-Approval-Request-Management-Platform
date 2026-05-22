@@ -42,12 +42,8 @@ function formatPersonList(people?: ApprovalRequest["approvers"]): string {
 }
 
 export function adaptRequestToTicket(r: ApprovalRequest): MockTicket {
-  const requesterName =
-    r.requesterName ??
-    `${r.requester?.firstName ?? ""} ${r.requester?.lastName ?? ""}`.trim() ||
-    r.requester?.name ||
-    r.requester?.email ||
-    "Unknown"
+  const requesterFullName = `${r.requester?.firstName ?? ""} ${r.requester?.lastName ?? ""}`.trim()
+  const requesterName = r.requesterName ?? (requesterFullName || r.requester?.name || r.requester?.email || "Unknown")
 
   const assignee =
     r.assignee ?? formatPersonList(r.approvers) ?? ""
