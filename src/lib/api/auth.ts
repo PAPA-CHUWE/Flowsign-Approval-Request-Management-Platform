@@ -3,6 +3,15 @@ import { apiClient } from "@/lib/api/client"
 export const AUTH_TOKEN_KEY = "flowsign_auth_token"
 export const AUTH_USER_KEY = "flowsign_auth_user"
 export const AUTH_SESSION_CHANGE_EVENT = "flowsign_auth_session_change"
+export const AUTH_COOKIE_NAME = "flowsign_auth"
+
+function setAuthCookie() {
+  document.cookie = `${AUTH_COOKIE_NAME}=1; path=/; SameSite=Lax; max-age=86400`
+}
+
+function clearAuthCookie() {
+  document.cookie = `${AUTH_COOKIE_NAME}=; path=/; SameSite=Lax; max-age=0`
+}
 
 export interface SignupPayload {
   organizationName: string
@@ -117,6 +126,7 @@ export function storeAuthSession(response: AuthResponse) {
 
   window.localStorage.setItem(AUTH_TOKEN_KEY, response.responseBody.token)
   storeAuthUser(response.responseBody.user)
+  setAuthCookie()
 }
 
 export interface ChangePasswordPayload {
@@ -161,5 +171,6 @@ export function clearAuthSession() {
 
   window.localStorage.removeItem(AUTH_TOKEN_KEY)
   window.localStorage.removeItem(AUTH_USER_KEY)
+  clearAuthCookie()
   window.dispatchEvent(new Event(AUTH_SESSION_CHANGE_EVENT))
 }
