@@ -11,6 +11,7 @@ import { PriorityBadge } from "./PriorityBadge"
 import { SortIcon } from "./SortIcon"
 import { FilterRadio } from "./FilterRadio"
 import { TicketSearch } from "./TicketSearch"
+import { TicketDrawer } from "./TicketDrawer"
 
 export type SortField = "reference" | "priority" | "submittedAt" | "completionDate"
 
@@ -46,6 +47,16 @@ export function TicketList({ tickets }: TicketListProps) {
   const [statuses,  setStatuses]  = useState<Record<string, StatusKey>>(
     Object.fromEntries(tickets.map((t) => [t.id, t.status as StatusKey]))
   )
+  const [drawerTicket, setDrawerTicket] = useState<(MockTicket & { currentStatus: StatusKey }) | null>(null)
+
+  function openDrawer(ticket: MockTicket) {
+    setDrawerTicket({ ...ticket, currentStatus: statuses[ticket.id] })
+  }
+
+  function handleDrawerStatusChange(id: string, status: StatusKey) {
+    setStatuses((prev) => ({ ...prev, [id]: status }))
+    setDrawerTicket((prev) => prev ? { ...prev, currentStatus: status } : prev)
+  }
 
   const toggleSort = (field: SortField) => {
     if (sortField === field) setSortDir((d) => (d === "asc" ? "desc" : "asc"))
@@ -140,6 +151,7 @@ export function TicketList({ tickets }: TicketListProps) {
           filtered.map((ticket, idx) => (
             <div
               key={ticket.id}
+              onClick={() => openDrawer(ticket)}
               className={cn(
                 "flex min-w-[940px] items-center gap-3 px-4 py-3 transition-colors duration-100",
                 "border-b border-brand-neutral-pale last:border-0",
@@ -163,7 +175,8 @@ export function TicketList({ tickets }: TicketListProps) {
                 <p className="text-[13px] font-medium text-[#2C2C2A] truncate">{ticket.title}</p>
               </div>
 
-              <div className="w-[130px] shrink-0">
+              {/* Stop click propagation so the dropdown doesn't also open the drawer */}
+              <div className="w-[130px] shrink-0" onClick={(e) => e.stopPropagation()}>
                 <StatusDropdown
                   value={statuses[ticket.id]}
                   onChange={(v) => setStatuses((prev) => ({ ...prev, [ticket.id]: v }))}
@@ -192,6 +205,13 @@ export function TicketList({ tickets }: TicketListProps) {
       <p className="text-[11px] text-[#B4B2A9] pl-1">
         Showing {filtered.length} of {tickets.length} tickets
       </p>
+
+      <TicketDrawer
+        ticket={drawerTicket}
+        open={drawerTicket !== null}
+        onClose={() => setDrawerTicket(null)}
+        onStatusChange={handleDrawerStatusChange}
+      />
     </div>
   )
 }
