@@ -130,6 +130,23 @@ export interface ChangePasswordResponse {
   responseBody: { ok: boolean }
 }
 
+export interface ForgotPasswordPayload {
+  email: string
+}
+
+export interface ForgotPasswordResponse {
+  statusCode: string
+  message: string
+  responseBody: { ok: boolean }
+}
+
+export function forgotPassword(payload: ForgotPasswordPayload) {
+  return apiClient<ForgotPasswordResponse>("/api/v1/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  })
+}
+
 export function changePassword(payload: ChangePasswordPayload) {
   return apiClient<ChangePasswordResponse>("/api/v1/auth/change-password", {
     method: "POST",

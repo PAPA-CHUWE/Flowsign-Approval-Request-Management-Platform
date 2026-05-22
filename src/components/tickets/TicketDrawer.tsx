@@ -102,7 +102,7 @@ export function TicketDrawer({ ticket, open, onClose, onStatusChange }: TicketDr
         </SheetHeader>
 
         {/* ── Scrollable body ── */}
-        <div className="flex-1 overflow-y-auto">
+        <div data-lenis-prevent className="flex-1 overflow-y-auto">
 
           {/* Status timeline */}
           <div className="border-b border-[#E8E6DE] px-6 py-5">

@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { BadgeCheck, Shield, Lock, Star, ArrowRight, Heart } from "lucide-react";
 import { FaXTwitter, FaLinkedinIn, FaGithub, FaYoutube } from "react-icons/fa6";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 
 const NAV = [
   {
@@ -73,7 +76,7 @@ const Footer = () => {
       <div className="mx-auto max-w-[1180px] overflow-hidden rounded-[20px] bg-gradient-to-br from-brand-neutral-dark to-[#085041]" data-aos="fade-up">
 
         {/* Top section */}
-        <div className="grid grid-cols-1 gap-8 border-b border-brand-card-border px-6 pb-9 pt-9 sm:grid-cols-2 sm:px-8 lg:grid-cols-[220px_repeat(4,1fr)] lg:px-11 lg:pt-11">
+        <div className="grid grid-cols-1 gap-8 px-6 pb-9 pt-9 sm:grid-cols-2 sm:px-8 lg:grid-cols-[220px_repeat(4,1fr)] lg:px-11 lg:pt-11">
           {/* Brand */}
           <div className="flex flex-col gap-4 sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-[9px]">
@@ -89,14 +92,17 @@ const Footer = () => {
             </p>
             <div className="flex gap-2 mt-1">
               {SOCIALS.map(({ Icon, href, label }) => (
-                <a
+                <Button
                   key={label}
-                  href={href}
-                  aria-label={label}
-                  className="w-[34px] h-[34px] rounded-[9px] bg-brand-card-surface border border-brand-card-border flex items-center justify-center cursor-pointer transition-all duration-150 hover:bg-brand-teal hover:border-brand-teal no-underline"
+                  variant="ghost"
+                  size="icon"
+                  asChild
+                  className="w-[34px] h-[34px] rounded-[9px] bg-brand-card-surface border border-brand-card-border transition-all duration-150 hover:bg-brand-teal hover:border-brand-teal"
                 >
-                  <Icon size={15} color="#A8C4B8" />
-                </a>
+                  <a href={href} aria-label={label}>
+                    <Icon size={15} color="#A8C4B8" />
+                  </a>
+                </Button>
               ))}
             </div>
           </div>
@@ -122,8 +128,10 @@ const Footer = () => {
           ))}
         </div>
 
+        <Separator className="bg-brand-card-border" />
+
         {/* Trust + newsletter strip */}
-        <div className="flex flex-col items-stretch justify-between gap-5 border-b border-brand-card-border px-6 py-5 sm:px-8 lg:flex-row lg:items-center lg:px-11">
+        <div className="flex flex-col items-stretch justify-between gap-5 px-6 py-5 sm:px-8 lg:flex-row lg:items-center lg:px-11">
           <div className="flex gap-2.5 flex-wrap">
             {TRUST_BADGES.map(({ Icon, text }) => (
               <div
@@ -139,20 +147,20 @@ const Footer = () => {
           <div className="flex w-full min-w-0 flex-col gap-2 sm:flex-row lg:flex-[0_1_380px]">
             {!subscribed ? (
               <>
-                <input
+                <Input
                   type="email"
                   placeholder="Get product updates…"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSubscribe()}
-                  className="flex-1 min-w-0 bg-brand-card-surface border border-brand-card-border rounded-[9px] px-3.5 py-2.5 text-[13px] text-white font-dm-sans outline-none transition-colors duration-150 focus:border-brand-teal-mid placeholder:text-brand-card-muted"
+                  className="flex-1 min-w-0 bg-brand-card-surface border-brand-card-border rounded-[9px] text-[13px] text-white font-dm-sans focus-visible:border-brand-teal-mid focus-visible:ring-0 placeholder:text-brand-card-muted"
                 />
-                <button
+                <Button
                   onClick={handleSubscribe}
-                  className="px-[18px] py-2.5 rounded-[9px] bg-brand-teal-mid border-none cursor-pointer text-white text-[13px] font-bold font-dm-sans flex items-center gap-1.5 whitespace-nowrap transition-colors duration-150 hover:bg-brand-teal-mid shrink-0"
+                  className="rounded-[9px] bg-brand-teal-mid px-[18px] text-[13px] font-bold font-dm-sans whitespace-nowrap hover:bg-brand-teal shrink-0"
                 >
                   Subscribe <ArrowRight size={13} strokeWidth={2.5} />
-                </button>
+                </Button>
               </>
             ) : (
               <div className="flex items-center gap-2 bg-brand-card-surface border border-brand-teal rounded-[9px] px-4 py-2.5 flex-1">
@@ -162,6 +170,8 @@ const Footer = () => {
             )}
           </div>
         </div>
+
+        <Separator className="bg-brand-card-border" />
 
         {/* Bottom bar */}
         <div className="flex flex-col items-start justify-between gap-4 px-6 py-4 sm:px-8 lg:flex-row lg:items-center lg:px-11">

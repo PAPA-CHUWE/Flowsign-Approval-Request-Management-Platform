@@ -28,8 +28,7 @@ import { DeactivateUserDialog } from "./DeactivateUserDialog"
 import { DeleteUserDialog } from "./DeleteUserDialog"
 import { InviteUserDialog } from "./InviteUserDialog"
 import { UpdateUserRolesDialog } from "./UpdateUserRolesDialog"
-import { UserActionsMenu } from "./UserActionsMenu"
-import { UserDetailsDialog } from "./UserDetailsDialog"
+import { UserDrawer } from "./UserDrawer"
 import { UserStatusPill } from "./UserStatusPill"
 
 const FILTERS = [
@@ -45,7 +44,6 @@ const COLS = [
   { label: "Department", width: "w-[140px]" },
   { label: "Status", width: "w-[120px]" },
   { label: "Roles", width: "w-[190px]" },
-  { label: "Actions", width: "w-[80px]" },
 ]
 
 function formatRole(role: string) {
@@ -86,6 +84,7 @@ export function UsersPageContent() {
   const { users, isLoading, error, setUsers } = useOrganizationUsers()
   const [query, setQuery] = useState("")
   const [filter, setFilter] = useState("all")
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<OrganizationUser | null>(null)
   const [isLoadingUserDetails, setIsLoadingUserDetails] = useState(false)
   const [userDetailsError, setUserDetailsError] = useState("")
@@ -132,6 +131,7 @@ export function UsersPageContent() {
     setSelectedUser(null)
     setUserDetailsError("")
     setIsLoadingUserDetails(true)
+    setDrawerOpen(true)
 
     try {
       const response = await getOrganizationUser(user.publicId)
@@ -143,6 +143,13 @@ export function UsersPageContent() {
     } finally {
       setIsLoadingUserDetails(false)
     }
+  }
+
+  const closeDrawer = () => {
+    setDrawerOpen(false)
+    setSelectedUser(null)
+    setUserDetailsError("")
+    setIsLoadingUserDetails(false)
   }
 
   const confirmDeleteUser = async () => {
@@ -358,7 +365,6 @@ export function UsersPageContent() {
               <div className="w-[190px] shrink-0">
                 <div className="h-6 w-28 animate-pulse rounded bg-[#F1EFE8]" />
               </div>
-              <div className="w-[80px] shrink-0" />
             </div>
           ))
         ) : filteredUsers.length === 0 ? (
@@ -369,10 +375,11 @@ export function UsersPageContent() {
           filteredUsers.map((user, index) => (
             <div
               key={user.publicId}
+              onClick={() => viewUserDetails(user)}
               className={cn(
                 "flex min-w-[900px] items-center gap-3 border-b border-brand-neutral-pale px-4 py-3 transition-colors duration-100 last:border-0",
                 index % 2 === 0 ? "bg-white" : "bg-[#FAFAF8]",
-                "hover:bg-[#F5FBF8]"
+                "cursor-pointer hover:bg-[#F5FBF8]"
               )}
             >
               <div className="min-w-0 flex-1">
@@ -413,30 +420,6 @@ export function UsersPageContent() {
                   ) : null}
                 </div>
               </div>
-              <div className="flex w-[80px] shrink-0 justify-end">
-                <UserActionsMenu
-                  user={user}
-                  onView={viewUserDetails}
-                  onEditRoles={(nextUser) => {
-                    setUserRolesError("")
-                    setUserToUpdateRoles(nextUser)
-                  }}
-                  onStatusChange={(nextUser) => {
-                    setUserStatusError("")
-                    setUserStatusAction(
-                      nextUser.status.toLowerCase() === "deactivated"
-                        ? "activate"
-                        : "deactivate"
-                    )
-                    setUserToDeactivate(nextUser)
-                  }}
-                  onDelete={(nextUser) => {
-                    setDeleteUserError("")
-                    setUserToDelete(nextUser)
-                  }}
-                  isBusy={isDeletingUser || isUpdatingUserStatus || isUpdatingUserRoles}
-                />
-              </div>
             </div>
           ))
         )}
@@ -446,16 +429,29 @@ export function UsersPageContent() {
         Showing {filteredUsers.length} of {users.length} users
       </p>
 
-      <UserDetailsDialog
+      <UserDrawer
         user={selectedUser}
+        open={drawerOpen}
         isLoading={isLoadingUserDetails}
         error={userDetailsError}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedUser(null)
-            setUserDetailsError("")
-            setIsLoadingUserDetails(false)
-          }
+        onClose={closeDrawer}
+        onEditRoles={(user) => {
+          closeDrawer()
+          setUserRolesError("")
+          setUserToUpdateRoles(user)
+        }}
+        onStatusChange={(user) => {
+          closeDrawer()
+          setUserStatusError("")
+          setUserStatusAction(
+            user.status.toLowerCase() === "deactivated" ? "activate" : "deactivate"
+          )
+          setUserToDeactivate(user)
+        }}
+        onDelete={(user) => {
+          closeDrawer()
+          setDeleteUserError("")
+          setUserToDelete(user)
         }}
       />
 
