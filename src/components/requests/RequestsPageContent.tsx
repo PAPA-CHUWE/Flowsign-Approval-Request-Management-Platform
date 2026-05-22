@@ -68,6 +68,10 @@ function getRequestTypeLabel(request: ApprovalRequest) {
   return REQUEST_TYPE_LABEL[key as keyof typeof REQUEST_TYPE_LABEL] ?? titleCase(key)
 }
 
+function getRequestTitle(request: ApprovalRequest) {
+  return request.title ?? request.summary ?? request.description ?? request.details ?? "Untitled request"
+}
+
 function getRequesterName(request: ApprovalRequest) {
   if (request.requesterName) return request.requesterName
   const requester = request.requester
