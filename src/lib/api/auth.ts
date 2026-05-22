@@ -119,6 +119,24 @@ export function storeAuthSession(response: AuthResponse) {
   storeAuthUser(response.responseBody.user)
 }
 
+export interface ChangePasswordPayload {
+  currentPassword: string
+  newPassword: string
+}
+
+export interface ChangePasswordResponse {
+  statusCode: string
+  message: string
+  responseBody: { ok: boolean }
+}
+
+export function changePassword(payload: ChangePasswordPayload) {
+  return apiClient<ChangePasswordResponse>("/api/v1/auth/change-password", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  })
+}
+
 export function clearAuthSession() {
   if (typeof window === "undefined") {
     return

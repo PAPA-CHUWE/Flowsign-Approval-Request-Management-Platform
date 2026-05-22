@@ -12,6 +12,7 @@ import {
   updateCurrentOrganizationSettings,
   type OrganizationSecuritySettings,
 } from "@/lib/api/organizations";
+import { changePassword } from "@/lib/api/auth";
 import { SettingsSectionHeading } from "../SettingsSectionHeading";
 import { SettingsFieldRow } from "../SettingsFieldRow";
 
@@ -210,6 +211,126 @@ function SecurityForm({ initialSecurity, onSaved }: SecurityFormProps) {
   );
 }
 
+function ChangePasswordForm({ minLength }: { minLength: number }) {
+  const [current,  setCurrent]  = useState("")
+  const [next,     setNext]     = useState("")
+  const [confirm,  setConfirm]  = useState("")
+  const [isSaving, setIsSaving] = useState(false)
+  const [error,    setError]    = useState("")
+  const [success,  setSuccess]  = useState(false)
+
+  const mismatch    = confirm.length > 0 && next !== confirm
+  const tooShort    = next.length > 0 && next.length < minLength
+  const valid       = current.trim().length > 0 && next.length >= minLength && next === confirm
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!valid || isSaving) return
+
+    setIsSaving(true)
+    setError("")
+    setSuccess(false)
+
+    try {
+      await changePassword({ currentPassword: current, newPassword: next })
+      setSuccess(true)
+      setCurrent("")
+      setNext("")
+      setConfirm("")
+      toast.success("Password changed", {
+        description: "Your password was updated successfully.",
+      })
+    } catch (reason) {
+      const message = reason instanceof Error ? reason.message : "Could not change password."
+      setError(message)
+      toast.error("Password not changed", { description: message })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  return (
+    <div>
+      <p className="mb-4 text-[13px] font-semibold text-[#2C2C2A] dark:text-foreground">
+        Change password
+      </p>
+      <form onSubmit={handleSubmit} className="max-w-md space-y-4">
+        {error && (
+          <div className="flex items-start gap-2.5 rounded-[10px] border border-[#F5C6C6] bg-[#FCEBEB] px-4 py-3 text-[13px] font-medium text-[#A32D2D]">
+            <AlertCircle size={16} className="mt-0.5 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+        {success && (
+          <p className="text-[12px] font-medium text-[#0F6E56]">Password changed successfully.</p>
+        )}
+
+        <SettingsFieldRow label="Current password" htmlFor="current-password">
+          <Input
+            id="current-password"
+            type="password"
+            placeholder="........"
+            value={current}
+            onChange={(e) => { setCurrent(e.target.value); setSuccess(false) }}
+            disabled={isSaving}
+            className="h-9 rounded-[8px] border-[#E8E6DE] text-[13px] focus-visible:ring-[#0F6E56]"
+          />
+        </SettingsFieldRow>
+
+        <SettingsFieldRow label="New password" htmlFor="new-password">
+          <Input
+            id="new-password"
+            type="password"
+            placeholder="........"
+            value={next}
+            onChange={(e) => { setNext(e.target.value); setSuccess(false) }}
+            disabled={isSaving}
+            className="h-9 rounded-[8px] border-[#E8E6DE] text-[13px] focus-visible:ring-[#0F6E56]"
+          />
+          {tooShort && (
+            <p className="mt-1 text-[11px] text-[#A32D2D]">
+              Must be at least {minLength} characters.
+            </p>
+          )}
+        </SettingsFieldRow>
+
+        <SettingsFieldRow label="Confirm new password" htmlFor="confirm-password">
+          <Input
+            id="confirm-password"
+            type="password"
+            placeholder="........"
+            value={confirm}
+            onChange={(e) => { setConfirm(e.target.value); setSuccess(false) }}
+            disabled={isSaving}
+            className="h-9 rounded-[8px] border-[#E8E6DE] text-[13px] focus-visible:ring-[#0F6E56]"
+          />
+          {mismatch && (
+            <p className="mt-1 text-[11px] text-[#A32D2D]">Passwords do not match.</p>
+          )}
+        </SettingsFieldRow>
+
+        <div className="flex justify-end">
+          <Button
+            type="submit"
+            size="sm"
+            disabled={!valid || isSaving}
+            className="h-8 rounded-[8px] bg-brand-teal px-5 text-[12px] font-semibold text-white hover:bg-[#0c5e49] disabled:opacity-40"
+          >
+            {isSaving ? (
+              <>
+                <Loader2 size={14} className="animate-spin" />
+                Saving
+              </>
+            ) : (
+              "Update password"
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
+  )
+}
+
 export function SecurityTab() {
   const { settings, isLoading, error, setSettings } = useCurrentOrganizationSettings();
   const security = settings?.security ?? DEFAULT_SECURITY;
@@ -237,37 +358,7 @@ export function SecurityTab() {
 
         <Separator className="bg-[#E8E6DE]" />
 
-        <div>
-          <p className="mb-4 text-[13px] font-semibold text-[#2C2C2A] dark:text-foreground">
-            Change password
-          </p>
-          <div className="max-w-md space-y-4">
-            <SettingsFieldRow label="Current password" htmlFor="current-password">
-              <Input
-                id="current-password"
-                type="password"
-                placeholder="........"
-                className="h-9 rounded-[8px] border-[#E8E6DE] text-[13px] focus-visible:ring-[#0F6E56]"
-              />
-            </SettingsFieldRow>
-            <SettingsFieldRow label="New password" htmlFor="new-password">
-              <Input
-                id="new-password"
-                type="password"
-                placeholder="........"
-                className="h-9 rounded-[8px] border-[#E8E6DE] text-[13px] focus-visible:ring-[#0F6E56]"
-              />
-            </SettingsFieldRow>
-            <SettingsFieldRow label="Confirm new password" htmlFor="confirm-password">
-              <Input
-                id="confirm-password"
-                type="password"
-                placeholder="........"
-                className="h-9 rounded-[8px] border-[#E8E6DE] text-[13px] focus-visible:ring-[#0F6E56]"
-              />
-            </SettingsFieldRow>
-          </div>
-        </div>
+        <ChangePasswordForm minLength={security.passwordMinLength} />
       </div>
     </div>
   );
