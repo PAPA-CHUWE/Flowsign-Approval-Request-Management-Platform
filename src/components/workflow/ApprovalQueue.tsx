@@ -1,8 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { CheckCircle2, XCircle, Clock, AlertCircle } from "lucide-react"
+import { CheckCircle2, XCircle, Clock, AlertCircle, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { formatTicketDate } from "@/lib/format/date"
 import { TICKET_STATUS } from "@/constants/ticketStatus.constants"
@@ -58,6 +67,9 @@ export function ApprovalQueue({ tickets }: ApprovalQueueProps) {
   const [decisions, setDecisions] = useState<Record<string, Decision>>(
     Object.fromEntries(tickets.map((t) => [t.id, null]))
   )
+  const [rejectionComments, setRejectionComments] = useState<Record<string, string>>({})
+  const [pendingRejectId,   setPendingRejectId]   = useState<string | null>(null)
+  const [rejectDraft,       setRejectDraft]       = useState("")
 
   const toggleSort = (field: SortField) => {
     if (sortField === field) setSortDir((d) => (d === "asc" ? "desc" : "asc"))
@@ -66,6 +78,19 @@ export function ApprovalQueue({ tickets }: ApprovalQueueProps) {
 
   function decide(id: string, action: "approved" | "rejected") {
     setDecisions((prev) => ({ ...prev, [id]: action }))
+  }
+
+  function openRejectDialog(id: string) {
+    setRejectDraft("")
+    setPendingRejectId(id)
+  }
+
+  function confirmRejection() {
+    if (!pendingRejectId || !rejectDraft.trim()) return
+    decide(pendingRejectId, "rejected")
+    setRejectionComments((prev) => ({ ...prev, [pendingRejectId]: rejectDraft.trim() }))
+    setPendingRejectId(null)
+    setRejectDraft("")
   }
 
   const filtered = tickets
@@ -220,21 +245,29 @@ export function ApprovalQueue({ tickets }: ApprovalQueueProps) {
                 {/* Actions */}
                 <div className="w-[160px] shrink-0">
                   {actioned ? (
-                    <span
-                      className={cn(
-                        "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold",
-                        decision === "approved"
-                          ? "bg-[#EAF3DE] text-[#27500A]"
-                          : "bg-[#FCEBEB] text-[#A32D2D]",
+                    <div className="flex flex-col gap-1">
+                      <span
+                        className={cn(
+                          "inline-flex w-fit items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold",
+                          decision === "approved"
+                            ? "bg-[#EAF3DE] text-[#27500A]"
+                            : "bg-[#FCEBEB] text-[#A32D2D]",
+                        )}
+                      >
+                        {decision === "approved" ? (
+                          <CheckCircle2 size={11} strokeWidth={2.5} />
+                        ) : (
+                          <XCircle size={11} strokeWidth={2.5} />
+                        )}
+                        {decision === "approved" ? "Approved" : "Rejected"}
+                      </span>
+                      {decision === "rejected" && rejectionComments[ticket.id] && (
+                        <p className="flex items-start gap-1 text-[10px] leading-[1.4] text-[#888780]">
+                          <MessageSquare size={9} className="mt-0.5 shrink-0" />
+                          <span className="line-clamp-2">{rejectionComments[ticket.id]}</span>
+                        </p>
                       )}
-                    >
-                      {decision === "approved" ? (
-                        <CheckCircle2 size={11} strokeWidth={2.5} />
-                      ) : (
-                        <XCircle size={11} strokeWidth={2.5} />
-                      )}
-                      {decision === "approved" ? "Approved" : "Rejected"}
-                    </span>
+                    </div>
                   ) : (
                     <div className="flex items-center gap-1.5">
                       <Button
@@ -248,7 +281,7 @@ export function ApprovalQueue({ tickets }: ApprovalQueueProps) {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => decide(ticket.id, "rejected")}
+                        onClick={() => openRejectDialog(ticket.id)}
                         className="h-7 rounded-[6px] border-red-200 px-3 text-[11px] font-semibold text-red-600 hover:bg-red-50 hover:border-red-300"
                       >
                         <XCircle size={12} strokeWidth={2.5} />
@@ -274,6 +307,67 @@ export function ApprovalQueue({ tickets }: ApprovalQueueProps) {
           </p>
         )}
       </div>
+
+      {/* Rejection reason dialog */}
+      <Dialog
+        open={pendingRejectId !== null}
+        onOpenChange={(open) => { if (!open) setPendingRejectId(null) }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-[15px]">
+              <XCircle size={16} className="text-red-500" strokeWidth={2.5} />
+              Reject request
+            </DialogTitle>
+            <DialogDescription className="text-[13px]">
+              Provide a reason so the requester understands why this was rejected and can resubmit if needed.
+            </DialogDescription>
+          </DialogHeader>
+
+          {pendingRejectId && (
+            <div className="rounded-[8px] border border-[#E8E6DE] bg-[#FAFAF8] px-3 py-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#888780]">Request</p>
+              <p className="mt-0.5 text-[13px] font-medium text-[#2C2C2A]">
+                {tickets.find((t) => t.id === pendingRejectId)?.title ?? "—"}
+              </p>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[12px] font-semibold text-[#2C2C2A]">
+              Rejection reason <span className="text-red-500">*</span>
+            </label>
+            <Textarea
+              value={rejectDraft}
+              onChange={(e) => setRejectDraft(e.target.value)}
+              placeholder="e.g. Budget limit exceeded for this quarter. Please resubmit in Q3 with updated cost breakdown."
+              rows={4}
+              className="resize-none rounded-[8px] border-[#E8E6DE] bg-[#FAFAF8] text-[13px] text-[#2C2C2A] placeholder:text-[#B4B2A9] focus-visible:border-red-300 focus-visible:ring-2 focus-visible:ring-red-100"
+            />
+            <p className="text-[11px] text-[#B4B2A9]">{rejectDraft.trim().length} / 500 characters</p>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setPendingRejectId(null)}
+              className="h-9 rounded-[8px] border-[#E8E6DE] text-[13px]"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              disabled={!rejectDraft.trim()}
+              onClick={confirmRejection}
+              className="h-9 rounded-[8px] bg-red-600 px-5 text-[13px] font-semibold text-white hover:bg-red-700 disabled:opacity-40"
+            >
+              <XCircle size={14} strokeWidth={2.5} />
+              Confirm rejection
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
