@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { MoreHorizontal, Plus, Search, UserRoundSearch, X } from "lucide-react"
+import { Plus, Search, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -11,18 +11,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { Loader } from "@/components/loader-ui/loader"
 import { RequestFormShell } from "@/components/request-form/RequestFormShell"
+import { RequestDrawer } from "@/components/requests/RequestDrawer"
 import { REQUEST_TYPE_LABEL } from "@/constants/requestType.constants"
 import { TICKET_STATUS_LABEL } from "@/constants/ticketStatus.constants"
 import { useApprovalRequests } from "@/hooks/requests/useApprovalRequests"
@@ -38,7 +30,6 @@ const COLUMNS = [
   { label: "Status", width: "w-[130px]" },
   { label: "Date", width: "w-[120px]" },
   { label: "Approver", width: "w-[140px]" },
-  { label: "", width: "w-[56px]" },
 ]
 
 const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
@@ -59,16 +50,8 @@ function titleCase(value: string) {
     .join(" ")
 }
 
-function getRequestId(request: ApprovalRequest) {
-  return request.requestKey ?? request.reference ?? request.requestNumber ?? request.publicId ?? request.id ?? "-"
-}
-
 function getRequestKey(request: ApprovalRequest) {
-  return request.publicId ?? request.id ?? request.requestKey ?? getRequestId(request)
-}
-
-function getRequestTitle(request: ApprovalRequest) {
-  return request.title ?? request.summary ?? request.description ?? request.details ?? "Untitled request"
+  return request.publicId ?? request.id ?? request.requestKey ?? request.reference ?? "-"
 }
 
 function getRequestTypeLabel(request: ApprovalRequest) {
@@ -80,70 +63,33 @@ function getRequestTypeLabel(request: ApprovalRequest) {
     request.requestTypeKey ??
     (typeof request.requestType === "string" ? request.requestType : undefined)
 
-  if (!key) {
-    return "-"
-  }
+  if (!key) return "-"
 
   return REQUEST_TYPE_LABEL[key as keyof typeof REQUEST_TYPE_LABEL] ?? titleCase(key)
 }
 
 function getRequesterName(request: ApprovalRequest) {
-  if (request.requesterName) {
-    return request.requesterName
-  }
-
+  if (request.requesterName) return request.requesterName
   const requester = request.requester
   const fullName = `${requester?.firstName ?? ""} ${requester?.lastName ?? ""}`.trim()
-
   return fullName || requester?.name || requester?.email || "Current user"
 }
 
 function getApproverName(request: ApprovalRequest) {
   if (request.approvers?.length) {
-    return formatPeopleList(request.approvers)
+    return request.approvers.map((p) => {
+      const full = `${p.firstName ?? ""} ${p.lastName ?? ""}`.trim()
+      return full || p.name || p.email || ""
+    }).filter(Boolean).join(", ")
   }
-
-  if (request.assignee) {
-    return request.assignee
-  }
-
+  if (request.assignee) return request.assignee
   const approver = request.currentApprover
   const fullName = `${approver?.firstName ?? ""} ${approver?.lastName ?? ""}`.trim()
-
   return fullName || approver?.name || approver?.email || "-"
 }
 
 function getSubmittedDate(request: ApprovalRequest) {
   return request.submittedAt ?? request.createdAt ?? request.updatedAt
-}
-
-function formatAmount(amount?: number) {
-  if (typeof amount !== "number") {
-    return "-"
-  }
-
-  return new Intl.NumberFormat("en", {
-    maximumFractionDigits: 2,
-  }).format(amount)
-}
-
-function formatDate(value?: string | null) {
-  return value ? formatTicketDate(value) : "-"
-}
-
-function formatPeopleList(people?: ApprovalRequest["approvers"]) {
-  if (!people?.length) {
-    return "-"
-  }
-
-  return people
-    .map((person) => {
-      const fullName = `${person.firstName ?? ""} ${person.lastName ?? ""}`.trim()
-
-      return fullName || person.name || person.email || person.publicId
-    })
-    .filter(Boolean)
-    .join(", ")
 }
 
 function StatusPill({ status }: { status?: string }) {
@@ -179,6 +125,7 @@ export function RequestsPageContent() {
   const [page, setPage] = useState(1)
   const [refreshKey, setRefreshKey] = useState(0)
   const [createOpen, setCreateOpen] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null)
   const [detailsLoading, setDetailsLoading] = useState(false)
   const [detailsError, setDetailsError] = useState<string | null>(null)
@@ -199,6 +146,7 @@ export function RequestsPageContent() {
   async function handleViewInfo(request: ApprovalRequest) {
     setSelectedRequest(request)
     setDetailsError(null)
+    setDrawerOpen(true)
 
     const requestPublicId = request.publicId
 
@@ -219,6 +167,13 @@ export function RequestsPageContent() {
     } finally {
       setDetailsLoading(false)
     }
+  }
+
+  function closeDrawer() {
+    setDrawerOpen(false)
+    setSelectedRequest(null)
+    setDetailsError(null)
+    setDetailsLoading(false)
   }
 
   return (
@@ -303,10 +258,11 @@ export function RequestsPageContent() {
             return (
               <div
                 key={getRequestKey(request)}
+                onClick={() => void handleViewInfo(request)}
                 className={cn(
                   "flex min-w-[860px] items-center gap-3 border-b border-brand-neutral-pale px-4 py-3 last:border-0",
                   index % 2 === 0 ? "bg-white" : "bg-[#FAFAF8]",
-                  "transition-colors duration-100 hover:bg-[#F5FBF8]"
+                  "cursor-pointer transition-colors duration-100 hover:bg-[#F5FBF8]"
                 )}
               >
                 <div className="w-[130px] shrink-0">
@@ -337,36 +293,6 @@ export function RequestsPageContent() {
                   <p className="truncate text-[12px] text-brand-neutral-mid">
                     {getApproverName(request)}
                   </p>
-                </div>
-                <div className="w-[56px] shrink-0">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      render={
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-sm"
-                          className="h-8 w-8 rounded-[8px] text-[#5F5E5A] hover:bg-[#E1F5EE] hover:text-[#0F6E56]"
-                          aria-label="Open request actions"
-                        />
-                      }
-                    >
-                      <MoreHorizontal size={16} />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40">
-                      <DropdownMenuGroup>
-                        <DropdownMenuLabel>Request actions</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => void handleViewInfo(request)}
-                          className="cursor-pointer text-[12px]"
-                        >
-                          <UserRoundSearch size={14} />
-                          View info
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
               </div>
             )
@@ -421,57 +347,13 @@ export function RequestsPageContent() {
         </DialogContent>
       </Dialog>
 
-      <Dialog
-        open={Boolean(selectedRequest)}
-        onOpenChange={(open) => {
-          if (!open) setSelectedRequest(null)
-        }}
-      >
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Request info</DialogTitle>
-            <DialogDescription>
-              Full request metadata and tracking details.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedRequest ? (
-            <div className="grid gap-3 text-[13px]">
-              {detailsLoading ? (
-                <Loader label="Loading request details" size="sm" className="min-h-16" />
-              ) : null}
-              {detailsError ? (
-                <p className="rounded-[8px] bg-[#FCEBEB] px-3 py-2 text-[12px] font-medium text-brand-danger-text">
-                  {detailsError}
-                </p>
-              ) : null}
-              {[
-                ["Request key", getRequestId(selectedRequest)],
-                ["Public ID", selectedRequest.publicId ?? "-"],
-                ["Title", getRequestTitle(selectedRequest)],
-                ["Type", getRequestTypeLabel(selectedRequest)],
-                ["Requester", getRequesterName(selectedRequest)],
-                ["Department", selectedRequest.department ?? "-"],
-                ["Amount", formatAmount(selectedRequest.amount)],
-                ["Status", selectedRequest.status ? titleCase(selectedRequest.status) : "-"],
-                ["Priority", selectedRequest.priority?.toUpperCase() ?? "-"],
-                ["Urgency", selectedRequest.urgency ? titleCase(selectedRequest.urgency) : "-"],
-                ["Visibility", selectedRequest.visibility ? titleCase(selectedRequest.visibility) : "-"],
-                ["Created", formatDate(selectedRequest.createdAt)],
-                ["Submitted", formatDate(selectedRequest.submittedAt)],
-                ["Due", formatDate(selectedRequest.dueAt)],
-                ["Resolved", formatDate(selectedRequest.resolvedAt)],
-                ["Approvers", formatPeopleList(selectedRequest.approvers)],
-                ["Implementors", formatPeopleList(selectedRequest.implementors)],
-              ].map(([label, value]) => (
-                <div key={label} className="grid grid-cols-[120px_1fr] gap-3">
-                  <span className="font-semibold text-[#888780]">{label}</span>
-                  <span className="min-w-0 break-words text-[#2C2C2A]">{value}</span>
-                </div>
-              ))}
-            </div>
-          ) : null}
-        </DialogContent>
-      </Dialog>
+      <RequestDrawer
+        request={selectedRequest}
+        open={drawerOpen}
+        isLoading={detailsLoading}
+        error={detailsError}
+        onClose={closeDrawer}
+      />
     </div>
   )
 }
