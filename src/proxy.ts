@@ -16,7 +16,7 @@ const PROTECTED_PREFIXES = [
 // Routes that logged-in users should be redirected away from
 const AUTH_ROUTES = ["/login", "/signup", "/forgot-password"]
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isAuthenticated = request.cookies.has(AUTH_COOKIE)
 

@@ -22,7 +22,7 @@ export default function ApprovalsPage() {
 
   const tickets = requests
     .map(adaptRequestToTicket)
-    .filter((t) => ACTIONABLE_STATUSES.has(t.status))
+    .filter((t) => (ACTIONABLE_STATUSES as Set<string>).has(t.status))
 
   return (
     <div className="flex w-full flex-col gap-6">
