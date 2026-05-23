@@ -28,6 +28,11 @@ export const navigationItems = [
     roles: [USER_ROLE.ADMIN],
   },
   {
+    title: "Workflow Rules",
+    href: "/workflow-rules",
+    roles: [USER_ROLE.ADMIN],
+  },
+  {
     title: "Onboarding",
     href: "/onboarding",
     roles: [USER_ROLE.ADMIN],

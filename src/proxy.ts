@@ -12,6 +12,7 @@ const PROTECTED_PREFIXES = [
   "/settings",
   "/users",
   "/onboarding",
+  "/workflow-rules",
 ]
 
 // Routes that logged-in users should be redirected away from
