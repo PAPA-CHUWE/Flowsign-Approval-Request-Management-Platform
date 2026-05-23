@@ -136,6 +136,21 @@ export function getApprovalRequest(requestPublicId: string) {
   )
 }
 
+export interface UpdateRequestStatusResponse {
+  statusCode: string
+  message: string
+  responseBody: {
+    request: ApprovalRequest
+  }
+}
+
+export function updateRequestStatus(requestPublicId: string, status: string) {
+  return apiClient<UpdateRequestStatusResponse>(
+    `/api/v1/requests/${encodeURIComponent(requestPublicId)}/status`,
+    { method: "PATCH", body: JSON.stringify({ status }) }
+  )
+}
+
 export interface RequestStats {
   pendingCount: number
   approvedThisMonth: number

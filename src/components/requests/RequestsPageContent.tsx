@@ -429,6 +429,10 @@ export function RequestsPageContent() {
         isLoading={detailsLoading}
         error={detailsError}
         onClose={closeDrawer}
+        onStatusUpdated={(updated) => {
+          setSelectedRequest(updated)
+          setRefreshKey((k) => k + 1)
+        }}
       />
 
       {/* Save filter dialog */}

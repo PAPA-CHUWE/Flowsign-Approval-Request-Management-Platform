@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import {
   AlertCircle,
   Banknote,
@@ -20,10 +21,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
+import { StatusDropdown, type StatusKey } from "@/components/tickets/StatusDropdown"
 import { formatTicketDate } from "@/lib/format/date"
 import { TICKET_STATUS_LABEL } from "@/constants/ticketStatus.constants"
 import { REQUEST_TYPE_LABEL } from "@/constants/requestType.constants"
-import type { ApprovalRequest } from "@/lib/api/requests"
+import { updateRequestStatus, type ApprovalRequest } from "@/lib/api/requests"
+import { toast } from "sonner"
 
 // ─── Helpers (mirrored from RequestsPageContent) ──────────────────────────────
 
@@ -122,12 +125,19 @@ function SectionHeading({ label }: { label: string }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
+const VALID_STATUS_KEYS = new Set<string>(["pending", "in_review", "approved", "rejected", "open"])
+
+function toStatusKey(status?: string): StatusKey {
+  return (status && VALID_STATUS_KEYS.has(status) ? status : "open") as StatusKey
+}
+
 interface RequestDrawerProps {
   request: ApprovalRequest | null
   open: boolean
   isLoading?: boolean
   error?: string | null
   onClose: () => void
+  onStatusUpdated?: (updated: ApprovalRequest) => void
 }
 
 export function RequestDrawer({
@@ -136,12 +146,33 @@ export function RequestDrawer({
   isLoading = false,
   error,
   onClose,
+  onStatusUpdated,
 }: RequestDrawerProps) {
+  const [statusOverride, setStatusOverride] = useState<StatusKey | null>(null)
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
+
+  const currentStatus = statusOverride ?? toStatusKey(request?.status)
   const amount = request ? formatAmount(request.amount) : null
   const description = request?.description ?? request?.details ?? request?.summary
 
+  async function handleStatusChange(next: StatusKey) {
+    if (!request?.publicId || isUpdatingStatus) return
+    setStatusOverride(next)
+    setIsUpdatingStatus(true)
+    try {
+      const res = await updateRequestStatus(request.publicId, next)
+      onStatusUpdated?.(res.responseBody.request)
+      toast.success("Status updated")
+    } catch {
+      setStatusOverride(toStatusKey(request.status))
+      toast.error("Could not update status")
+    } finally {
+      setIsUpdatingStatus(false)
+    }
+  }
+
   return (
-    <Sheet open={open} onOpenChange={(o) => { if (!o) onClose() }}>
+    <Sheet open={open} onOpenChange={(o) => { if (!o) { setStatusOverride(null); onClose() } }}>
       <SheetContent
         side="right"
         className="flex w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-[500px]"
@@ -186,7 +217,11 @@ export function RequestDrawer({
                 <span className="font-mono text-[12px] font-semibold text-brand-teal">
                   {getRequestId(request)}
                 </span>
-                <StatusPill status={request.status} />
+                <StatusDropdown
+                  value={currentStatus}
+                  onChange={handleStatusChange}
+                  disabled={isUpdatingStatus || !request.publicId}
+                />
               </div>
               <SheetTitle className="pr-8 text-[16px] font-semibold leading-snug text-[#2C2C2A]">
                 {getTitle(request)}
