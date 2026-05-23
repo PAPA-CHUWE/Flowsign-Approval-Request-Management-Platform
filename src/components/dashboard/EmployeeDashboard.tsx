@@ -19,7 +19,17 @@ import { useCurrentUser, getUserDisplayName } from "@/hooks/use-current-user";
 import { useDashboard } from "@/hooks/use-dashboard";
 import { mockPipelineStats } from "@/lib/mock/dashboard.mock";
 
-// Dynamically import the Recharts-heavy card — keeps initial bundle lean
+// Dynamically import Recharts-heavy components — keeps initial bundle lean
+const VolumeChart = dynamic(
+  () => import("./VolumeChart").then((m) => ({ default: m.VolumeChart })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[320px] animate-pulse rounded-[16px] border border-[#E8E6DE] bg-white" />
+    ),
+  }
+);
+
 const ApprovalPipelineCard = dynamic(
   () => import("./ApprovalPipelineCard").then((m) => ({ default: m.ApprovalPipelineCard })),
   {
@@ -113,7 +123,10 @@ export function EmployeeDashboard() {
         ))}
       </div>
 
-      {/* Section 2 — Requests table + pipeline (5/3) */}
+      {/* Section 2 — Volume chart */}
+      <VolumeChart />
+
+      {/* Section 3 — Requests table + pipeline (5/3) */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[5fr_3fr]">
         <RequestsTable requests={isLoading ? [] : requests} />
         <ApprovalPipelineCard
@@ -122,7 +135,7 @@ export function EmployeeDashboard() {
         />
       </div>
 
-      {/* Section 3 — Activity feed + quick actions (50/50) */}
+      {/* Section 4 — Activity feed + quick actions (50/50) */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ActivityFeed
           items={isLoading ? [] : activity}
