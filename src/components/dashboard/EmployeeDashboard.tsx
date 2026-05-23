@@ -17,7 +17,7 @@ import { QuickActionsGrid } from "./QuickActionsGrid";
 import { RequestFormShell } from "@/components/request-form/RequestFormShell";
 import { useCurrentUser, getUserDisplayName } from "@/hooks/use-current-user";
 import { useDashboard } from "@/hooks/use-dashboard";
-import { mockPipelineStats, mockRequestsByType } from "@/lib/mock/dashboard.mock";
+import { mockPipelineStats } from "@/lib/mock/dashboard.mock";
 
 // Dynamically import the Recharts-heavy card — keeps initial bundle lean
 const ApprovalPipelineCard = dynamic(
@@ -61,32 +61,20 @@ export function EmployeeDashboard() {
     {
       Icon: Clock,
       label: "Pending approvals",
-      value: isLoading ? "—" : String(stats?.pendingCount ?? mockPipelineStats.pending),
-      trend: {
-        delta: stats ? `${stats.pendingDelta >= 0 ? "+" : ""}${stats.pendingDelta}` : "+2",
-        direction: ((stats?.pendingDelta ?? 1) >= 0 ? "up" : "down") as "up" | "down",
-        label: "vs last week",
-      },
+      value: isLoading ? "—" : String(stats?.pendingApprovals ?? stats?.totalPending ?? mockPipelineStats.pending),
+      trend: { delta: "—", direction: "up" as const, label: "awaiting action" },
     },
     {
       Icon: CheckCircle2,
-      label: "Approved this month",
-      value: isLoading ? "—" : String(stats?.approvedThisMonth ?? mockPipelineStats.approved),
-      trend: {
-        delta: stats ? `${stats.approvedDelta >= 0 ? "+" : ""}${stats.approvedDelta}` : "+5",
-        direction: ((stats?.approvedDelta ?? 1) >= 0 ? "up" : "down") as "up" | "down",
-        label: "vs last month",
-      },
+      label: "Total approved",
+      value: isLoading ? "—" : String(stats?.totalApproved ?? mockPipelineStats.approved),
+      trend: { delta: "—", direction: "up" as const, label: "all time" },
     },
     {
       Icon: XCircle,
-      label: "Rejected",
-      value: isLoading ? "—" : String(stats?.rejectedThisMonth ?? mockPipelineStats.rejected),
-      trend: {
-        delta: stats ? `${stats.rejectedDelta >= 0 ? "+" : ""}${stats.rejectedDelta}` : "-1",
-        direction: ((stats?.rejectedDelta ?? -1) <= 0 ? "down" : "up") as "up" | "down",
-        label: "vs last month",
-      },
+      label: "Total rejected",
+      value: isLoading ? "—" : String(stats?.totalRejected ?? mockPipelineStats.rejected),
+      trend: { delta: "—", direction: "down" as const, label: "all time" },
     },
     {
       Icon: Timer,
@@ -130,7 +118,7 @@ export function EmployeeDashboard() {
         <RequestsTable requests={isLoading ? [] : requests} />
         <ApprovalPipelineCard
           stats={stats?.pipelineStats ?? mockPipelineStats}
-          byType={stats?.requestsByType ?? mockRequestsByType}
+          topRequestTypes={stats?.topRequestTypes ?? []}
         />
       </div>
 

@@ -1,15 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { getRequestStats, listApprovalRequests, type ApprovalRequest } from "@/lib/api/requests"
+import { getAnalyticsDashboard, type TopRequestType } from "@/lib/api/analytics"
+import { listApprovalRequests, type ApprovalRequest } from "@/lib/api/requests"
 import { getActivity, type ActivityEvent } from "@/lib/api/activity"
 import { formatRelativeTime } from "@/lib/format/date"
-import type {
-  DashboardRequest,
-  ActivityItem,
-  PipelineStats,
-  RequestsByType,
-} from "@/lib/mock/dashboard.mock"
+import type { DashboardRequest, ActivityItem, PipelineStats } from "@/lib/mock/dashboard.mock"
 
 // ── Adapters ──────────────────────────────────────────────────────────────────
 
@@ -41,7 +37,6 @@ function adaptRequest(r: ApprovalRequest): DashboardRequest {
   }
 }
 
-
 function adaptActivity(e: ActivityEvent): ActivityItem {
   return {
     id:   e.id as number,
@@ -51,37 +46,25 @@ function adaptActivity(e: ActivityEvent): ActivityItem {
   }
 }
 
-function adaptPipelineStats(byStatus: Record<string, number>): PipelineStats {
+function adaptPipelineStats(totals: Record<string, number>): PipelineStats {
   return {
-    pending:  byStatus["pending"]   ?? 0,
-    approved: byStatus["approved"]  ?? 0,
-    rejected: byStatus["rejected"]  ?? 0,
-    inReview: byStatus["in_review"] ?? 0,
-  }
-}
-
-function adaptRequestsByType(byType: Record<string, number>): RequestsByType {
-  return {
-    funds:  byType["finance"]      ?? byType["funds"]  ?? byType["expense_claim"] ?? 0,
-    travel: byType["travel"]       ?? 0,
-    assets: byType["asset"]        ?? byType["assets"] ?? 0,
-    access: byType["access"]       ?? 0,
-    hr:     byType["hr"]           ?? 0,
+    pending:  totals["pending"]   ?? 0,
+    approved: totals["approved"]  ?? 0,
+    rejected: totals["rejected"]  ?? 0,
+    inReview: totals["in_review"] ?? 0,
   }
 }
 
 // ── Dashboard data shape ──────────────────────────────────────────────────────
 
 export interface DashboardStats {
-  pendingCount: number
-  approvedThisMonth: number
-  rejectedThisMonth: number
-  avgResolutionHours: number
-  pendingDelta: number
-  approvedDelta: number
-  rejectedDelta: number
+  pendingApprovals: number
+  totalPending: number
+  totalApproved: number
+  totalRejected: number
+  avgResolutionHours: number | null
   pipelineStats: PipelineStats
-  requestsByType: RequestsByType
+  topRequestTypes: TopRequestType[]
 }
 
 export interface DashboardData {
@@ -93,37 +76,34 @@ export interface DashboardData {
   error: string
 }
 
-
 export function useDashboard(): DashboardData {
-  const [stats, setStats]     = useState<DashboardStats | null>(null)
-  const [requests, setRequests] = useState<DashboardRequest[]>([])
-  const [activity, setActivity] = useState<ActivityItem[]>([])
+  const [stats, setStats]           = useState<DashboardStats | null>(null)
+  const [requests, setRequests]     = useState<DashboardRequest[]>([])
+  const [activity, setActivity]     = useState<ActivityItem[]>([])
   const [activityUpdatedAt, setActivityUpdatedAt] = useState("—")
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError]     = useState("")
+  const [isLoading, setIsLoading]   = useState(true)
+  const [error, setError]           = useState("")
 
   useEffect(() => {
     let ignore = false
 
     Promise.all([
-      getRequestStats(),
+      getAnalyticsDashboard(),
       listApprovalRequests({ limit: 10, page: 1 }),
       getActivity({ scope: "own", limit: 10 }),
     ])
-      .then(([statsRes, requestsRes, activityRes]) => {
+      .then(([analyticsRes, requestsRes, activityRes]) => {
         if (ignore) return
 
-        const s = statsRes.responseBody.stats
+        const d = analyticsRes.responseBody.dashboard
         setStats({
-          pendingCount:        s.pendingCount,
-          approvedThisMonth:   s.approvedThisMonth,
-          rejectedThisMonth:   s.rejectedThisMonth,
-          avgResolutionHours:  s.avgResolutionHours,
-          pendingDelta:        s.pendingDelta,
-          approvedDelta:       s.approvedDelta,
-          rejectedDelta:       s.rejectedDelta,
-          pipelineStats:       adaptPipelineStats(s.byStatus ?? {}),
-          requestsByType:      adaptRequestsByType(s.byType ?? {}),
+          pendingApprovals:   d.pendingApprovals,
+          totalPending:       d.totals["pending"]  ?? 0,
+          totalApproved:      d.totals["approved"] ?? 0,
+          totalRejected:      d.totals["rejected"] ?? 0,
+          avgResolutionHours: d.averageResolutionHours,
+          pipelineStats:      adaptPipelineStats(d.totals),
+          topRequestTypes:    d.topRequestTypes ?? [],
         })
 
         setRequests(requestsRes.responseBody.result.items.map(adaptRequest))

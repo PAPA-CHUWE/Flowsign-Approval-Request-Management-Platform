@@ -12,7 +12,8 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import type { PipelineStats, RequestsByType } from "@/lib/mock/dashboard.mock";
+import type { PipelineStats } from "@/lib/mock/dashboard.mock";
+import type { TopRequestType } from "@/lib/api/analytics";
 
 // Recharts requires hex values as component props — not inline styles
 const CHART_COLORS = {
@@ -32,10 +33,10 @@ const PIE_CONFIG = [
 
 interface ApprovalPipelineCardProps {
   stats: PipelineStats;
-  byType: RequestsByType;
+  topRequestTypes: TopRequestType[];
 }
 
-export function ApprovalPipelineCard({ stats, byType }: ApprovalPipelineCardProps) {
+export function ApprovalPipelineCard({ stats, topRequestTypes }: ApprovalPipelineCardProps) {
   const total = stats.pending + stats.approved + stats.rejected + stats.inReview;
 
   const pieData = PIE_CONFIG.map((cfg) => ({
@@ -43,13 +44,9 @@ export function ApprovalPipelineCard({ stats, byType }: ApprovalPipelineCardProp
     value: stats[cfg.key],
   }));
 
-  const barData = [
-    { name: "Funds",  value: byType.funds  },
-    { name: "Travel", value: byType.travel },
-    { name: "Assets", value: byType.assets },
-    { name: "Access", value: byType.access },
-    { name: "HR",     value: byType.hr     },
-  ];
+  const barData = topRequestTypes.length > 0
+    ? topRequestTypes.map((rt) => ({ name: rt.name, value: rt.count }))
+    : [{ name: "No data", value: 0 }];
 
   return (
     <div className="flex flex-col overflow-hidden rounded-[16px] border border-[#E8E6DE] bg-white">
@@ -129,11 +126,11 @@ export function ApprovalPipelineCard({ stats, byType }: ApprovalPipelineCardProp
         {/* Divider */}
         <div className="my-4 h-px bg-[#E8E6DE]" />
 
-        {/* Horizontal bar chart */}
+        {/* Horizontal bar chart — top request types */}
         <p className="mb-3 font-dm-sans text-[11px] font-semibold uppercase tracking-[0.06em] text-brand-neutral-mid">
-          Active requests by type
+          Requests by type
         </p>
-        <ResponsiveContainer width="100%" height={130}>
+        <ResponsiveContainer width="100%" height={Math.max(80, barData.length * 26)}>
           <BarChart
             data={barData}
             layout="vertical"
@@ -146,7 +143,7 @@ export function ApprovalPipelineCard({ stats, byType }: ApprovalPipelineCardProp
               tick={{ fontSize: 12, fontFamily: "DM Sans", fill: "#5F5E5A" }}
               axisLine={false}
               tickLine={false}
-              width={52}
+              width={90}
             />
             <Tooltip
               contentStyle={{
