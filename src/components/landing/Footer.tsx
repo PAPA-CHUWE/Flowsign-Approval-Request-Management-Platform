@@ -92,17 +92,14 @@ const Footer = () => {
             </p>
             <div className="flex gap-2 mt-1">
               {SOCIALS.map(({ Icon, href, label }) => (
-                <Button
+                <a
                   key={label}
-                  variant="ghost"
-                  size="icon"
-                  asChild
-                  className="w-[34px] h-[34px] rounded-[9px] bg-brand-card-surface border border-brand-card-border transition-all duration-150 hover:bg-brand-teal hover:border-brand-teal"
+                  href={href}
+                  aria-label={label}
+                  className="inline-flex items-center justify-center w-[34px] h-[34px] rounded-[9px] bg-brand-card-surface border border-brand-card-border transition-all duration-150 hover:bg-brand-teal hover:border-brand-teal"
                 >
-                  <a href={href} aria-label={label}>
-                    <Icon size={15} color="#A8C4B8" />
-                  </a>
-                </Button>
+                  <Icon size={15} color="#A8C4B8" />
+                </a>
               ))}
             </div>
           </div>
