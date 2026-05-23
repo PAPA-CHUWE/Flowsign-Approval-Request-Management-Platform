@@ -1,10 +1,12 @@
 "use client"
 
 import { useState } from "react"
+import { toast } from "sonner"
 import { TICKET_STATUS } from "@/constants/ticketStatus.constants"
 import type { MockTicket } from "@/constants/mockTickets.constants"
 import { cn } from "@/lib/utils"
 import { formatTicketDate } from "@/lib/format/date"
+import { updateRequestStatus } from "@/lib/api/requests"
 import { StatusDropdown } from "./StatusDropdown"
 import type { StatusKey } from "./StatusDropdown"
 import { PriorityBadge } from "./PriorityBadge"
@@ -48,14 +50,27 @@ export function TicketList({ tickets }: TicketListProps) {
     Object.fromEntries(tickets.map((t) => [t.id, t.status as StatusKey]))
   )
   const [drawerTicket, setDrawerTicket] = useState<(MockTicket & { currentStatus: StatusKey }) | null>(null)
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
 
   function openDrawer(ticket: MockTicket) {
     setDrawerTicket({ ...ticket, currentStatus: statuses[ticket.id] })
   }
 
-  function handleDrawerStatusChange(id: string, status: StatusKey) {
-    setStatuses((prev) => ({ ...prev, [id]: status }))
-    setDrawerTicket((prev) => prev ? { ...prev, currentStatus: status } : prev)
+  async function handleStatusChange(id: string, status: StatusKey) {
+    const prev = statuses[id]
+    setStatuses((s) => ({ ...s, [id]: status }))
+    setDrawerTicket((d) => d?.id === id ? { ...d, currentStatus: status } : d)
+    setUpdatingId(id)
+    try {
+      await updateRequestStatus(id, status)
+      toast.success("Status updated")
+    } catch {
+      setStatuses((s) => ({ ...s, [id]: prev }))
+      setDrawerTicket((d) => d?.id === id ? { ...d, currentStatus: prev } : d)
+      toast.error("Could not update status")
+    } finally {
+      setUpdatingId(null)
+    }
   }
 
   const toggleSort = (field: SortField) => {
@@ -179,7 +194,8 @@ export function TicketList({ tickets }: TicketListProps) {
               <div className="w-[130px] shrink-0" onClick={(e) => e.stopPropagation()}>
                 <StatusDropdown
                   value={statuses[ticket.id]}
-                  onChange={(v) => setStatuses((prev) => ({ ...prev, [ticket.id]: v }))}
+                  onChange={(v) => void handleStatusChange(ticket.id, v)}
+                  disabled={updatingId === ticket.id}
                 />
               </div>
 
@@ -210,7 +226,7 @@ export function TicketList({ tickets }: TicketListProps) {
         ticket={drawerTicket}
         open={drawerTicket !== null}
         onClose={() => setDrawerTicket(null)}
-        onStatusChange={handleDrawerStatusChange}
+        onStatusChange={handleStatusChange}
       />
     </div>
   )
