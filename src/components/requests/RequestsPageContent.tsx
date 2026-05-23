@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Search, X } from "lucide-react"
+import { Bookmark, BookmarkPlus, Plus, Search, Trash2, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { Loader } from "@/components/loader-ui/loader"
 import { RequestFormShell } from "@/components/request-form/RequestFormShell"
@@ -18,10 +19,12 @@ import { RequestDrawer } from "@/components/requests/RequestDrawer"
 import { REQUEST_TYPE_LABEL } from "@/constants/requestType.constants"
 import { TICKET_STATUS_LABEL } from "@/constants/ticketStatus.constants"
 import { useApprovalRequests } from "@/hooks/requests/useApprovalRequests"
+import { useSavedFilters } from "@/hooks/useSavedFilters"
 import { getApprovalRequest } from "@/lib/api/requests"
 import { formatTicketDate } from "@/lib/format/date"
 import { cn } from "@/lib/utils"
 import type { ApprovalRequest } from "@/lib/api/requests"
+import { toast } from "sonner"
 
 const COLUMNS = [
   { label: "Type", width: "w-[130px]" },
@@ -133,12 +136,39 @@ export function RequestsPageContent() {
   const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null)
   const [detailsLoading, setDetailsLoading] = useState(false)
   const [detailsError, setDetailsError] = useState<string | null>(null)
+  const [saveFilterOpen, setSaveFilterOpen] = useState(false)
+  const [saveFilterName, setSaveFilterName] = useState("")
+  const [savingFilter, setSavingFilter] = useState(false)
+
+  const { filters: savedFilters, save: saveFilter, remove: removeFilter } = useSavedFilters("requests")
+
   const { requests, limit, total, isLoading, error } = useApprovalRequests({
     scope: "own",
     search,
     page,
     limit: 25,
   }, refreshKey)
+
+  async function handleSaveFilter() {
+    if (!saveFilterName.trim()) return
+    setSavingFilter(true)
+    try {
+      const filterValues: Record<string, string> = {}
+      if (search) filterValues.search = search
+      await saveFilter(saveFilterName.trim(), filterValues)
+      toast.success("Filter saved")
+      setSaveFilterOpen(false)
+      setSaveFilterName("")
+    } catch {
+      toast.error("Could not save filter")
+    } finally {
+      setSavingFilter(false)
+    }
+  }
+
+  function applyFilter(filters: Record<string, string>) {
+    if (filters.search !== undefined) { setSearch(filters.search); setPage(1) }
+  }
   const totalPages = Math.max(1, Math.ceil(total / limit))
 
   function handleRequestCreated() {
@@ -215,16 +245,58 @@ export function RequestsPageContent() {
             ) : null}
           </div>
 
-          <Button
-            type="button"
-            onClick={() => setCreateOpen(true)}
-            className="h-9 rounded-[8px] bg-brand-teal px-4 text-[12px] font-semibold text-white hover:bg-[#0c5e49]"
-          >
-            <Plus size={14} />
-            Create new
-          </Button>
+          <div className="flex items-center gap-2">
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSaveFilterOpen(true)}
+                className="flex h-9 items-center gap-1.5 rounded-[8px] border border-[#E8E6DE] px-3 text-[12px] font-semibold text-[#5F5E5A] hover:bg-[#F1EFE8]"
+              >
+                <BookmarkPlus size={13} />
+                Save filter
+              </button>
+            )}
+            <Button
+              type="button"
+              onClick={() => setCreateOpen(true)}
+              className="h-9 rounded-[8px] bg-brand-teal px-4 text-[12px] font-semibold text-white hover:bg-[#0c5e49]"
+            >
+              <Plus size={14} />
+              Create new
+            </Button>
+          </div>
         </div>
       </div>
+
+      {/* Saved filter pills */}
+      {savedFilters.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="flex items-center gap-1 text-[11px] text-[#B4B2A9]">
+            <Bookmark size={11} /> Saved:
+          </span>
+          {savedFilters.map((f) => (
+            <div
+              key={f.publicId}
+              className="group flex items-center gap-1.5 rounded-full border border-[#E8E6DE] bg-[#FAFAF8] pl-3 pr-1.5 py-1"
+            >
+              <button
+                type="button"
+                onClick={() => applyFilter(f.filters)}
+                className="text-[11px] font-semibold text-[#5F5E5A] hover:text-brand-teal"
+              >
+                {f.name}
+              </button>
+              <button
+                type="button"
+                onClick={() => removeFilter(f.publicId)}
+                className="flex h-4 w-4 items-center justify-center rounded-full text-[#B4B2A9] opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-50 hover:text-red-400"
+              >
+                <X size={9} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="w-full overflow-x-auto rounded-[12px] border border-[#E8E6DE] bg-white shadow-[0_1px_6px_rgba(0,0,0,0.04)]">
         <div className="flex min-w-[860px] items-center gap-3 border-b border-[#E8E6DE] bg-[#FAFAF8] px-4 py-3">
@@ -358,6 +430,52 @@ export function RequestsPageContent() {
         error={detailsError}
         onClose={closeDrawer}
       />
+
+      {/* Save filter dialog */}
+      <Dialog open={saveFilterOpen} onOpenChange={setSaveFilterOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-[15px]">
+              <Bookmark size={15} className="text-brand-teal" />
+              Save filter preset
+            </DialogTitle>
+            <DialogDescription className="text-[13px]">
+              Name this filter so you can quickly apply it later.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3">
+            {search && (
+              <div className="rounded-[8px] border border-[#E8E6DE] bg-[#FAFAF8] px-3 py-2 text-[12px] text-[#5F5E5A]">
+                Search: <span className="font-semibold">&ldquo;{search}&rdquo;</span>
+              </div>
+            )}
+            <Input
+              value={saveFilterName}
+              onChange={(e) => setSaveFilterName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleSaveFilter() }}
+              placeholder="e.g. My pending finance requests"
+              className="h-9 rounded-[8px] border-[#E8E6DE] text-[13px]"
+              autoFocus
+            />
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setSaveFilterOpen(false)}
+                className="h-9 rounded-[8px] border-[#E8E6DE] text-[12px]"
+              >
+                Cancel
+              </Button>
+              <Button
+                disabled={!saveFilterName.trim() || savingFilter}
+                onClick={handleSaveFilter}
+                className="h-9 rounded-[8px] bg-brand-teal px-4 text-[12px] font-semibold text-white"
+              >
+                Save
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

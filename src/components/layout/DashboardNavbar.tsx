@@ -1,7 +1,8 @@
 "use client"
 
-import { Bell, CheckCheck, Loader2, Search, Trash2, X } from "lucide-react"
+import { Bell, CheckCheck, Loader2, Trash2, X } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { GlobalSearchBar } from "@/components/layout/GlobalSearchBar"
 import { getUserInitials, useCurrentUser } from "@/hooks/use-current-user"
 import { useNotifications } from "@/hooks/useNotifications"
 import type { Notification } from "@/lib/api/notifications"
@@ -149,13 +150,7 @@ export function DashboardNavbar() {
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-[#E8E6DE] bg-white px-4 sm:px-6">
-      <div className="flex h-9 w-full max-w-[320px] items-center gap-2 rounded-[10px] border border-[#E8E6DE] bg-[#FAFAF8] px-3">
-        <Search size={14} color="#888780" strokeWidth={2} />
-        <input
-          className="min-w-0 flex-1 bg-transparent font-dm-sans text-[13px] text-brand-neutral-dark outline-none placeholder:text-[#B4B2A9]"
-          placeholder="Search..."
-        />
-      </div>
+      <GlobalSearchBar />
 
       <div className="flex shrink-0 items-center gap-2">
         <NotificationBell />
