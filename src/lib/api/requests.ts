@@ -146,7 +146,7 @@ export interface UpdateRequestStatusResponse {
 
 export function updateRequestStatus(requestPublicId: string, status: string) {
   return apiClient<UpdateRequestStatusResponse>(
-    `/api/v1/requests/${encodeURIComponent(requestPublicId)}/status`,
+    `/api/v1/requests/${encodeURIComponent(requestPublicId)}`,
     { method: "PATCH", body: JSON.stringify({ status }) }
   )
 }
