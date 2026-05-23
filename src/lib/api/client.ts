@@ -77,9 +77,15 @@ export async function apiClient<TResponse>(
         : `API request failed: ${response.status}`
 
     if (response.status === 401 && typeof window !== "undefined") {
+      const AUTH_PATHS = ["/login", "/signup", "/forgot-password"]
+      const onAuthPage = AUTH_PATHS.some(
+        (p) => window.location.pathname === p || window.location.pathname.startsWith(p + "/")
+      )
       window.localStorage.removeItem(AUTH_TOKEN_KEY)
       document.cookie = "flowsign_auth=; path=/; SameSite=Lax; max-age=0"
-      window.location.href = "/login"
+      if (!onAuthPage) {
+        window.location.href = "/login"
+      }
     }
 
     throw new ApiError(message, response.status, body)
