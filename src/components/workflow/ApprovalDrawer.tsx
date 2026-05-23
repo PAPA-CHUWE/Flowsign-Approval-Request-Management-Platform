@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import {
   CalendarDays, User, Users, Layers,
-  CheckCircle2, XCircle, Clock, AlertCircle, Circle, MessageSquare,
+  CheckCircle2, XCircle, Clock, AlertCircle, Circle,
+  MessageSquare, Loader2, Send, Pencil, Trash2, X,
 } from "lucide-react"
 import type { ElementType } from "react"
 import {
@@ -24,10 +25,12 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { PriorityBadge } from "@/components/tickets/PriorityBadge"
 import { RequestTypeBadge } from "./RequestTypeBadge"
-import { formatTicketDate } from "@/lib/format/date"
+import { formatTicketDate, formatRelativeTime } from "@/lib/format/date"
 import { cn } from "@/lib/utils"
 import type { MockTicket } from "@/constants/mockTickets.constants"
 import { TICKET_STATUS } from "@/constants/ticketStatus.constants"
+import { useRequestComments } from "@/hooks/useRequestComments"
+import type { RequestComment } from "@/lib/api/comments"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -80,6 +83,196 @@ function MetaRow({ icon: Icon, label, children }: {
   )
 }
 
+// ─── Comment bubble ───────────────────────────────────────────────────────────
+
+function CommentBubble({
+  comment,
+  onEdit,
+  onDelete,
+}: {
+  comment: RequestComment
+  onEdit: (id: string, body: string) => Promise<void>
+  onDelete: (id: string) => Promise<void>
+}) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(comment.body)
+  const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  async function handleSaveEdit() {
+    if (!draft.trim() || draft === comment.body) { setEditing(false); return }
+    setSaving(true)
+    try {
+      await onEdit(comment.publicId, draft.trim())
+      setEditing(false)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleDelete() {
+    setDeleting(true)
+    try { await onDelete(comment.publicId) }
+    finally { setDeleting(false) }
+  }
+
+  const initials = comment.authorName
+    ? comment.authorName.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()
+    : "?"
+
+  return (
+    <div className="flex items-start gap-2.5">
+      {/* Avatar */}
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#E1F5EE] text-[10px] font-bold text-brand-teal">
+        {initials}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-2">
+          <span className="text-[12px] font-semibold text-[#2C2C2A]">{comment.authorName}</span>
+          <span className="text-[10px] text-[#B4B2A9]">{formatRelativeTime(comment.createdAt)}</span>
+          {comment.internal && (
+            <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-amber-700">
+              Internal
+            </span>
+          )}
+        </div>
+
+        {editing ? (
+          <div className="mt-1.5 flex flex-col gap-1.5">
+            <Textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              rows={2}
+              autoFocus
+              className="resize-none rounded-[8px] border-[#E8E6DE] bg-[#FAFAF8] text-[12px] text-[#2C2C2A]"
+            />
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleSaveEdit}
+                disabled={saving || !draft.trim()}
+                className="flex items-center gap-1 rounded-[5px] bg-brand-teal px-2.5 py-1 text-[11px] font-semibold text-white disabled:opacity-50"
+              >
+                {saving ? <Loader2 size={10} className="animate-spin" /> : null}
+                Save
+              </button>
+              <button
+                type="button"
+                onClick={() => { setEditing(false); setDraft(comment.body) }}
+                className="flex items-center gap-1 text-[11px] text-[#888780] hover:text-[#2C2C2A]"
+              >
+                <X size={10} /> Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="group mt-1 flex items-start justify-between gap-2">
+            <p className="text-[12px] leading-relaxed text-[#5F5E5A] whitespace-pre-wrap break-words">
+              {comment.body}
+            </p>
+            <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+              <button
+                type="button"
+                onClick={() => { setDraft(comment.body); setEditing(true) }}
+                className="flex h-5 w-5 items-center justify-center rounded-[4px] text-[#B4B2A9] hover:bg-[#F1EFE8] hover:text-[#5F5E5A]"
+              >
+                <Pencil size={10} />
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex h-5 w-5 items-center justify-center rounded-[4px] text-[#B4B2A9] hover:bg-red-50 hover:text-red-500 disabled:opacity-40"
+              >
+                {deleting ? <Loader2 size={10} className="animate-spin" /> : <Trash2 size={10} />}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── Comments section ─────────────────────────────────────────────────────────
+
+function CommentsSection({ requestPublicId }: { requestPublicId: string }) {
+  const { comments, isLoading, error, post, edit, remove } = useRequestComments(requestPublicId)
+  const [draft, setDraft] = useState("")
+  const [posting, setPosting] = useState(false)
+  const bottomRef = useRef<HTMLDivElement>(null)
+
+  async function handlePost() {
+    const text = draft.trim()
+    if (!text) return
+    setPosting(true)
+    try {
+      await post(text)
+      setDraft("")
+      setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50)
+    } catch {
+      // error surfaced by hook
+    } finally {
+      setPosting(false)
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-4 border-t border-[#E8E6DE] px-6 py-5">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#B4B2A9]">
+        Discussion
+      </p>
+
+      {/* Thread */}
+      {isLoading ? (
+        <div className="flex items-center gap-2 text-[12px] text-[#B4B2A9]">
+          <Loader2 size={13} className="animate-spin" /> Loading comments…
+        </div>
+      ) : error ? (
+        <p className="text-[12px] text-red-500">{error}</p>
+      ) : comments.length === 0 ? (
+        <div className="flex flex-col items-center gap-1.5 rounded-[10px] border border-dashed border-[#E8E6DE] py-6">
+          <MessageSquare size={18} className="text-[#D3D1C7]" />
+          <p className="text-[12px] text-[#B4B2A9]">No comments yet — start the discussion</p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {comments.map((c) => (
+            <CommentBubble key={c.publicId} comment={c} onEdit={edit} onDelete={remove} />
+          ))}
+          <div ref={bottomRef} />
+        </div>
+      )}
+
+      {/* Compose */}
+      <div className="flex items-end gap-2">
+        <Textarea
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+              e.preventDefault()
+              handlePost()
+            }
+          }}
+          placeholder="Add a comment… (Ctrl+Enter to send)"
+          rows={2}
+          className="flex-1 resize-none rounded-[8px] border-[#E8E6DE] bg-[#FAFAF8] text-[12px] text-[#2C2C2A] placeholder:text-[#B4B2A9]"
+        />
+        <Button
+          type="button"
+          onClick={handlePost}
+          disabled={posting || !draft.trim()}
+          className="h-9 w-9 shrink-0 rounded-[8px] bg-brand-teal p-0 text-white disabled:opacity-40"
+        >
+          {posting ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 interface ApprovalDrawerProps {
@@ -110,6 +303,9 @@ export function ApprovalDrawer({
 
   const steps        = getTimelineSteps(ticket.status)
   const currentIndex = getStepIndex(ticket.status)
+
+  // reference is requestPublicId (req_xxx); only use it if it looks like a real request ID
+  const requestPublicId = ticket.reference?.startsWith("req_") ? ticket.reference : null
 
   function openRejectDialog() {
     setRejectDraft("")
@@ -238,7 +434,7 @@ export function ApprovalDrawer({
             </div>
 
             {/* Decision section */}
-            <div className="px-6 py-5">
+            <div className="border-b border-[#E8E6DE] px-6 py-5">
               <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#B4B2A9]">
                 Your decision
               </p>
@@ -285,6 +481,9 @@ export function ApprovalDrawer({
                 </div>
               )}
             </div>
+
+            {/* Comments thread */}
+            {requestPublicId && <CommentsSection requestPublicId={requestPublicId} />}
 
           </div>
         </SheetContent>
