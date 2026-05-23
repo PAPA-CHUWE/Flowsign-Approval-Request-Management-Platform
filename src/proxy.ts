@@ -11,6 +11,7 @@ const PROTECTED_PREFIXES = [
   "/approvals",
   "/settings",
   "/users",
+  "/onboarding",
 ]
 
 // Routes that logged-in users should be redirected away from

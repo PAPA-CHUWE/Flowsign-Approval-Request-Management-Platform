@@ -1,39 +1,22 @@
 import { apiClient } from "@/lib/api/client"
 
-export interface ApprovalQueueRequester {
-  publicId?: string
-  firstName?: string
-  lastName?: string
-  email?: string
-}
-
-export interface ApprovalQueueRequestType {
-  key?: string
-  name?: string
-  category?: string
-}
-
-export interface ApprovalQueueRequest {
-  publicId?: string
-  title?: string
-  priority?: string
-  requestType?: ApprovalQueueRequestType | string
-  requester?: ApprovalQueueRequester
-  submittedAt?: string
-}
-
-export interface ApprovalQueueStep {
-  name?: string
-  dueAt?: string
-  order?: number
-}
-
+// Flat shape returned by GET /approvals/queue (backend service flattens it)
 export interface ApprovalQueueItem {
-  publicId: string
-  status: string
-  decidedAt?: string | null
-  request: ApprovalQueueRequest
-  step?: ApprovalQueueStep
+  assignmentPublicId: string
+  requestPublicId: string | null
+  title: string | null
+  description: string | null
+  requestType: { key: string; name: string } | null
+  requesterName: string | null
+  amount: number | null
+  department: string | null
+  urgency: string | null
+  priority: string | null
+  status: string | null
+  stepName: string | null
+  stepOrder: number | null
+  dueAt: string | null
+  createdAt: string | null
 }
 
 export interface ListApprovalQueueResponse {
