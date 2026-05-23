@@ -141,8 +141,8 @@ export interface RequestStats {
   approvedThisMonth: number
   rejectedThisMonth: number
   avgResolutionHours: number
-  byStatus: { status: string; count: number }[]
-  byType: { key: string; name: string; count: number }[]
+  byStatus: Record<string, number>
+  byType: Record<string, number>
   pendingDelta: number
   approvedDelta: number
   rejectedDelta: number
@@ -151,7 +151,9 @@ export interface RequestStats {
 export interface RequestStatsResponse {
   statusCode: string
   message: string
-  responseBody: RequestStats
+  responseBody: {
+    stats: RequestStats
+  }
 }
 
 export function getRequestStats() {

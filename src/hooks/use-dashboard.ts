@@ -41,51 +41,32 @@ function adaptRequest(r: ApprovalRequest): DashboardRequest {
   }
 }
 
-const ACTIVITY_TYPE_MAP: Record<string, ActivityItem["type"]> = {
-  approved:        "approved",
-  approve:         "approved",
-  rejected:        "rejected",
-  reject:          "rejected",
-  pending:         "pending",
-  submitted:       "pending",
-  submit:          "pending",
-  request_changes: "info",
-  delegated:       "info",
-  escalated:       "info",
-  comment:         "info",
-  commented:       "info",
-}
 
 function adaptActivity(e: ActivityEvent): ActivityItem {
-  const type = ACTIVITY_TYPE_MAP[e.type?.toLowerCase()] ?? "info"
   return {
     id:   e.id as number,
-    type,
+    type: e.type,
     text: e.text,
-    time: formatRelativeTime(e.createdAt),
+    time: formatRelativeTime(e.occurredAt),
   }
 }
 
-function adaptPipelineStats(byStatus: { status: string; count: number }[]): PipelineStats {
-  const map: Record<string, number> = {}
-  byStatus.forEach((s) => { map[s.status] = s.count })
+function adaptPipelineStats(byStatus: Record<string, number>): PipelineStats {
   return {
-    pending:  map["pending"]   ?? 0,
-    approved: map["approved"]  ?? 0,
-    rejected: map["rejected"]  ?? 0,
-    inReview: map["in_review"] ?? 0,
+    pending:  byStatus["pending"]   ?? 0,
+    approved: byStatus["approved"]  ?? 0,
+    rejected: byStatus["rejected"]  ?? 0,
+    inReview: byStatus["in_review"] ?? 0,
   }
 }
 
-function adaptRequestsByType(byType: { key: string; name: string; count: number }[]): RequestsByType {
-  const map: Record<string, number> = {}
-  byType.forEach((t) => { map[t.key.toLowerCase()] = t.count })
+function adaptRequestsByType(byType: Record<string, number>): RequestsByType {
   return {
-    funds:  map["finance"]      ?? map["funds"]  ?? map["expense_claim"] ?? 0,
-    travel: map["travel"]       ?? 0,
-    assets: map["asset"]        ?? map["assets"] ?? 0,
-    access: map["access"]       ?? 0,
-    hr:     map["hr"]           ?? 0,
+    funds:  byType["finance"]      ?? byType["funds"]  ?? byType["expense_claim"] ?? 0,
+    travel: byType["travel"]       ?? 0,
+    assets: byType["asset"]        ?? byType["assets"] ?? 0,
+    access: byType["access"]       ?? 0,
+    hr:     byType["hr"]           ?? 0,
   }
 }
 
@@ -112,8 +93,6 @@ export interface DashboardData {
   error: string
 }
 
-const EMPTY_PIPELINE: PipelineStats  = { pending: 0, approved: 0, rejected: 0, inReview: 0 }
-const EMPTY_BY_TYPE: RequestsByType  = { funds: 0, travel: 0, assets: 0, access: 0, hr: 0 }
 
 export function useDashboard(): DashboardData {
   const [stats, setStats]     = useState<DashboardStats | null>(null)
@@ -134,22 +113,22 @@ export function useDashboard(): DashboardData {
       .then(([statsRes, requestsRes, activityRes]) => {
         if (ignore) return
 
-        const rb = statsRes.responseBody
+        const s = statsRes.responseBody.stats
         setStats({
-          pendingCount:        rb.pendingCount,
-          approvedThisMonth:   rb.approvedThisMonth,
-          rejectedThisMonth:   rb.rejectedThisMonth,
-          avgResolutionHours:  rb.avgResolutionHours,
-          pendingDelta:        rb.pendingDelta,
-          approvedDelta:       rb.approvedDelta,
-          rejectedDelta:       rb.rejectedDelta,
-          pipelineStats:       adaptPipelineStats(rb.byStatus ?? []),
-          requestsByType:      adaptRequestsByType(rb.byType ?? []),
+          pendingCount:        s.pendingCount,
+          approvedThisMonth:   s.approvedThisMonth,
+          rejectedThisMonth:   s.rejectedThisMonth,
+          avgResolutionHours:  s.avgResolutionHours,
+          pendingDelta:        s.pendingDelta,
+          approvedDelta:       s.approvedDelta,
+          rejectedDelta:       s.rejectedDelta,
+          pipelineStats:       adaptPipelineStats(s.byStatus ?? {}),
+          requestsByType:      adaptRequestsByType(s.byType ?? {}),
         })
 
         setRequests(requestsRes.responseBody.result.items.map(adaptRequest))
 
-        const events = activityRes.responseBody.activities ?? []
+        const events = activityRes.responseBody.items ?? []
         setActivity(events.map(adaptActivity))
         setActivityUpdatedAt(events.length > 0 ? "just now" : "—")
       })

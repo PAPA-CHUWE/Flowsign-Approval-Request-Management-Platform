@@ -2,20 +2,20 @@ import { apiClient } from "@/lib/api/client"
 
 export interface ActivityEvent {
   id: string | number
-  type: string
+  type: "approved" | "rejected" | "pending" | "info"
   text: string
   actorName?: string
-  requestTitle?: string
-  requestPublicId?: string
+  requestTitle?: string | null
+  requestPublicId?: string | null
   entityType?: string
-  createdAt: string
+  occurredAt: string
 }
 
 export interface GetActivityResponse {
   statusCode: string
   message: string
   responseBody: {
-    activities: ActivityEvent[]
+    items: ActivityEvent[]
   }
 }
 
