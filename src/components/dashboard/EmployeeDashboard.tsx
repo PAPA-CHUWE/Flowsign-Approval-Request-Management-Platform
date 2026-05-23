@@ -16,6 +16,7 @@ import { ActivityFeed } from "./ActivityFeed";
 import { QuickActionsGrid } from "./QuickActionsGrid";
 import { RequestFormShell } from "@/components/request-form/RequestFormShell";
 import { useCurrentUser, getUserDisplayName } from "@/hooks/use-current-user";
+import { useDashboard } from "@/hooks/use-dashboard";
 import {
   mockRequests,
   mockActivity,
@@ -52,39 +53,53 @@ const ApprovalPipelineCard = dynamic(
   }
 );
 
-const STAT_CARDS = [
-  {
-    Icon: Clock,
-    label: "Pending approvals",
-    value: "4",
-    trend: { delta: "+2", direction: "up" as const, label: "vs last week" },
-  },
-  {
-    Icon: CheckCircle2,
-    label: "Approved this month",
-    value: "12",
-    trend: { delta: "+5", direction: "up" as const, label: "vs last month" },
-  },
-  {
-    Icon: XCircle,
-    label: "Rejected",
-    value: "2",
-    trend: { delta: "-1", direction: "down" as const, label: "vs last month" },
-  },
-  {
-    Icon: Timer,
-    label: "Avg. resolution time",
-    value: "3.2h",
-    trend: { delta: "-0.4h", direction: "down" as const, label: "improvement" },
-  },
-] as const;
-
 export function EmployeeDashboard() {
   const { user } = useCurrentUser();
   const firstName = user?.firstName ?? getUserDisplayName(user).split(" ")[0];
 
+  const { stats, requests, activity, activityUpdatedAt, isLoading } = useDashboard();
+
   const [createOpen, setCreateOpen] = useState(false);
   const [initialType, setInitialType] = useState<string | undefined>();
+
+  const statCards = [
+    {
+      Icon: Clock,
+      label: "Pending approvals",
+      value: isLoading ? "—" : String(stats?.pendingCount ?? mockPipelineStats.pending),
+      trend: {
+        delta: stats ? `${stats.pendingDelta >= 0 ? "+" : ""}${stats.pendingDelta}` : "+2",
+        direction: ((stats?.pendingDelta ?? 1) >= 0 ? "up" : "down") as "up" | "down",
+        label: "vs last week",
+      },
+    },
+    {
+      Icon: CheckCircle2,
+      label: "Approved this month",
+      value: isLoading ? "—" : String(stats?.approvedThisMonth ?? mockPipelineStats.approved),
+      trend: {
+        delta: stats ? `${stats.approvedDelta >= 0 ? "+" : ""}${stats.approvedDelta}` : "+5",
+        direction: ((stats?.approvedDelta ?? 1) >= 0 ? "up" : "down") as "up" | "down",
+        label: "vs last month",
+      },
+    },
+    {
+      Icon: XCircle,
+      label: "Rejected",
+      value: isLoading ? "—" : String(stats?.rejectedThisMonth ?? mockPipelineStats.rejected),
+      trend: {
+        delta: stats ? `${stats.rejectedDelta >= 0 ? "+" : ""}${stats.rejectedDelta}` : "-1",
+        direction: ((stats?.rejectedDelta ?? -1) <= 0 ? "down" : "up") as "up" | "down",
+        label: "vs last month",
+      },
+    },
+    {
+      Icon: Timer,
+      label: "Avg. resolution time",
+      value: isLoading ? "—" : `${stats?.avgResolutionHours?.toFixed(1) ?? "3.2"}h`,
+      trend: { delta: "—", direction: "down" as const, label: "hours" },
+    },
+  ];
 
   function openCreateForType(typeKey: string) {
     setInitialType(typeKey);
@@ -110,20 +125,26 @@ export function EmployeeDashboard() {
 
       {/* Section 1 — Stat cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {STAT_CARDS.map((card) => (
+        {statCards.map((card) => (
           <DashboardStatCard key={card.label} {...card} />
         ))}
       </div>
 
       {/* Section 2 — Requests table + pipeline (5/3) */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[5fr_3fr]">
-        <RequestsTable requests={mockRequests} />
-        <ApprovalPipelineCard stats={mockPipelineStats} byType={mockRequestsByType} />
+        <RequestsTable requests={requests.length > 0 ? requests : (isLoading ? [] : mockRequests)} />
+        <ApprovalPipelineCard
+          stats={stats?.pipelineStats ?? mockPipelineStats}
+          byType={stats?.requestsByType ?? mockRequestsByType}
+        />
       </div>
 
       {/* Section 3 — Activity feed + quick actions (50/50) */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <ActivityFeed items={mockActivity} updatedAt="just now" />
+        <ActivityFeed
+          items={activity.length > 0 ? activity : (isLoading ? [] : mockActivity)}
+          updatedAt={activityUpdatedAt}
+        />
         <QuickActionsGrid onCreateRequest={openCreateForType} />
       </div>
 

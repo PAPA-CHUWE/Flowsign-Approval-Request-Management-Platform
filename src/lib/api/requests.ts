@@ -135,3 +135,25 @@ export function getApprovalRequest(requestPublicId: string) {
     `/api/v1/requests/${encodeURIComponent(requestPublicId)}`
   )
 }
+
+export interface RequestStats {
+  pendingCount: number
+  approvedThisMonth: number
+  rejectedThisMonth: number
+  avgResolutionHours: number
+  byStatus: { status: string; count: number }[]
+  byType: { key: string; name: string; count: number }[]
+  pendingDelta: number
+  approvedDelta: number
+  rejectedDelta: number
+}
+
+export interface RequestStatsResponse {
+  statusCode: string
+  message: string
+  responseBody: RequestStats
+}
+
+export function getRequestStats() {
+  return apiClient<RequestStatsResponse>("/api/v1/requests/stats")
+}
