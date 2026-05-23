@@ -76,15 +76,13 @@ function NotificationBell() {
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <button className="relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-[10px] border border-[#E8E6DE] bg-[#FAFAF8] transition-colors duration-150 hover:bg-brand-teal-pale">
-          <Bell size={16} color="#5F5E5A" strokeWidth={2} />
-          {unreadCount > 0 && (
-            <span className="absolute right-1.5 top-1.5 flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-brand-teal px-0.5 text-[8px] font-bold text-white ring-2 ring-white">
-              {unreadCount > 99 ? "99+" : unreadCount}
-            </span>
-          )}
-        </button>
+      <PopoverTrigger className="relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-[10px] border border-[#E8E6DE] bg-[#FAFAF8] transition-colors duration-150 hover:bg-brand-teal-pale">
+        <Bell size={16} color="#5F5E5A" strokeWidth={2} />
+        {unreadCount > 0 && (
+          <span className="absolute right-1.5 top-1.5 flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-brand-teal px-0.5 text-[8px] font-bold text-white ring-2 ring-white">
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
+        )}
       </PopoverTrigger>
 
       <PopoverContent
