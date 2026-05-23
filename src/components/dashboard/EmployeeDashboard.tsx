@@ -17,12 +17,7 @@ import { QuickActionsGrid } from "./QuickActionsGrid";
 import { RequestFormShell } from "@/components/request-form/RequestFormShell";
 import { useCurrentUser, getUserDisplayName } from "@/hooks/use-current-user";
 import { useDashboard } from "@/hooks/use-dashboard";
-import {
-  mockRequests,
-  mockActivity,
-  mockPipelineStats,
-  mockRequestsByType,
-} from "@/lib/mock/dashboard.mock";
+import { mockPipelineStats, mockRequestsByType } from "@/lib/mock/dashboard.mock";
 
 // Dynamically import the Recharts-heavy card — keeps initial bundle lean
 const ApprovalPipelineCard = dynamic(
@@ -96,7 +91,7 @@ export function EmployeeDashboard() {
     {
       Icon: Timer,
       label: "Avg. resolution time",
-      value: isLoading ? "—" : `${stats?.avgResolutionHours?.toFixed(1) ?? "3.2"}h`,
+      value: isLoading ? "—" : stats ? `${stats.avgResolutionHours.toFixed(1)}h` : "—",
       trend: { delta: "—", direction: "down" as const, label: "hours" },
     },
   ];
@@ -132,7 +127,7 @@ export function EmployeeDashboard() {
 
       {/* Section 2 — Requests table + pipeline (5/3) */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[5fr_3fr]">
-        <RequestsTable requests={requests.length > 0 ? requests : (isLoading ? [] : mockRequests)} />
+        <RequestsTable requests={isLoading ? [] : requests} />
         <ApprovalPipelineCard
           stats={stats?.pipelineStats ?? mockPipelineStats}
           byType={stats?.requestsByType ?? mockRequestsByType}
@@ -142,7 +137,7 @@ export function EmployeeDashboard() {
       {/* Section 3 — Activity feed + quick actions (50/50) */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ActivityFeed
-          items={activity.length > 0 ? activity : (isLoading ? [] : mockActivity)}
+          items={isLoading ? [] : activity}
           updatedAt={activityUpdatedAt}
         />
         <QuickActionsGrid onCreateRequest={openCreateForType} />

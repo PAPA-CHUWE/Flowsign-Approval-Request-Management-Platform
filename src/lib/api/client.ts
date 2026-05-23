@@ -76,6 +76,12 @@ export async function apiClient<TResponse>(
         ? body.message
         : `API request failed: ${response.status}`
 
+    if (response.status === 401 && typeof window !== "undefined") {
+      window.localStorage.removeItem(AUTH_TOKEN_KEY)
+      document.cookie = "flowsign_auth=; path=/; SameSite=Lax; max-age=0"
+      window.location.href = "/login"
+    }
+
     throw new ApiError(message, response.status, body)
   }
 

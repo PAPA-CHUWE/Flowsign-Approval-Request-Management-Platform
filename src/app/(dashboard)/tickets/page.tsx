@@ -12,7 +12,6 @@ import { adaptRequestToTicket } from "@/lib/adapters/request-to-ticket"
 export default function TicketsPage() {
   const [page, setPage] = useState(1)
   const { requests, total, limit, isLoading, error } = useApprovalRequests({
-    scope: "all",
     page,
     limit: 50,
   })
