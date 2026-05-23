@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { AlertCircle, Building2, Globe, Loader2, Plus, Trash2, UserPlus, Users } from "lucide-react"
+import { Building2, CheckCircle2, ChevronRight, Globe, Loader2, Plus, Trash2, UserPlus, Users, Zap } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -74,6 +74,176 @@ function PendingInvitesTable({ users }: { users: OrganizationUser[] }) {
         </div>
       ))}
     </div>
+  )
+}
+
+// ── SSO providers ─────────────────────────────────────────────────────────────
+
+const SSO_PROVIDERS = [
+  {
+    key: "oidc",
+    name: "Google Workspace",
+    description: "Sign in with Google (OIDC). Employees use their @company.com Google accounts.",
+    logo: (
+      <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+    ),
+  },
+  {
+    key: "saml",
+    name: "Microsoft 365 / Entra ID",
+    description: "Sign in with Microsoft (SAML / OIDC). Employees use their work Microsoft accounts.",
+    logo: (
+      <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+        <path d="M11.4 2H2v9.4h9.4V2z" fill="#F25022"/>
+        <path d="M22 2h-9.4v9.4H22V2z" fill="#7FBA00"/>
+        <path d="M11.4 12.6H2V22h9.4v-9.4z" fill="#00A4EF"/>
+        <path d="M22 12.6h-9.4V22H22v-9.4z" fill="#FFB900"/>
+      </svg>
+    ),
+  },
+] as const
+
+type SsoProviderKey = (typeof SSO_PROVIDERS)[number]["key"]
+
+// ── SSO card ──────────────────────────────────────────────────────────────────
+
+function SsoCard({
+  currentEnabled,
+  currentProvider,
+}: {
+  currentEnabled: boolean
+  currentProvider: string | null
+}) {
+  const [enabled, setEnabled] = useState<boolean | null>(null)
+  const [provider, setProvider] = useState<SsoProviderKey | null>(null)
+  const [saving, setSaving] = useState(false)
+
+  const liveEnabled = enabled ?? currentEnabled
+  const liveProvider = (provider ?? currentProvider) as SsoProviderKey | null
+
+  const hasChanged =
+    (enabled !== null && enabled !== currentEnabled) ||
+    (provider !== null && provider !== currentProvider)
+
+  async function save() {
+    if (!liveEnabled && !liveProvider) return
+    setSaving(true)
+    try {
+      await updateCurrentOrganizationSettings({
+        security: { ssoEnabled: liveEnabled, ssoProvider: liveEnabled ? liveProvider : null },
+      })
+      toast.success(liveEnabled ? "SSO enabled" : "SSO disabled")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not save SSO settings")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <section className="flex flex-col gap-4 rounded-[16px] border border-[#E8E6DE] bg-white p-6">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-brand-teal-pale">
+            <Zap size={16} className="text-brand-teal" strokeWidth={2} />
+          </div>
+          <div>
+            <h2 className="font-dm-sans text-[14px] font-semibold text-[#2C2C2A]">
+              Identity provider (SSO)
+            </h2>
+            <p className="mt-0.5 text-[12px] text-[#888780]">
+              Connect your company email directory so employees can sign in with their existing accounts.
+            </p>
+          </div>
+        </div>
+
+        {/* Toggle */}
+        <button
+          type="button"
+          role="switch"
+          aria-checked={liveEnabled}
+          onClick={() => setEnabled(!liveEnabled)}
+          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal ${
+            liveEnabled ? "bg-brand-teal" : "bg-[#E8E6DE]"
+          }`}
+        >
+          <span
+            className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+              liveEnabled ? "translate-x-4" : "translate-x-0"
+            }`}
+          />
+        </button>
+      </div>
+
+      <Separator className="bg-[#F1EFE8]" />
+
+      {/* Provider list */}
+      <div className={`flex flex-col gap-2 transition-opacity ${liveEnabled ? "opacity-100" : "opacity-40 pointer-events-none"}`}>
+        {SSO_PROVIDERS.map((p) => {
+          const selected = liveProvider === p.key
+          return (
+            <button
+              key={p.key}
+              type="button"
+              onClick={() => setProvider(p.key)}
+              className={`flex w-full items-center gap-3 rounded-[10px] border px-4 py-3 text-left transition-colors ${
+                selected
+                  ? "border-brand-teal bg-[#E1F5EE]"
+                  : "border-[#E8E6DE] bg-[#FAFAF8] hover:border-[#C8E6DC]"
+              }`}
+            >
+              <span className="shrink-0">{p.logo}</span>
+              <div className="flex-1">
+                <p className="text-[13px] font-semibold text-[#2C2C2A]">{p.name}</p>
+                <p className="mt-0.5 text-[11px] text-[#888780]">{p.description}</p>
+              </div>
+              {selected ? (
+                <CheckCircle2 size={15} className="shrink-0 text-brand-teal" />
+              ) : (
+                <ChevronRight size={14} className="shrink-0 text-[#B4B2A9]" />
+              )}
+            </button>
+          )
+        })}
+      </div>
+
+      {liveEnabled && liveProvider && (
+        <div className="rounded-[10px] border border-[#E8E6DE] bg-[#FAFAF8] px-4 py-3.5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#888780] mb-2">Setup instructions</p>
+          {liveProvider === "oidc" ? (
+            <ol className="flex flex-col gap-1.5 text-[12px] text-[#5F5E5A]">
+              <li>1. In Google Admin Console, create a new OAuth 2.0 app.</li>
+              <li>2. Set the authorised redirect URI to <span className="font-mono bg-[#F1EFE8] rounded px-1">/api/v1/auth/sso/callback</span></li>
+              <li>3. Copy the Client ID and Client Secret into your backend environment variables.</li>
+              <li>4. Ensure all employee accounts belong to your verified domain above.</li>
+            </ol>
+          ) : (
+            <ol className="flex flex-col gap-1.5 text-[12px] text-[#5F5E5A]">
+              <li>1. In Microsoft Entra ID (Azure AD), register an Enterprise Application.</li>
+              <li>2. Set the reply URL (ACS) to <span className="font-mono bg-[#F1EFE8] rounded px-1">/api/v1/auth/sso/saml/callback</span></li>
+              <li>3. Download the Federation Metadata XML and upload it in your backend config.</li>
+              <li>4. Assign the app to the user groups you want to give access.</li>
+            </ol>
+          )}
+        </div>
+      )}
+
+      {hasChanged && (
+        <Button
+          onClick={save}
+          disabled={saving || (liveEnabled && !liveProvider)}
+          className="self-start h-9 rounded-[8px] bg-brand-teal px-4 text-[12px] font-semibold text-white"
+        >
+          {saving ? <Loader2 size={13} className="animate-spin" /> : null}
+          Save changes
+        </Button>
+      )}
+    </section>
   )
 }
 
@@ -242,6 +412,14 @@ export function OnboardingPageContent() {
           </div>
         </section>
       </div>
+
+      {/* SSO / Identity provider */}
+      {!settingsLoading && (
+        <SsoCard
+          currentEnabled={settings?.security.ssoEnabled ?? false}
+          currentProvider={settings?.security.ssoProvider ?? null}
+        />
+      )}
 
       {/* Pending invites */}
       <section className="flex flex-col gap-4">

@@ -84,7 +84,7 @@ export interface OrganizationIntegrationsSettings {
 
 export type UpdateOrganizationSecuritySettingsPayload = Pick<
   OrganizationSecuritySettings,
-  "enforceMfa" | "allowedDomains" | "sessionTimeoutMinutes"
+  "enforceMfa" | "allowedDomains" | "sessionTimeoutMinutes" | "ssoEnabled" | "ssoProvider"
 >
 
 export interface OrganizationSettings {
