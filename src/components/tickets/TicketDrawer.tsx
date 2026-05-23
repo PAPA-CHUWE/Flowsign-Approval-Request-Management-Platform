@@ -167,6 +167,7 @@ export function TicketDrawer({ ticket, open, onClose, onStatusChange }: TicketDr
               <StatusDropdown
                 value={ticket.currentStatus}
                 onChange={(v) => onStatusChange(ticket.id, v)}
+                disabled={ticket.status !== "draft"}
               />
             </MetaRow>
 

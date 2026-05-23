@@ -195,7 +195,7 @@ export function TicketList({ tickets }: TicketListProps) {
                 <StatusDropdown
                   value={statuses[ticket.id]}
                   onChange={(v) => void handleStatusChange(ticket.id, v)}
-                  disabled={updatingId === ticket.id}
+                  disabled={updatingId === ticket.id || ticket.status !== "draft"}
                 />
               </div>
 

@@ -220,7 +220,7 @@ export function RequestDrawer({
                 <StatusDropdown
                   value={currentStatus}
                   onChange={handleStatusChange}
-                  disabled={isUpdatingStatus || !request.publicId}
+                  disabled={isUpdatingStatus || !request.publicId || request.status !== "draft"}
                 />
               </div>
               <SheetTitle className="pr-8 text-[16px] font-semibold leading-snug text-[#2C2C2A]">
