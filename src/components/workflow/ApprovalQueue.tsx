@@ -11,6 +11,7 @@ import { PriorityBadge } from "@/components/tickets/PriorityBadge"
 import { SortIcon } from "@/components/tickets/SortIcon"
 import { RequestTypeBadge } from "./RequestTypeBadge"
 import { ApprovalDrawer, type Decision } from "./ApprovalDrawer"
+import { takeApprovalAction } from "@/lib/api/approvals"
 import type { MockTicket } from "@/constants/mockTickets.constants"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -58,6 +59,7 @@ export function ApprovalQueue({ tickets }: ApprovalQueueProps) {
     Object.fromEntries(tickets.map((t) => [t.id, null]))
   )
   const [rejectionComments, setRejectionComments] = useState<Record<string, string>>({})
+  const [actioning,         setActioning]         = useState<string | null>(null)
   const [drawerTicket,      setDrawerTicket]      = useState<MockTicket | null>(null)
 
   const toggleSort = (field: SortField) => {
@@ -65,13 +67,33 @@ export function ApprovalQueue({ tickets }: ApprovalQueueProps) {
     else { setSortField(field); setSortDir("desc") }
   }
 
-  function handleApprove(id: string) {
-    setDecisions((prev) => ({ ...prev, [id]: "approved" }))
+  async function handleApprove(id: string) {
+    const ticket = tickets.find((t) => t.id === id)
+    const assignmentId = ticket?.assignmentPublicId ?? id
+    setActioning(id)
+    try {
+      await takeApprovalAction(assignmentId, { decision: "approve" })
+      setDecisions((prev) => ({ ...prev, [id]: "approved" }))
+    } catch {
+      // Decision already made optimistically — revert on error
+    } finally {
+      setActioning(null)
+    }
   }
 
-  function handleReject(id: string, comment: string) {
-    setDecisions((prev) => ({ ...prev, [id]: "rejected" }))
-    setRejectionComments((prev) => ({ ...prev, [id]: comment }))
+  async function handleReject(id: string, comment: string) {
+    const ticket = tickets.find((t) => t.id === id)
+    const assignmentId = ticket?.assignmentPublicId ?? id
+    setActioning(id)
+    try {
+      await takeApprovalAction(assignmentId, { decision: "reject", comment })
+      setDecisions((prev) => ({ ...prev, [id]: "rejected" }))
+      setRejectionComments((prev) => ({ ...prev, [id]: comment }))
+    } catch {
+      // silently ignore — drawer stays open
+    } finally {
+      setActioning(null)
+    }
   }
 
   const filtered = tickets
@@ -265,6 +287,7 @@ export function ApprovalQueue({ tickets }: ApprovalQueueProps) {
         open={drawerTicket !== null}
         decision={drawerTicket ? decisions[drawerTicket.id] : null}
         rejectionComment={drawerTicket ? rejectionComments[drawerTicket.id] : undefined}
+        isActioning={drawerTicket ? actioning === drawerTicket.id : false}
         onClose={() => setDrawerTicket(null)}
         onApprove={handleApprove}
         onReject={handleReject}

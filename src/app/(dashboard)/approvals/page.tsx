@@ -4,25 +4,10 @@ import { AlertCircle } from "lucide-react"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { ApprovalQueue } from "@/components/workflow/ApprovalQueue"
 import { Loader } from "@/components/loader-ui/loader"
-import { useApprovalRequests } from "@/hooks/requests/useApprovalRequests"
-import { adaptRequestToTicket } from "@/lib/adapters/request-to-ticket"
-import { TICKET_STATUS } from "@/constants/ticketStatus.constants"
-
-const ACTIONABLE_STATUSES = new Set([
-  TICKET_STATUS.PENDING,
-  TICKET_STATUS.IN_REVIEW,
-  TICKET_STATUS.OPEN,
-])
+import { useApprovalQueue } from "@/hooks/requests/useApprovalQueue"
 
 export default function ApprovalsPage() {
-  const { requests, isLoading, error } = useApprovalRequests({
-    scope: "pending_approval",
-    limit: 100,
-  })
-
-  const tickets = requests
-    .map(adaptRequestToTicket)
-    .filter((t) => (ACTIONABLE_STATUSES as Set<string>).has(t.status))
+  const { tickets, isLoading, error } = useApprovalQueue({ limit: 100 })
 
   return (
     <div className="flex w-full flex-col gap-6">

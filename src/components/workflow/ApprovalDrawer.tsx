@@ -87,6 +87,7 @@ interface ApprovalDrawerProps {
   open: boolean
   decision: Decision
   rejectionComment?: string
+  isActioning?: boolean
   onClose: () => void
   onApprove: (id: string) => void
   onReject: (id: string, comment: string) => void
@@ -97,6 +98,7 @@ export function ApprovalDrawer({
   open,
   decision,
   rejectionComment,
+  isActioning = false,
   onClose,
   onApprove,
   onReject,
@@ -265,15 +267,17 @@ export function ApprovalDrawer({
                 <div className="flex flex-col gap-2">
                   <Button
                     onClick={() => { onApprove(ticket.id); onClose() }}
-                    className="h-10 w-full rounded-[8px] bg-[#0F6E56] text-[13px] font-semibold text-white hover:bg-[#0c5e49]"
+                    disabled={isActioning}
+                    className="h-10 w-full rounded-[8px] bg-[#0F6E56] text-[13px] font-semibold text-white hover:bg-[#0c5e49] disabled:opacity-50"
                   >
                     <CheckCircle2 size={15} strokeWidth={2.5} />
-                    Approve request
+                    {isActioning ? "Processing…" : "Approve request"}
                   </Button>
                   <Button
                     variant="outline"
                     onClick={openRejectDialog}
-                    className="h-10 w-full rounded-[8px] border-red-200 text-[13px] font-semibold text-red-600 hover:bg-red-50 hover:border-red-300"
+                    disabled={isActioning}
+                    className="h-10 w-full rounded-[8px] border-red-200 text-[13px] font-semibold text-red-600 hover:bg-red-50 hover:border-red-300 disabled:opacity-50"
                   >
                     <XCircle size={15} strokeWidth={2.5} />
                     Reject request

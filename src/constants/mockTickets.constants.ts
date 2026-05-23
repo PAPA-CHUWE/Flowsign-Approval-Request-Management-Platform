@@ -8,6 +8,7 @@ export type MockTicket = Ticket & {
   assignee: string
   releasedBy: string
   completionDate?: string
+  assignmentPublicId?: string
 }
 
 export const MOCK_TICKETS: MockTicket[] = [

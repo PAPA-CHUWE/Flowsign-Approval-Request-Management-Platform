@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react"
 import { UserPlus, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { MOCK_PEOPLE, type Person } from "@/constants/mockPeople.constants"
+import type { Person } from "@/constants/mockPeople.constants"
 import { FormField } from "./FormField"
+import { useOrganizationUsers } from "@/hooks/use-organization-users"
 
 export type { Person }
 
@@ -25,7 +26,17 @@ export function PeoplePicker({
   const [open,  setOpen]  = useState(false)
   const ref               = useRef<HTMLDivElement>(null)
 
-  const filtered = MOCK_PEOPLE.filter(
+  const { users, isLoading: usersLoading } = useOrganizationUsers()
+
+  // Adapt OrganizationUser → Person for the picker
+  const allPeople: Person[] = users.map((u) => ({
+    id:       u.publicId,
+    name:     `${u.firstName} ${u.lastName}`.trim(),
+    role:     u.title ?? u.department ?? u.roles?.[0] ?? "",
+    initials: `${u.firstName[0] ?? ""}${u.lastName[0] ?? ""}`.toUpperCase(),
+  }))
+
+  const filtered = allPeople.filter(
     (p) => !selected.find((s) => s.id === p.id) &&
       (p.name.toLowerCase().includes(query.toLowerCase()) ||
        p.role.toLowerCase().includes(query.toLowerCase()))
@@ -94,25 +105,31 @@ export function PeoplePicker({
         </div>
 
         {/* Dropdown */}
-        {open && filtered.length > 0 && !disabled && (
+        {open && !disabled && (
           <div className="absolute top-full left-0 right-0 z-20 mt-1 bg-white border border-[#E8E6DE] rounded-[10px] shadow-[0_8px_24px_rgba(0,0,0,0.08)] max-h-48 overflow-y-auto">
-            {filtered.map((p) => (
-              <Button
-                key={p.id}
-                type="button"
-                variant="ghost"
-                onClick={() => add(p)}
-                className="flex items-center gap-2.5 w-full px-3 py-2.5 h-auto rounded-none text-left justify-start cursor-pointer hover:bg-[#F1EFE8]"
-              >
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#E1F5EE] text-[11px] font-bold text-[#0F6E56] shrink-0">
-                  {p.initials}
-                </div>
-                <div>
-                  <p className="text-[13px] font-medium text-[#2C2C2A]">{p.name}</p>
-                  <p className="text-[11px] text-[#888780]">{p.role}</p>
-                </div>
-              </Button>
-            ))}
+            {usersLoading ? (
+              <p className="px-3 py-3 text-[12px] text-[#B4B2A9]">Loading users…</p>
+            ) : filtered.length === 0 ? (
+              <p className="px-3 py-3 text-[12px] text-[#B4B2A9]">No results.</p>
+            ) : (
+              filtered.map((p) => (
+                <Button
+                  key={p.id}
+                  type="button"
+                  variant="ghost"
+                  onClick={() => add(p)}
+                  className="flex items-center gap-2.5 w-full px-3 py-2.5 h-auto rounded-none text-left justify-start cursor-pointer hover:bg-[#F1EFE8]"
+                >
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#E1F5EE] text-[11px] font-bold text-[#0F6E56] shrink-0">
+                    {p.initials}
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-medium text-[#2C2C2A]">{p.name}</p>
+                    <p className="text-[11px] text-[#888780]">{p.role}</p>
+                  </div>
+                </Button>
+              ))
+            )}
           </div>
         )}
       </div>
