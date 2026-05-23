@@ -10,10 +10,12 @@ import {
   FilePlus2,
   LayoutDashboard,
   LogOut,
+  Rocket,
   Settings,
   TicketCheck,
   UserCog,
   Users,
+  Workflow,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -33,12 +35,14 @@ import {
 import { LogoutModal } from "@/components/logout-modal-ui/logoutModal";
 
 const NAV_ICONS: Record<string, React.ElementType> = {
-  "/dashboard": LayoutDashboard,
-  "/requests":  FilePlus2,
-  "/tickets":   TicketCheck,
-  "/approvals": ClipboardCheck,
-  "/users":     Users,
-  "/settings":  Settings,
+  "/dashboard":      LayoutDashboard,
+  "/requests":       FilePlus2,
+  "/tickets":        TicketCheck,
+  "/approvals":      ClipboardCheck,
+  "/users":          Users,
+  "/workflow-rules": Workflow,
+  "/onboarding":     Rocket,
+  "/settings":       Settings,
 };
 
 const ROLE_LABELS: Record<UserRole, string> = {
