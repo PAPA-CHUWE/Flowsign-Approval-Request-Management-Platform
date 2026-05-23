@@ -91,7 +91,7 @@ export function EmployeeDashboard() {
     {
       Icon: Timer,
       label: "Avg. resolution time",
-      value: isLoading ? "—" : stats ? `${stats.avgResolutionHours.toFixed(1)}h` : "—",
+      value: isLoading ? "—" : stats?.avgResolutionHours != null ? `${stats.avgResolutionHours.toFixed(1)}h` : "—",
       trend: { delta: "—", direction: "down" as const, label: "hours" },
     },
   ];
