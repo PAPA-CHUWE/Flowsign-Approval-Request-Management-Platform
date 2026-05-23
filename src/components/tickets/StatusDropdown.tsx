@@ -54,8 +54,15 @@ interface StatusDropdownProps {
   disabled?: boolean
 }
 
+const FALLBACK_CONFIG = {
+  label: "Unknown",
+  color: "#888780",
+  bg: "#F1EFE8",
+  Icon: Circle,
+}
+
 export function StatusDropdown({ value, onChange, disabled }: StatusDropdownProps) {
-  const cfg = STATUS_CONFIG[value]
+  const cfg = STATUS_CONFIG[value] ?? FALLBACK_CONFIG
 
   return (
     <DropdownMenu>
