@@ -147,14 +147,14 @@ export interface UpdateRequestStatusResponse {
 export function submitRequest(requestPublicId: string, comment?: string) {
   return apiClient<UpdateRequestStatusResponse>(
     `/api/v1/requests/${encodeURIComponent(requestPublicId)}/submit`,
-    { method: "POST", body: JSON.stringify({ comment }) }
+    { method: "POST", body: comment ? JSON.stringify({ comment }) : JSON.stringify({}) }
   )
 }
 
 export function cancelRequest(requestPublicId: string, reason?: string) {
   return apiClient<UpdateRequestStatusResponse>(
     `/api/v1/requests/${encodeURIComponent(requestPublicId)}/cancel`,
-    { method: "POST", body: JSON.stringify({ reason }) }
+    { method: "POST", body: reason ? JSON.stringify({ reason }) : JSON.stringify({}) }
   )
 }
 

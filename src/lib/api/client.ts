@@ -53,7 +53,7 @@ export async function apiClient<TResponse>(
     headers.set("Accept", "application/json")
   }
 
-  if (!headers.has("Content-Type")) {
+  if (init?.body != null && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json")
   }
 
