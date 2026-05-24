@@ -2,23 +2,36 @@ import { apiClient } from "@/lib/api/client"
 
 export interface Notification {
   publicId: string
-  type: string
   title: string
   body: string
-  read: boolean
+  status: "unread" | "read"
+  requestPublicId: string | null
+  metadata: Record<string, unknown>
+  readAt: string | null
   createdAt: string
-  data?: Record<string, unknown>
 }
 
 export interface NotificationsResponse {
   statusCode: string
   message: string
   responseBody: {
-    items: Notification[]
-    unreadCount: number
-    page: number
-    limit: number
-    total: number
+    // API may use either key
+    items?: Notification[]
+    notifications?: Notification[]
+    unreadCount?: number
+    total?: number
+    page?: number
+    limit?: number
+  }
+}
+
+/** Normalize the response — the API sometimes returns `notifications`, sometimes `items`. */
+export function extractNotifications(res: NotificationsResponse) {
+  const rb = res.responseBody
+  return {
+    items:       rb.items ?? rb.notifications ?? [],
+    unreadCount: rb.unreadCount ?? 0,
+    total:       rb.total ?? 0,
   }
 }
 

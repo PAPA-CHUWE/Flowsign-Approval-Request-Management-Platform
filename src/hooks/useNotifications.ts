@@ -8,6 +8,7 @@ import {
   markNotificationRead,
   markAllNotificationsRead,
   deleteNotification,
+  extractNotifications,
   type Notification,
 } from "@/lib/api/notifications"
 
@@ -26,9 +27,7 @@ export function useNotifications() {
     if (showLoading) setIsLoading(true)
     try {
       const res = await listNotifications({ status: "unread", limit: 25 })
-      const rb  = res.responseBody
-      const items      = rb.items      ?? []
-      const newCount   = rb.unreadCount ?? 0
+      const { items, unreadCount: newCount } = extractNotifications(res)
 
       setNotifications(items)
       setUnreadCount(newCount)
@@ -77,19 +76,19 @@ export function useNotifications() {
   async function markRead(publicId: string) {
     await markNotificationRead(publicId)
     setNotifications((prev) =>
-      prev.map((n) => (n.publicId === publicId ? { ...n, read: true } : n))
+      prev.map((n) => (n.publicId === publicId ? { ...n, status: "read" as const } : n))
     )
     setUnreadCount((c) => Math.max(0, c - 1))
   }
 
   async function markAllRead() {
     await markAllNotificationsRead()
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+    setNotifications((prev) => prev.map((n) => ({ ...n, status: "read" as const })))
     setUnreadCount(0)
   }
 
   async function remove(publicId: string) {
-    const wasUnread = notifications.find((n) => n.publicId === publicId)?.read === false
+    const wasUnread = notifications.find((n) => n.publicId === publicId)?.status === "unread"
     await deleteNotification(publicId)
     setNotifications((prev) => prev.filter((n) => n.publicId !== publicId))
     if (wasUnread) setUnreadCount((c) => Math.max(0, c - 1))

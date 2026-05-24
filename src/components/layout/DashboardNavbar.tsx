@@ -20,8 +20,9 @@ const TYPE_DOT: Record<string, string> = {
   escalation:     "bg-red-400",
   status_update:  "bg-[#185FA5]",
 }
-function dotColor(type: string) {
-  return TYPE_DOT[type?.toLowerCase()] ?? "bg-[#888780]"
+function dotColor(n: Notification) {
+  const type = (n.metadata?.type as string | undefined) ?? ""
+  return TYPE_DOT[type.toLowerCase()] ?? "bg-[#888780]"
 }
 
 // ── Single notification row ───────────────────────────────────────────────────
@@ -38,17 +39,17 @@ function NotifRow({
   return (
     <div
       className={`group relative flex items-start gap-3 px-4 py-3 transition-colors hover:bg-[#FAFAF8] ${
-        notif.read ? "" : "bg-[#F5FBF8]"
+        notif.status === "unread" ? "bg-[#F5FBF8]" : ""
       }`}
-      onClick={() => { if (!notif.read) onRead(notif.publicId) }}
-      role={notif.read ? undefined : "button"}
-      style={{ cursor: notif.read ? "default" : "pointer" }}
+      onClick={() => { if (notif.status === "unread") onRead(notif.publicId) }}
+      role={notif.status === "unread" ? "button" : undefined}
+      style={{ cursor: notif.status === "unread" ? "pointer" : "default" }}
     >
       {/* Colour dot */}
-      <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${dotColor(notif.type)} ${notif.read ? "opacity-30" : ""}`} />
+      <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${dotColor(notif)} ${notif.status === "read" ? "opacity-30" : ""}`} />
 
       <div className="min-w-0 flex-1">
-        <p className={`text-[12px] font-semibold leading-snug ${notif.read ? "text-[#888780]" : "text-[#2C2C2A]"}`}>
+        <p className={`text-[12px] font-semibold leading-snug ${notif.status === "read" ? "text-[#888780]" : "text-[#2C2C2A]"}`}>
           {notif.title}
         </p>
         {notif.body && (
