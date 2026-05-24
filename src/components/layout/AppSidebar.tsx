@@ -23,6 +23,7 @@ import { clearAuthSession, logout as logoutUser } from "@/lib/api/auth";
 import { getUserDisplayName, getUserInitials, getUserRoleLabel, useCurrentUser } from "@/hooks/use-current-user";
 import { USER_ROLE, type UserRole } from "@/constants/role.constants";
 import { navigationItems } from "@/config/navigation.config";
+import { useApprovalQueueCount } from "@/hooks/useApprovalQueueCount";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -130,6 +131,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
   };
 
   const items = navigationItems.filter((item) => item.roles.includes(role));
+  const approvalCount = useApprovalQueueCount();
 
   return (
     <aside className={cn("flex w-[220px] shrink-0 flex-col border-r border-[#E8E6DE] bg-white", className)}>
@@ -161,6 +163,11 @@ export function AppSidebar({ className }: AppSidebarProps) {
             >
               {Icon && <Icon size={16} strokeWidth={active ? 2.5 : 2} />}
               {item.title}
+              {item.href === "/approvals" && approvalCount > 0 && (
+                <span className="ml-auto flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#0F6E56] px-1 text-[9px] font-bold text-white">
+                  {approvalCount > 99 ? "99+" : approvalCount}
+                </span>
+              )}
             </Link>
           );
         })}

@@ -1,6 +1,8 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 import {
   listNotifications,
   markNotificationRead,
@@ -9,35 +11,66 @@ import {
   type Notification,
 } from "@/lib/api/notifications"
 
-const POLL_INTERVAL_MS = 60_000 // refresh unread count every 60 s
+const POLL_INTERVAL_MS = 30_000 // refresh every 30 s
 
 export function useNotifications() {
+  const router = useRouter()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount]     = useState(0)
   const [isLoading, setIsLoading]         = useState(false)
   const [error, setError]                 = useState("")
+  const prevCountRef  = useRef<number | null>(null) // null = initial load not yet done
+  const isHiddenRef   = useRef(false)
 
   const load = useCallback(async (showLoading = true) => {
     if (showLoading) setIsLoading(true)
     try {
-      const res = await listNotifications({ limit: 25 })
-      const rb = res.responseBody
-      setNotifications(rb.items ?? [])
-      setUnreadCount(rb.unreadCount ?? 0)
+      const res = await listNotifications({ status: "unread", limit: 25 })
+      const rb  = res.responseBody
+      const items      = rb.items      ?? []
+      const newCount   = rb.unreadCount ?? 0
+
+      setNotifications(items)
+      setUnreadCount(newCount)
       setError("")
+
+      // Toast when a new notification arrives after the initial load
+      if (prevCountRef.current !== null && newCount > prevCountRef.current) {
+        const newest = items[0]
+        toast(newest?.title ?? "You have a new notification", {
+          description: newest?.body ?? undefined,
+          action: {
+            label: "View",
+            onClick: () => router.push("/approvals"),
+          },
+        })
+      }
+      prevCountRef.current = newCount
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not load notifications.")
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [router])
 
   // initial load
   useEffect(() => { load() }, [load])
 
-  // background poll for unread count
+  // pause polling when tab is hidden
   useEffect(() => {
-    const id = setInterval(() => { load(false) }, POLL_INTERVAL_MS)
+    function onVisibilityChange() {
+      isHiddenRef.current = document.visibilityState === "hidden"
+      if (document.visibilityState === "visible") load(false)
+    }
+    document.addEventListener("visibilitychange", onVisibilityChange)
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange)
+  }, [load])
+
+  // background poll
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (!isHiddenRef.current) load(false)
+    }, POLL_INTERVAL_MS)
     return () => clearInterval(id)
   }, [load])
 

@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { DashboardStatCard } from "./DashboardStatCard";
+import { WorkflowSetupBanner } from "./WorkflowSetupBanner";
 import { RequestsTable } from "./RequestsTable";
 import { ActivityFeed } from "./ActivityFeed";
 import { QuickActionsGrid } from "./QuickActionsGrid";
@@ -115,6 +116,9 @@ export function EmployeeDashboard() {
           Welcome back, {firstName}. Here&apos;s what&apos;s happening today.
         </p>
       </div>
+
+      {/* Getting-started banner — only shown when no workflow rules exist */}
+      <WorkflowSetupBanner />
 
       {/* Section 1 — Stat cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
