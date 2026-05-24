@@ -151,7 +151,7 @@ export function TicketDrawer({ ticket, open, onClose, onStatusChange }: TicketDr
                     {!isLast && (
                       <div
                         className="mx-1 mt-3.5 h-[2px] flex-1 rounded-full"
-                        style={{ backgroundColor: done ? "#D3D1C7" : "#E8E6DE" }}
+                        style={{ backgroundColor: done ? step.color : "#E8E6DE" }}
                       />
                     )}
                   </div>
@@ -167,7 +167,7 @@ export function TicketDrawer({ ticket, open, onClose, onStatusChange }: TicketDr
               <StatusDropdown
                 value={ticket.currentStatus}
                 onChange={(v) => onStatusChange(ticket.id, v)}
-                disabled={ticket.status !== "draft"}
+                disabled={ticket.currentStatus !== "draft"}
               />
             </MetaRow>
 
