@@ -12,6 +12,7 @@ import { SortIcon } from "@/components/tickets/SortIcon"
 import { RequestTypeBadge } from "./RequestTypeBadge"
 import { ApprovalDrawer, type Decision } from "./ApprovalDrawer"
 import { takeApprovalAction } from "@/lib/api/approvals"
+import { toast } from "sonner"
 import type { MockTicket } from "@/constants/mockTickets.constants"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -74,8 +75,9 @@ export function ApprovalQueue({ tickets }: ApprovalQueueProps) {
     try {
       await takeApprovalAction(assignmentId, { decision: "approve" })
       setDecisions((prev) => ({ ...prev, [id]: "approved" }))
-    } catch {
-      // Decision already made optimistically — revert on error
+      toast.success("Request approved.")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to approve request.")
     } finally {
       setActioning(null)
     }
@@ -89,8 +91,9 @@ export function ApprovalQueue({ tickets }: ApprovalQueueProps) {
       await takeApprovalAction(assignmentId, { decision: "reject", comment })
       setDecisions((prev) => ({ ...prev, [id]: "rejected" }))
       setRejectionComments((prev) => ({ ...prev, [id]: comment }))
-    } catch {
-      // silently ignore — drawer stays open
+      toast.success("Request rejected.")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to reject request.")
     } finally {
       setActioning(null)
     }

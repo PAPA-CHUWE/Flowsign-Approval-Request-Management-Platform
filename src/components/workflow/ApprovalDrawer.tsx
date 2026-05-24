@@ -462,7 +462,7 @@ export function ApprovalDrawer({
               ) : (
                 <div className="flex flex-col gap-2">
                   <Button
-                    onClick={() => { onApprove(ticket.id); onClose() }}
+                    onClick={() => onApprove(ticket.id)}
                     disabled={isActioning}
                     className="h-10 w-full rounded-[8px] bg-[#0F6E56] text-[13px] font-semibold text-white hover:bg-[#0c5e49] disabled:opacity-50"
                   >
