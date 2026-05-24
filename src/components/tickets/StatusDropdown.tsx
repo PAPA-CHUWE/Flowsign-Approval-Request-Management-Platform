@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronDown, Circle, CheckCircle2, Clock, XCircle, AlertCircle } from "lucide-react"
+import { ChevronDown, Circle, CheckCircle2, Clock, XCircle, AlertCircle, FileText } from "lucide-react"
 import { TICKET_STATUS } from "@/constants/ticketStatus.constants"
 import { cn } from "@/lib/utils"
 import {
@@ -14,6 +14,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 const STATUS_CONFIG = {
+  [TICKET_STATUS.DRAFT]: {
+    label: "Draft",
+    color: "#5F5E5A",
+    bg: "#F1EFE8",
+    Icon: FileText,
+  },
   [TICKET_STATUS.PENDING]: {
     label: "Pending",
     color: "#854F0B",
@@ -44,9 +50,20 @@ const STATUS_CONFIG = {
     bg: "#E6F1FB",
     Icon: Circle,
   },
+  [TICKET_STATUS.CANCELLED]: {
+    label: "Cancelled",
+    color: "#888780",
+    bg: "#F1EFE8",
+    Icon: XCircle,
+  },
 } as const
 
 export type StatusKey = keyof typeof STATUS_CONFIG
+
+// Only transitions that map to a real API endpoint
+const VALID_NEXT: Partial<Record<StatusKey, StatusKey[]>> = {
+  [TICKET_STATUS.DRAFT]: [TICKET_STATUS.PENDING, TICKET_STATUS.CANCELLED],
+}
 
 interface StatusDropdownProps {
   value: StatusKey
@@ -86,7 +103,7 @@ export function StatusDropdown({ value, onChange, disabled }: StatusDropdownProp
         <DropdownMenuGroup>
           <DropdownMenuLabel>Select status</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {(Object.keys(STATUS_CONFIG) as StatusKey[]).map((s) => {
+          {(VALID_NEXT[value] ?? (Object.keys(STATUS_CONFIG) as StatusKey[])).map((s) => {
             const c = STATUS_CONFIG[s]
             const sel = s === value
             return (

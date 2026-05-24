@@ -144,11 +144,25 @@ export interface UpdateRequestStatusResponse {
   }
 }
 
-export function updateRequestStatus(requestPublicId: string, status: string) {
+export function submitRequest(requestPublicId: string, comment?: string) {
   return apiClient<UpdateRequestStatusResponse>(
-    `/api/v1/requests/${encodeURIComponent(requestPublicId)}`,
-    { method: "PATCH", body: JSON.stringify({ status }) }
+    `/api/v1/requests/${encodeURIComponent(requestPublicId)}/submit`,
+    { method: "POST", body: JSON.stringify({ comment }) }
   )
+}
+
+export function cancelRequest(requestPublicId: string, reason?: string) {
+  return apiClient<UpdateRequestStatusResponse>(
+    `/api/v1/requests/${encodeURIComponent(requestPublicId)}/cancel`,
+    { method: "POST", body: JSON.stringify({ reason }) }
+  )
+}
+
+export function updateRequestStatus(requestPublicId: string, status: string) {
+  if (status === "pending") return submitRequest(requestPublicId)
+  if (status === "cancelled") return cancelRequest(requestPublicId)
+  // Remaining transitions (approved, rejected, in_review) are owned by the approvals engine
+  return Promise.reject(new Error(`Status "${status}" cannot be set directly.`))
 }
 
 export interface RequestStats {
