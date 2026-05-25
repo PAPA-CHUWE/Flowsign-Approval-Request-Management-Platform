@@ -101,3 +101,16 @@ export function updateUserRoles(
     body: JSON.stringify(payload),
   })
 }
+
+export interface ResendInviteResponse {
+  statusCode: string
+  message: string
+  responseBody: { ok: boolean }
+}
+
+export function resendInvite(publicId: string) {
+  return apiClient<ResendInviteResponse>(
+    `/api/v1/users/${encodeURIComponent(publicId)}/resend-invite`,
+    { method: "POST" }
+  )
+}

@@ -96,7 +96,7 @@ export function TicketDrawer({ ticket, open, onClose, onStatusChange }: TicketDr
             </span>
             <PriorityBadge priority={ticket.priority} />
           </div>
-          <SheetTitle className="pr-8 text-[16px] font-semibold leading-snug text-[#2C2C2A]">
+          <SheetTitle className="pr-8 text-[16px] font-semibold leading-snug text-brand-neutral-dark">
             {ticket.title}
           </SheetTitle>
         </SheetHeader>
@@ -175,35 +175,35 @@ export function TicketDrawer({ ticket, open, onClose, onStatusChange }: TicketDr
               <RequestTypeBadge type={ticket.requestType} />
             </MetaRow>
 
-            <div className="h-px bg-[#F1EFE8]" />
+            <div className="h-px bg-brand-neutral-pale" />
 
             <MetaRow icon={User} label="Requested by">
               <div className="flex items-center gap-2">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#E1F5EE] text-[10px] font-bold text-brand-teal">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-teal-pale text-[10px] font-bold text-brand-teal">
                   {ticket.requesterName.charAt(0)}
                 </div>
-                <span className="text-[13px] text-[#2C2C2A]">{ticket.requesterName}</span>
+                <span className="text-[13px] text-brand-neutral-dark">{ticket.requesterName}</span>
               </div>
             </MetaRow>
 
             <MetaRow icon={Users} label="Assignee">
-              <span className="text-[13px] text-[#2C2C2A]">{ticket.assignee}</span>
+              <span className="text-[13px] text-brand-neutral-dark">{ticket.assignee}</span>
             </MetaRow>
 
             <MetaRow icon={Users} label="Released by">
-              <span className="text-[13px] text-[#2C2C2A]">{ticket.releasedBy}</span>
+              <span className="text-[13px] text-brand-neutral-dark">{ticket.releasedBy}</span>
             </MetaRow>
 
-            <div className="h-px bg-[#F1EFE8]" />
+            <div className="h-px bg-brand-neutral-pale" />
 
             <MetaRow icon={CalendarDays} label="Created on">
-              <span className="text-[13px] text-[#2C2C2A]">
+              <span className="text-[13px] text-brand-neutral-dark">
                 {formatTicketDate(ticket.submittedAt)}
               </span>
             </MetaRow>
 
             <MetaRow icon={CalendarDays} label="Completion date">
-              <span className="text-[13px] text-[#2C2C2A]">
+              <span className="text-[13px] text-brand-neutral-dark">
                 {ticket.completionDate ? formatTicketDate(ticket.completionDate) : "—"}
               </span>
             </MetaRow>

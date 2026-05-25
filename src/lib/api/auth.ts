@@ -164,6 +164,37 @@ export function changePassword(payload: ChangePasswordPayload) {
   })
 }
 
+// ── Accept invite ─────────────────────────────────────────────────────────────
+
+export interface AcceptInvitePayload {
+  token: string
+  password: string
+  firstName?: string
+  lastName?: string
+}
+
+interface AcceptInviteRawResponse {
+  status: number
+  message: string
+  data: {
+    token: string
+    user: AuthUser
+  }
+}
+
+export async function acceptInvite(payload: AcceptInvitePayload): Promise<AuthUser> {
+  const res = await apiClient<AcceptInviteRawResponse>("/api/v1/auth/accept-invite", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  })
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(AUTH_TOKEN_KEY, res.data.token)
+    storeAuthUser(res.data.user)
+    document.cookie = `${AUTH_COOKIE_NAME}=1; path=/; SameSite=Lax; max-age=86400`
+  }
+  return res.data.user
+}
+
 export function clearAuthSession() {
   if (typeof window === "undefined") {
     return
