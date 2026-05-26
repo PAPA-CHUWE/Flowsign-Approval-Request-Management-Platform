@@ -163,7 +163,7 @@ export function InviteUserDialog({ open, onOpenChange, onInvited }: InviteUserDi
         </div>
 
         {/* Scrollable body */}
-        <form id="invite-form" onSubmit={handleSubmit} className="min-h-0 flex-1 overflow-y-auto">
+        <form id="invite-form" onSubmit={handleSubmit} className="min-h-0 flex-1 overflow-y-auto" data-lenis-prevent>
           <div className="flex flex-col gap-5 px-6 py-5">
 
             {generalError && (
