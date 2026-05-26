@@ -29,7 +29,7 @@ function ApprovalProgress({ step, total }: { step: number; total: number }) {
   );
 }
 
-export function RequestsTable({ requests }: { requests: DashboardRequest[] }) {
+export function RequestsTable({ requests, title = "My Requests" }: { requests: DashboardRequest[]; title?: string }) {
   const [activeTab, setActiveTab] = useState<Tab>("All");
 
   const filtered = requests.filter((r) => {
@@ -45,7 +45,7 @@ export function RequestsTable({ requests }: { requests: DashboardRequest[] }) {
       {/* Header */}
       <div className="flex flex-col gap-3 border-b border-[#E8E6DE] px-5 pb-4 pt-5 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="font-dm-sans text-[15px] font-semibold text-brand-neutral-dark">
-          My Requests
+          {title}
         </h2>
         <Link
           href="/requests"

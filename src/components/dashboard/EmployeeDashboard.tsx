@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import dynamic from "next/dynamic";
 import { Clock, CheckCircle2, XCircle, Timer } from "lucide-react";
 import {
   Dialog,
@@ -11,87 +10,46 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { DashboardStatCard } from "./DashboardStatCard";
-import { WorkflowSetupBanner } from "./WorkflowSetupBanner";
 import { RequestsTable } from "./RequestsTable";
 import { ActivityFeed } from "./ActivityFeed";
 import { QuickActionsGrid } from "./QuickActionsGrid";
 import { RequestFormShell } from "@/components/request-form/RequestFormShell";
 import { useCurrentUser, getUserDisplayName } from "@/hooks/use-current-user";
-import { useDashboard } from "@/hooks/use-dashboard";
-import { mockPipelineStats } from "@/lib/mock/dashboard.mock";
-
-// Dynamically import Recharts-heavy components — keeps initial bundle lean
-const VolumeChart = dynamic(
-  () => import("./VolumeChart").then((m) => ({ default: m.VolumeChart })),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-[320px] animate-pulse rounded-[16px] border border-[#E8E6DE] bg-white" />
-    ),
-  }
-);
-
-const ApprovalPipelineCard = dynamic(
-  () => import("./ApprovalPipelineCard").then((m) => ({ default: m.ApprovalPipelineCard })),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex animate-pulse flex-col overflow-hidden rounded-[16px] border border-[#E8E6DE] bg-white">
-        <div className="border-b border-[#E8E6DE] px-5 pb-4 pt-5">
-          <div className="h-4 w-36 rounded-full bg-[#F1EFE8]" />
-        </div>
-        <div className="flex flex-col gap-4 px-5 py-6">
-          <div className="mx-auto h-[180px] w-[180px] rounded-full bg-[#F1EFE8]" />
-          <div className="flex flex-col gap-3">
-            {[80, 60, 40, 30].map((w) => (
-              <div key={w} className="flex flex-col gap-1.5">
-                <div className="flex justify-between">
-                  <div className="h-3 w-16 rounded-full bg-[#F1EFE8]" />
-                  <div className="h-3 w-6 rounded-full bg-[#F1EFE8]" />
-                </div>
-                <div className="h-1.5 rounded-full bg-[#F1EFE8]" style={{ width: `${w}%` }} />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    ),
-  }
-);
+import { useEmployeeDashboard } from "@/hooks/use-employee-dashboard";
 
 export function EmployeeDashboard() {
   const { user } = useCurrentUser();
   const firstName = user?.firstName ?? getUserDisplayName(user).split(" ")[0];
 
-  const { stats, requests, activity, activityUpdatedAt, isLoading } = useDashboard();
+  const { stats, requests, activity, activityUpdatedAt, isLoading } = useEmployeeDashboard();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [initialType, setInitialType] = useState<string | undefined>();
 
   const statCards = [
     {
-      Icon: Clock,
-      label: "Pending approvals",
-      value: isLoading ? "—" : String(stats?.pendingApprovals ?? stats?.totalPending ?? mockPipelineStats.pending),
-      trend: { delta: "—", direction: "up" as const, label: "awaiting action" },
+      Icon:  Clock,
+      label: "My pending requests",
+      value: isLoading ? "—" : String(stats?.pendingCount ?? 0),
+      trend: { delta: "open", direction: "up" as const, label: "awaiting approval" },
     },
     {
-      Icon: CheckCircle2,
-      label: "Total approved",
-      value: isLoading ? "—" : String(stats?.totalApproved ?? mockPipelineStats.approved),
-      trend: { delta: "—", direction: "up" as const, label: "all time" },
+      Icon:  CheckCircle2,
+      label: "Approved this month",
+      value: isLoading ? "—" : String(stats?.approvedThisMonth ?? 0),
+      trend: { delta: "this month", direction: "up" as const, label: "requests approved" },
     },
     {
-      Icon: XCircle,
-      label: "Total rejected",
-      value: isLoading ? "—" : String(stats?.totalRejected ?? mockPipelineStats.rejected),
-      trend: { delta: "—", direction: "down" as const, label: "all time" },
+      Icon:  XCircle,
+      label: "Rejected this month",
+      value: isLoading ? "—" : String(stats?.rejectedThisMonth ?? 0),
+      trend: { delta: "this month", direction: "down" as const, label: "requests rejected" },
     },
     {
-      Icon: Timer,
+      Icon:  Timer,
       label: "Avg. resolution time",
       value: isLoading ? "—" : stats?.avgResolutionHours != null ? `${stats.avgResolutionHours.toFixed(1)}h` : "—",
-      trend: { delta: "—", direction: "down" as const, label: "hours" },
+      trend: { delta: "my avg", direction: "down" as const, label: "hours to resolve" },
     },
   ];
 
@@ -107,48 +65,28 @@ export function EmployeeDashboard() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Page heading */}
       <div>
         <h1 className="font-dm-sans text-[28px] font-bold tracking-[-0.02em] text-brand-neutral-dark">
           Dashboard
         </h1>
         <p className="mt-0.5 font-dm-sans text-[14px] text-brand-neutral-mid">
-          Welcome back, {firstName}. Here&apos;s what&apos;s happening today.
+          Welcome back, {firstName}. Here&apos;s a summary of your requests.
         </p>
       </div>
 
-      {/* Getting-started banner — only shown when no workflow rules exist */}
-      <WorkflowSetupBanner />
-
-      {/* Section 1 — Stat cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card) => (
           <DashboardStatCard key={card.label} {...card} />
         ))}
       </div>
 
-      {/* Section 2 — Volume chart */}
-      <VolumeChart />
+      <RequestsTable requests={isLoading ? [] : requests} />
 
-      {/* Section 3 — Requests table + pipeline (5/3) */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[5fr_3fr]">
-        <RequestsTable requests={isLoading ? [] : requests} />
-        <ApprovalPipelineCard
-          stats={stats?.pipelineStats ?? mockPipelineStats}
-          topRequestTypes={stats?.topRequestTypes ?? []}
-        />
-      </div>
-
-      {/* Section 4 — Activity feed + quick actions (50/50) */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <ActivityFeed
-          items={isLoading ? [] : activity}
-          updatedAt={activityUpdatedAt}
-        />
+        <ActivityFeed items={isLoading ? [] : activity} updatedAt={activityUpdatedAt} />
         <QuickActionsGrid onCreateRequest={openCreateForType} />
       </div>
 
-      {/* Create request dialog — opened from quick actions */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="flex h-[92vh] max-h-[92vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl">
           <div className="border-b border-[#E8E6DE] px-6 py-4">

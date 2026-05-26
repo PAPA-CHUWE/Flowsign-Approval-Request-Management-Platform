@@ -90,7 +90,7 @@ export function useDashboard(): DashboardData {
     Promise.all([
       getAnalyticsDashboard(),
       listApprovalRequests({ limit: 10, page: 1 }),
-      getActivity({ scope: "own", limit: 10 }),
+      getActivity({ scope: "all", limit: 10 }),
     ])
       .then(([analyticsRes, requestsRes, activityRes]) => {
         if (ignore) return
