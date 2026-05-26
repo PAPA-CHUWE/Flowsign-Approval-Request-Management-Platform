@@ -1,6 +1,7 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
 import { AlertCircle, Download, FileDown, FileSpreadsheet, FileText, Loader2, Mail, RefreshCw, Search, Trash2, UserPlus, X } from "lucide-react"
 import { toast } from "sonner"
 
@@ -84,10 +85,18 @@ function toCsv(users: OrganizationUser[]) {
 }
 
 export function UsersPageContent() {
-  const { user: currentUser } = useCurrentUser()
+  const router = useRouter()
+  const { user: currentUser, isLoading: isLoadingCurrentUser } = useCurrentUser()
   const canManageUsers = currentUser?.permissions?.includes("manage_users") ?? false
 
-  const { users, isLoading, error, setUsers } = useOrganizationUsers()
+  useEffect(() => {
+    if (!isLoadingCurrentUser && currentUser && !canManageUsers) {
+      toast.error("You don't have permission to manage users.")
+      router.replace("/dashboard")
+    }
+  }, [isLoadingCurrentUser, currentUser, canManageUsers, router])
+
+  const { users, isLoading, error, setUsers } = useOrganizationUsers({ enabled: canManageUsers })
   const [query, setQuery] = useState("")
   const [filter, setFilter] = useState("all")
   const [drawerOpen, setDrawerOpen] = useState(false)

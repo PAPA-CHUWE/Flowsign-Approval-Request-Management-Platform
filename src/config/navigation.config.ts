@@ -26,6 +26,7 @@ export const navigationItems = [
     title: "Users",
     href: "/users",
     roles: [USER_ROLE.ADMIN],
+    permission: "manage_users",
   },
   {
     title: "Workflow Rules",
@@ -41,5 +42,6 @@ export const navigationItems = [
     title: "Settings",
     href: "/settings",
     roles: [USER_ROLE.ADMIN],
+    permission: "manage_settings",
   },
 ] satisfies NavigationItem[]

@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { SettingsSidebar } from "./SettingsSidebar";
 import { GeneralTab } from "./tabs/GeneralTab";
@@ -9,6 +11,7 @@ import { SecurityTab } from "./tabs/SecurityTab";
 import { NotificationsTab } from "./tabs/NotificationsTab";
 import { AccountTab } from "./tabs/AccountTab";
 import { BillingTab } from "./tabs/BillingTab";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import type { SettingsTab } from "./settings.types";
 
 const TAB_CONTENT: Record<SettingsTab, React.ReactNode> = {
@@ -21,7 +24,17 @@ const TAB_CONTENT: Record<SettingsTab, React.ReactNode> = {
 };
 
 export function SettingsShell() {
+  const router = useRouter();
+  const { user, isLoading: isLoadingUser } = useCurrentUser();
+  const canManageSettings = user?.permissions?.includes("manage_settings") ?? false;
   const [activeTab, setActiveTab] = useState<SettingsTab>("general");
+
+  useEffect(() => {
+    if (!isLoadingUser && user && !canManageSettings) {
+      toast.error("You don't have permission to access settings.");
+      router.replace("/dashboard");
+    }
+  }, [isLoadingUser, user, canManageSettings, router]);
 
   return (
     <div className="flex h-full flex-col">

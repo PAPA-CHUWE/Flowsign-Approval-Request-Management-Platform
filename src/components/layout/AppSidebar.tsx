@@ -135,7 +135,12 @@ export function AppSidebar({ className }: AppSidebarProps) {
   }
   const navRole = resolveNavRole()
 
-  const items = navigationItems.filter((item) => item.roles.includes(navRole));
+  const userPerms = user?.permissions ?? []
+  const items = navigationItems.filter((item) => {
+    if (!item.roles.includes(navRole)) return false
+    if (item.permission && !userPerms.includes(item.permission)) return false
+    return true
+  });
   const approvalCount = useApprovalQueueCount();
 
   return (
@@ -255,7 +260,13 @@ export function MobileDashboardNav() {
     return USER_ROLE.EMPLOYEE
   }
 
-  const items = navigationItems.filter((item) => item.roles.includes(resolveNavRole()));
+  const userPerms = user?.permissions ?? []
+  const navRole2  = resolveNavRole()
+  const items = navigationItems.filter((item) => {
+    if (!item.roles.includes(navRole2)) return false
+    if (item.permission && !userPerms.includes(item.permission)) return false
+    return true
+  });
 
   return (
     <nav

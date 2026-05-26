@@ -188,3 +188,23 @@ export interface RequestStatsResponse {
 export function getRequestStats() {
   return apiClient<RequestStatsResponse>("/api/v1/requests/stats")
 }
+
+export interface UpdateApprovalRequestPayload {
+  requestTypeKey?: string
+  title?: string
+  description?: string
+  data?: Record<string, string | number>
+  amount?: number
+  department?: string
+  priority?: string
+  visibility?: string
+  approverPublicIds?: string[]
+  implementorPublicIds?: string[]
+}
+
+export function updateApprovalRequest(publicId: string, payload: UpdateApprovalRequestPayload) {
+  return apiClient<CreateApprovalRequestResponse>(
+    `/api/v1/requests/${encodeURIComponent(publicId)}`,
+    { method: "PATCH", body: JSON.stringify(payload) }
+  )
+}

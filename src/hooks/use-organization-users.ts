@@ -4,12 +4,13 @@ import { useCallback, useEffect, useState } from "react"
 
 import { listOrganizationUsers, type OrganizationUser } from "@/lib/api/users"
 
-export function useOrganizationUsers() {
+export function useOrganizationUsers({ enabled = true }: { enabled?: boolean } = {}) {
   const [users, setUsers] = useState<OrganizationUser[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(enabled)
   const [error, setError] = useState("")
 
   const loadUsers = useCallback(async () => {
+    if (!enabled) return
     setIsLoading(true)
 
     try {
@@ -21,9 +22,13 @@ export function useOrganizationUsers() {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [enabled])
 
   useEffect(() => {
+    if (!enabled) {
+      setIsLoading(false)
+      return
+    }
     let ignore = false
 
     listOrganizationUsers()
@@ -47,7 +52,7 @@ export function useOrganizationUsers() {
     return () => {
       ignore = true
     }
-  }, [])
+  }, [enabled])
 
   return { users, isLoading, error, setUsers, refreshUsers: loadUsers }
 }

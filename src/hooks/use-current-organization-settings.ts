@@ -7,12 +7,17 @@ import {
   type OrganizationSettings,
 } from "@/lib/api/organizations"
 
-export function useCurrentOrganizationSettings() {
+export function useCurrentOrganizationSettings({ enabled = true }: { enabled?: boolean } = {}) {
   const [settings, setSettings] = useState<OrganizationSettings | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(enabled)
   const [error, setError] = useState("")
 
   useEffect(() => {
+    if (!enabled) {
+      setIsLoading(false)
+      return
+    }
+
     let ignore = false
 
     getCurrentOrganizationSettings()
@@ -40,7 +45,7 @@ export function useCurrentOrganizationSettings() {
     return () => {
       ignore = true
     }
-  }, [])
+  }, [enabled])
 
   return { settings, isLoading, error, setSettings }
 }
