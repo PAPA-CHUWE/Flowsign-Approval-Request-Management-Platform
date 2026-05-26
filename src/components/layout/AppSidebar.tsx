@@ -137,7 +137,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
 
   const userPerms = user?.permissions ?? []
   const items = navigationItems.filter((item) => {
-    if (!item.roles.includes(navRole)) return false
+    if (!(item.roles as UserRole[]).includes(navRole)) return false
     if (item.permission && !userPerms.includes(item.permission)) return false
     return true
   });
@@ -263,7 +263,7 @@ export function MobileDashboardNav() {
   const userPerms = user?.permissions ?? []
   const navRole2  = resolveNavRole()
   const items = navigationItems.filter((item) => {
-    if (!item.roles.includes(navRole2)) return false
+    if (!(item.roles as UserRole[]).includes(navRole2)) return false
     if (item.permission && !userPerms.includes(item.permission)) return false
     return true
   });
