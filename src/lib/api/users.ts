@@ -32,8 +32,8 @@ export interface UserResponse {
 
 export interface InviteUserPayload {
   email: string
-  firstName: string
-  lastName: string
+  firstName?: string
+  lastName?: string
   department?: string
   title?: string
   roles: string[]
