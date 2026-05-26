@@ -11,23 +11,30 @@ export interface Notification {
   createdAt: string
 }
 
-export interface NotificationsResponse {
-  statusCode: string
-  message: string
-  responseBody: {
-    // API may use either key
-    items?: Notification[]
-    notifications?: Notification[]
-    unreadCount?: number
-    total?: number
-    page?: number
-    limit?: number
-  }
+interface NotificationsEnvelope {
+  items?: Notification[]
+  notifications?: Notification[]
+  unreadCount?: number
+  total?: number
+  page?: number
+  limit?: number
 }
 
-/** Normalize the response — the API sometimes returns `notifications`, sometimes `items`. */
+export interface NotificationsResponse {
+  // standard envelope
+  statusCode?: string
+  status?: number
+  message?: string
+  responseBody?: NotificationsEnvelope
+  // alternate envelope some endpoints use
+  data?: NotificationsEnvelope
+}
+
+/** Normalize the response — handles both `responseBody` and `data` envelopes,
+ *  and both `items` / `notifications` array keys. */
 export function extractNotifications(res: NotificationsResponse) {
-  const rb = res.responseBody
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rb: NotificationsEnvelope = res.responseBody ?? res.data ?? (res as any) ?? {}
   return {
     items:       rb.items ?? rb.notifications ?? [],
     unreadCount: rb.unreadCount ?? 0,

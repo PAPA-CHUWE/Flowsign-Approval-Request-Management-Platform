@@ -26,7 +26,7 @@ export function useNotifications() {
   const load = useCallback(async (showLoading = true) => {
     if (showLoading) setIsLoading(true)
     try {
-      const res = await listNotifications({ status: "unread", limit: 25 })
+      const res = await listNotifications({ limit: 25 })
       console.log("[notifications] raw response:", JSON.stringify(res, null, 2))
       const { items, unreadCount: newCount } = extractNotifications(res)
       console.log("[notifications] parsed:", JSON.stringify({ items, newCount }, null, 2))
