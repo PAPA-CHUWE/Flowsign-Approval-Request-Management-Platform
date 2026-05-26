@@ -106,12 +106,6 @@ export function AppSidebar({ className }: AppSidebarProps) {
   const userName = getUserDisplayName(user);
   const userRole = user ? getUserRoleLabel(user) : ROLE_LABELS[role];
 
-  const cycleRole = () => {
-    const next = ROLE_CYCLE[(ROLE_CYCLE.indexOf(role) + 1) % ROLE_CYCLE.length];
-    localStorage.setItem(ROLE_KEY, next);
-    window.dispatchEvent(new Event(ROLE_CHANGE_EVENT));
-  };
-
   const signOut = async () => {
     if (isLoggingOut) return;
 
@@ -218,13 +212,6 @@ export function AppSidebar({ className }: AppSidebarProps) {
               <DropdownMenuItem onClick={() => router.push("/settings")} className="flex items-center gap-2 cursor-pointer">
                 <UserCog size={14} />
                 Profile
-              </DropdownMenuItem>
-
-              {/* Switch role */}
-              <DropdownMenuItem onClick={cycleRole} className="flex items-center gap-2 cursor-pointer">
-                <Settings size={14} />
-                <span>Switch role</span>
-                <span className="ml-auto text-[11px] text-muted-foreground">{ROLE_LABELS[role]}</span>
               </DropdownMenuItem>
 
             </DropdownMenuGroup>
