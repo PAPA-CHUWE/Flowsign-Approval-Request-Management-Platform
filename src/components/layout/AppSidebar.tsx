@@ -130,7 +130,18 @@ export function AppSidebar({ className }: AppSidebarProps) {
     }
   };
 
-  const items = navigationItems.filter((item) => item.roles.includes(role));
+  // Derive nav role from real API user roles when available;
+  // fall back to dev switcher only when no user is loaded yet.
+  function resolveNavRole(): UserRole {
+    if (!user) return role
+    const r = user.roles.map((x) => x.toLowerCase())
+    if (r.includes("org_admin") || r.includes("it_admin")) return USER_ROLE.ADMIN
+    if (r.includes("manager") || r.includes("hr"))         return USER_ROLE.MANAGER
+    return USER_ROLE.EMPLOYEE
+  }
+  const navRole = resolveNavRole()
+
+  const items = navigationItems.filter((item) => item.roles.includes(navRole));
   const approvalCount = useApprovalQueueCount();
 
   return (
@@ -247,8 +258,17 @@ export function AppSidebar({ className }: AppSidebarProps) {
 export function MobileDashboardNav() {
   const pathname = usePathname();
   const role = useStoredRole();
+  const { user } = useCurrentUser();
 
-  const items = navigationItems.filter((item) => item.roles.includes(role));
+  function resolveNavRole(): UserRole {
+    if (!user) return role
+    const r = user.roles.map((x) => x.toLowerCase())
+    if (r.includes("org_admin") || r.includes("it_admin")) return USER_ROLE.ADMIN
+    if (r.includes("manager") || r.includes("hr"))         return USER_ROLE.MANAGER
+    return USER_ROLE.EMPLOYEE
+  }
+
+  const items = navigationItems.filter((item) => item.roles.includes(resolveNavRole()));
 
   return (
     <nav
