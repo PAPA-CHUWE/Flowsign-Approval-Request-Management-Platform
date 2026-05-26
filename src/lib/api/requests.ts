@@ -55,8 +55,8 @@ export interface CreateApprovalRequestPayload {
   requestKey?: string
   title: string
   summary: string
-  description: string
-  details: string
+  description?: string
+  details?: string
   data: Record<string, string | number>
   amount?: number
   department?: string

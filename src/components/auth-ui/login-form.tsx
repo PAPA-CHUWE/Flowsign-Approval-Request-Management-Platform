@@ -316,6 +316,17 @@ const LoginForm = () => {
               Create Account
             </Link>
           </p>
+
+          {/* Legal links */}
+          <div className="flex items-center justify-center gap-4 mt-4">
+            <Link href="/terms" className="text-[11px] text-[#B4B2A9] hover:text-[#0F6E56] hover:underline transition-colors duration-150">
+              Terms of Service
+            </Link>
+            <span className="w-[3px] h-[3px] rounded-full bg-[#D3D1C7]" />
+            <Link href="/privacy" className="text-[11px] text-[#B4B2A9] hover:text-[#0F6E56] hover:underline transition-colors duration-150">
+              Privacy Policy
+            </Link>
+          </div>
         </div>
       </div>
     </div>
