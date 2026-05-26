@@ -108,6 +108,31 @@ export interface ResendInviteResponse {
   responseBody: { ok: boolean }
 }
 
+// ── Org members (lightweight search endpoint for pickers) ─────────────────────
+
+export interface OrgMember {
+  publicId: string
+  firstName: string
+  lastName: string
+  email: string
+  status: "active" | "invited"
+  department: string | null
+  title: string | null
+}
+
+interface OrgMembersRawResponse {
+  data?: { members?: OrgMember[] }
+  responseBody?: { members?: OrgMember[] }
+}
+
+export async function getOrgMembers(q?: string): Promise<OrgMember[]> {
+  const url = q?.trim()
+    ? `/api/v1/users/members?q=${encodeURIComponent(q.trim())}`
+    : "/api/v1/users/members"
+  const res = await apiClient<OrgMembersRawResponse>(url)
+  return res.data?.members ?? res.responseBody?.members ?? []
+}
+
 export function resendInvite(publicId: string) {
   return apiClient<ResendInviteResponse>(
     `/api/v1/users/${encodeURIComponent(publicId)}/resend-invite`,
