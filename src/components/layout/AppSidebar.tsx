@@ -214,7 +214,7 @@ export function AppSidebar({ className }: AppSidebarProps) {
 
             <DropdownMenuGroup>
               {/* Profile */}
-              <DropdownMenuItem onClick={() => router.push("/settings")} className="flex items-center gap-2 cursor-pointer">
+              <DropdownMenuItem onClick={() => router.push("/profile")} className="flex items-center gap-2 cursor-pointer">
                 <UserCog size={14} />
                 Profile
               </DropdownMenuItem>
