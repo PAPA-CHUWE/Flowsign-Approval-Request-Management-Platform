@@ -174,9 +174,9 @@ export interface AcceptInvitePayload {
 }
 
 interface AcceptInviteRawResponse {
-  status: number
+  statusCode: string
   message: string
-  data: {
+  responseBody: {
     token: string
     user: AuthUser
   }
@@ -188,11 +188,11 @@ export async function acceptInvite(payload: AcceptInvitePayload): Promise<AuthUs
     body: JSON.stringify(payload),
   })
   if (typeof window !== "undefined") {
-    window.localStorage.setItem(AUTH_TOKEN_KEY, res.data.token)
-    storeAuthUser(res.data.user)
+    window.localStorage.setItem(AUTH_TOKEN_KEY, res.responseBody.token)
+    storeAuthUser(res.responseBody.user)
     document.cookie = `${AUTH_COOKIE_NAME}=1; path=/; SameSite=Lax; max-age=86400`
   }
-  return res.data.user
+  return res.responseBody.user
 }
 
 export function clearAuthSession() {
