@@ -132,7 +132,9 @@ function LeftPanel() {
   );
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ??
+  "https://flowsign-approval-request-management-2ss4.onrender.com";
 
 const SIGNUP_ERROR_MESSAGES: Record<string, string> = {
   org_slug_taken: "That organisation slug is already in use. Please choose a different one.",
