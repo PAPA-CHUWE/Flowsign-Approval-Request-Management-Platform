@@ -18,9 +18,17 @@ const PROTECTED_PREFIXES = [
 // Routes that logged-in users should be redirected away from
 const AUTH_ROUTES = ["/login", "/signup", "/forgot-password"]
 
+// Routes that must always pass through regardless of auth state
+const PASSTHROUGH = ["/auth/oauth/callback", "/oauth/callback"]
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isAuthenticated = request.cookies.has(AUTH_COOKIE)
+
+  // Always let OAuth callback through — it sets up the session
+  if (PASSTHROUGH.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
+    return NextResponse.next()
+  }
 
   const isProtected = PROTECTED_PREFIXES.some((prefix) =>
     pathname === prefix || pathname.startsWith(`${prefix}/`)
