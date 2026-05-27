@@ -156,7 +156,11 @@ function LeftPanel() {
 
 // ─── LoginForm ────────────────────────────────────────────────────────────────
 function slugify(value: string) {
-  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return value.toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/-{2,}/g, "-").replace(/^-+/, "");
+}
+
+function slugifyFinal(value: string) {
+  return slugify(value).replace(/-+$/, "");
 }
 
 function getLoginErrorMessage(error: unknown) {
@@ -220,7 +224,7 @@ const LoginForm = () => {
     setIsSubmitting(true);
     try {
       const response = await loginUser({
-        organizationSlug: form.organizationSlug,
+        organizationSlug: slugifyFinal(form.organizationSlug),
         email: form.email.trim().toLowerCase(),
         password: form.password,
       });
@@ -282,6 +286,7 @@ const LoginForm = () => {
                   placeholder="solvify-technologies"
                   value={form.organizationSlug}
                   onChange={(e) => { setOauthSlugError(false); set("organizationSlug")(e); }}
+                  onBlur={() => setForm((p) => ({ ...p, organizationSlug: slugifyFinal(p.organizationSlug) }))}
                   autoComplete="organization"
                   className={cn(inputCn, oauthSlugError && "border-[#F5C6C6] focus-visible:border-[#A32D2D] focus-visible:ring-[#FCEBEB]")}
                 />
