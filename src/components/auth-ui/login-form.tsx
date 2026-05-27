@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button }   from "@/components/ui/button";
 import { Input }    from "@/components/ui/input";
 import { Label }    from "@/components/ui/label";
@@ -11,6 +11,10 @@ import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/api/client";
 import { login as loginUser, storeAuthSession } from "@/lib/api/auth";
 import { AlertCircle, Building2, Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ??
+  "https://flowsign-approval-request-management-2ss4.onrender.com";
 function GoogleIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
@@ -53,12 +57,24 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 // ─── Social button ────────────────────────────────────────────────────────────
-function SocialBtn({ Icon, label }: { Icon: React.ElementType; label: string }) {
+function SocialBtn({
+  Icon,
+  label,
+  onClick,
+  disabled,
+}: {
+  Icon: React.ElementType;
+  label: string;
+  onClick?: () => void;
+  disabled?: boolean;
+}) {
   return (
     <button
       type="button"
       aria-label={`Sign in with ${label}`}
-      className="flex items-center justify-center gap-2 h-11 flex-1 rounded-[10px] border border-[#D3D1C7] bg-white text-[13px] font-medium text-[#5F5E5A] hover:border-[#1D9E75] hover:bg-[#E1F5EE] hover:text-[#0F6E56] transition-all duration-150 cursor-pointer"
+      onClick={onClick}
+      disabled={disabled}
+      className="flex items-center justify-center gap-2 h-11 flex-1 rounded-[10px] border border-[#D3D1C7] bg-white text-[13px] font-medium text-[#5F5E5A] hover:border-[#1D9E75] hover:bg-[#E1F5EE] hover:text-[#0F6E56] transition-all duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <Icon size={16} />
       {label}
@@ -149,13 +165,42 @@ function getLoginErrorMessage(error: unknown) {
   return "Could not sign you in. Please try again.";
 }
 
+const OAUTH_ERROR_MESSAGES: Record<string, string> = {
+  account_not_found: "No account found for your email in this organisation. Ask your admin to invite you first, then sign in with Google.",
+  invalid_state: "Sign-in request expired. Please try again.",
+  access_denied: "You cancelled the Google sign-in. You can try again below.",
+  oauth_failed: "Google sign-in failed. Please try again or use your password.",
+};
+
 const LoginForm = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember]         = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm]                 = useState({ organizationSlug: "", email: "", password: "" });
   const [error, setError]               = useState("");
+  const [oauthSlugError, setOauthSlugError] = useState(false);
+
+  useEffect(() => {
+    const errorCode = searchParams.get("error");
+    if (errorCode) {
+      setError(OAUTH_ERROR_MESSAGES[errorCode] ?? `Sign-in error: ${errorCode}`);
+      // Pre-fill org slug hint from ?email= if backend sent it
+      // (clean the URL so the error doesn't persist on refresh)
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }, [searchParams]);
+
+  const handleOAuth = (provider: "google" | "microsoft") => {
+    if (!form.organizationSlug) {
+      setOauthSlugError(true);
+      return;
+    }
+    setOauthSlugError(false);
+    const url = `${API_BASE_URL}/api/v1/auth/oauth/${provider}?orgSlug=${encodeURIComponent(form.organizationSlug)}`;
+    window.location.href = url;
+  };
 
   const set = (key: keyof typeof form) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -233,8 +278,20 @@ const LoginForm = () => {
             <Field label="Organisation slug">
               <div className="relative">
                 <Building2 size={15} color="#B4B2A9" strokeWidth={2} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <Input placeholder="solvify-technologies" value={form.organizationSlug} onChange={set("organizationSlug")} autoComplete="organization" className={inputCn} />
+                <Input
+                  placeholder="solvify-technologies"
+                  value={form.organizationSlug}
+                  onChange={(e) => { setOauthSlugError(false); set("organizationSlug")(e); }}
+                  autoComplete="organization"
+                  className={cn(inputCn, oauthSlugError && "border-[#F5C6C6] focus-visible:border-[#A32D2D] focus-visible:ring-[#FCEBEB]")}
+                />
               </div>
+              {oauthSlugError && (
+                <p className="text-[11px] text-[#A32D2D] flex items-center gap-1 mt-0.5">
+                  <AlertCircle size={11} />
+                  Enter your organisation slug before signing in with Google or Microsoft.
+                </p>
+              )}
             </Field>
 
             {/* Email */}
@@ -305,8 +362,8 @@ const LoginForm = () => {
 
           {/* Social login */}
           <div className="flex gap-3">
-            <SocialBtn Icon={GoogleIcon}    label="Google"    />
-            <SocialBtn Icon={MicrosoftIcon} label="Microsoft" />
+            <SocialBtn Icon={GoogleIcon}    label="Google"    onClick={() => handleOAuth("google")}    disabled={isSubmitting} />
+            <SocialBtn Icon={MicrosoftIcon} label="Microsoft" onClick={() => handleOAuth("microsoft")} disabled={isSubmitting} />
           </div>
 
           {/* Sign up link */}
