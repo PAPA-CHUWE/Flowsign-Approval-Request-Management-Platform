@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button }   from "@/components/ui/button";
 import { Input }    from "@/components/ui/input";
 import { Label }    from "@/components/ui/label";
@@ -53,12 +53,14 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 // ─── Social button ────────────────────────────────────────────────────────────
-function SocialBtn({ Icon, label }: { Icon: React.ElementType; label: string }) {
+function SocialBtn({ Icon, label, onClick, disabled }: { Icon: React.ElementType; label: string; onClick?: () => void; disabled?: boolean }) {
   return (
     <button
       type="button"
       aria-label={`Sign up with ${label}`}
-      className="flex items-center justify-center gap-2 h-11 flex-1 rounded-[10px] border border-[#D3D1C7] bg-white text-[13px] font-medium text-[#5F5E5A] hover:border-[#1D9E75] hover:bg-[#E1F5EE] hover:text-[#0F6E56] transition-all duration-150 cursor-pointer"
+      onClick={onClick}
+      disabled={disabled}
+      className="flex items-center justify-center gap-2 h-11 flex-1 rounded-[10px] border border-[#D3D1C7] bg-white text-[13px] font-medium text-[#5F5E5A] hover:border-[#1D9E75] hover:bg-[#E1F5EE] hover:text-[#0F6E56] transition-all duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <Icon size={16} />
       {label}
@@ -130,6 +132,20 @@ function LeftPanel() {
   );
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
+
+const SIGNUP_ERROR_MESSAGES: Record<string, string> = {
+  org_slug_taken: "That organisation slug is already in use. Please choose a different one.",
+  oauth_failed: "Something went wrong during sign-up. Please try again.",
+  unsupported_provider: "That sign-in method is not supported.",
+  missing_org_fields: "Please fill in your organisation name and slug before signing up with Google.",
+};
+
+function getOAuthSignupError(code: string | null): string {
+  if (!code) return "";
+  return SIGNUP_ERROR_MESSAGES[code] ?? `Sign-up failed (${code}). Please try again.`;
+}
+
 // ─── SignupForm ───────────────────────────────────────────────────────────────
 function slugify(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
@@ -150,12 +166,21 @@ function getSignupErrorMessage(error: unknown) {
 
 const SignupForm = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword]   = useState(false);
   const [agreed, setAgreed]               = useState(false);
   const [orgSlugEdited, setOrgSlugEdited] = useState(false);
   const [isSubmitting, setIsSubmitting]   = useState(false);
   const [error, setError]                 = useState("");
+  const [oauthOrgError, setOauthOrgError] = useState("");
   const [form, setForm]                   = useState({ name: "", org: "", orgSlug: "", email: "", password: "" });
+
+  useEffect(() => {
+    const code = searchParams.get("error");
+    const msg = getOAuthSignupError(code);
+    if (msg) setError(msg);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const set = (key: keyof typeof form) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -199,6 +224,16 @@ const SignupForm = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleOAuth = (provider: "google" | "microsoft") => {
+    if (!form.org.trim() || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.orgSlug)) {
+      setOauthOrgError("Please fill in your organisation name and a valid slug before continuing.");
+      return;
+    }
+    setOauthOrgError("");
+    const url = `${API_BASE_URL}/api/v1/auth/oauth/${provider}/signup?orgSlug=${encodeURIComponent(form.orgSlug)}&orgName=${encodeURIComponent(form.org.trim())}`;
+    window.location.href = url;
   };
 
   return (
@@ -264,6 +299,13 @@ const SignupForm = () => {
               </div>
             </div>
 
+            {oauthOrgError && (
+              <div className="flex items-start gap-2.5 rounded-[10px] border border-[#F5C6C6] bg-[#FCEBEB] px-4 py-3 text-[13px] font-medium text-[#A32D2D]">
+                <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                <span>{oauthOrgError}</span>
+              </div>
+            )}
+
             <Field label="Work email">
               <div className="relative">
                 <Mail size={15} color="#B4B2A9" strokeWidth={2} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -324,8 +366,8 @@ const SignupForm = () => {
           </div>
 
           <div className="flex gap-3">
-            <SocialBtn Icon={GoogleIcon}    label="Google"    />
-            <SocialBtn Icon={MicrosoftIcon} label="Microsoft" />
+            <SocialBtn Icon={GoogleIcon}    label="Google"    onClick={() => handleOAuth("google")}    disabled={isSubmitting} />
+            <SocialBtn Icon={MicrosoftIcon} label="Microsoft" onClick={() => handleOAuth("microsoft")} disabled={isSubmitting} />
           </div>
 
           <p className="text-center text-[13px] text-[#5F5E5A] mt-6">

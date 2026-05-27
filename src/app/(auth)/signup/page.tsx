@@ -1,9 +1,12 @@
-import SignupForm from "@/components/auth-ui/signup-form"
+import { Suspense } from "react";
+import SignupForm from "@/components/auth-ui/signup-form";
 
 export default function SignupPage() {
   return (
     <main className="min-h-screen w-full">
-     <SignupForm />
+      <Suspense>
+        <SignupForm />
+      </Suspense>
     </main>
-  )
+  );
 }
