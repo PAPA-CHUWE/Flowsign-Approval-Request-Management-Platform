@@ -1,4 +1,5 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const AUTH_TOKEN_KEY = "flowsign_auth_token";
 
 export interface AgentClassification {
   request_type_key: string;
@@ -37,10 +38,13 @@ export interface AISuggestInput {
 
 export async function aiSuggest(input: AISuggestInput): Promise<AIAgentDecision | null> {
   try {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const token = typeof window !== "undefined" ? window.localStorage.getItem(AUTH_TOKEN_KEY) : null;
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
     const response = await fetch(`${API_BASE}/api/v1/ai/orchestrate`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
+      headers,
       body: JSON.stringify(input),
     });
 
