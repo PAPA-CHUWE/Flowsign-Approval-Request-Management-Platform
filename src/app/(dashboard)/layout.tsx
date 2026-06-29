@@ -1,6 +1,7 @@
 import { AppSidebar, MobileDashboardNav } from "@/components/layout/AppSidebar";
 import { DashboardNavbar } from "@/components/layout/DashboardNavbar";
 import { OrganizationBrandingProvider } from "@/hooks/use-organization-branding";
+import { ChatButton } from "@/components/layout/ChatButton";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -12,6 +13,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <main data-lenis-prevent className="flex-1 overflow-y-auto p-4 pb-24 sm:p-6 sm:pb-24 md:p-8">{children}</main>
         </div>
         <MobileDashboardNav />
+        <ChatButton />
       </div>
     </OrganizationBrandingProvider>
   );

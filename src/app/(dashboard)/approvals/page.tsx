@@ -1,5 +1,7 @@
 "use client"
 
+export const dynamic = "force-dynamic"
+
 import { AlertCircle } from "lucide-react"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { ApprovalQueue } from "@/components/workflow/ApprovalQueue"

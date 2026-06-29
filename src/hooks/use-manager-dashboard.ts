@@ -6,7 +6,7 @@ import { listApprovalRequests } from "@/lib/api/requests"
 import { getActivity } from "@/lib/api/activity"
 import { listApprovalQueue, type ApprovalQueueItem } from "@/lib/api/approvals"
 import type { DashboardRequest, ActivityItem } from "@/lib/mock/dashboard.mock"
-import { adaptRequest, adaptActivity } from "./use-employee-dashboard"
+import { adaptRequest, adaptActivity } from "@/lib/adapters/dashboard"
 
 export interface ManagerStats {
   pendingApprovals: number

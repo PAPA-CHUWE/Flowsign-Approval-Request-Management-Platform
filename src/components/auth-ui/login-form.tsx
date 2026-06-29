@@ -183,15 +183,15 @@ const LoginForm = () => {
   const [remember, setRemember]         = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm]                 = useState({ organizationSlug: "", email: "", password: "" });
-  const [error, setError]               = useState("");
+  const [error, setError]               = useState(() => {
+    const code = searchParams.get("error");
+    return code ? (OAUTH_ERROR_MESSAGES[code] ?? `Sign-in error: ${code}`) : "";
+  });
   const [oauthSlugError, setOauthSlugError] = useState(false);
 
   useEffect(() => {
     const errorCode = searchParams.get("error");
     if (errorCode) {
-      setError(OAUTH_ERROR_MESSAGES[errorCode] ?? `Sign-in error: ${errorCode}`);
-      // Pre-fill org slug hint from ?email= if backend sent it
-      // (clean the URL so the error doesn't persist on refresh)
       window.history.replaceState(null, "", window.location.pathname);
     }
   }, [searchParams]);

@@ -35,7 +35,6 @@ export function useWorkflowRules() {
 
   useEffect(() => {
     let ignore = false
-    setIsLoading(true)
     listWorkflowRules()
       .then((res) => { if (!ignore) setRules(res.responseBody.workflowRules) })
       .catch((err) => { if (!ignore) setError(err instanceof Error ? err.message : "Could not load workflow rules.") })

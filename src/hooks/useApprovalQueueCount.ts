@@ -18,7 +18,11 @@ export function useApprovalQueueCount() {
     }
   }, [])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    listApprovalQueue({ page: 1, limit: 1 })
+      .then((res) => setCount(res.responseBody.total ?? 0))
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     function onVisibilityChange() {

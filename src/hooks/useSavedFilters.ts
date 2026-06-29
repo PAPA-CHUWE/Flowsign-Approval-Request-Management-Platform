@@ -15,7 +15,6 @@ export function useSavedFilters(context: string) {
 
   useEffect(() => {
     let ignore = false
-    setIsLoading(true)
     listSavedFilters(context)
       .then((res) => { if (!ignore) setFilters(res.responseBody.savedFilters) })
       .catch(() => {})

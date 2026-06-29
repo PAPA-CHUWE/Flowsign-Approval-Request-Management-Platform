@@ -243,15 +243,11 @@ function CreateWorkflowDialog({
 export function WorkflowSetupBanner() {
   const router = useRouter()
   const { rules, isLoading } = useWorkflowRules()
-  const [dismissed, setDismissed] = useState(true) // start hidden, check storage below
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window === "undefined") return true
+    return !!localStorage.getItem(DISMISS_KEY)
+  })
   const [dialogOpen, setDialogOpen] = useState(false)
-
-  useEffect(() => {
-    const stored = typeof window !== "undefined"
-      ? localStorage.getItem(DISMISS_KEY)
-      : null
-    if (!stored) setDismissed(false)
-  }, [])
 
   function dismiss() {
     localStorage.setItem(DISMISS_KEY, "1")
@@ -277,7 +273,7 @@ export function WorkflowSetupBanner() {
               Set up your first approval workflow
             </p>
             <p className="mt-0.5 text-[12px] text-[#3A8C6E]">
-              Requests won't route to approvers until you create a workflow rule. It takes less than 2 minutes.
+              Requests won&apos;t route to approvers until you create a workflow rule. It takes less than 2 minutes.
             </p>
           </div>
         </div>

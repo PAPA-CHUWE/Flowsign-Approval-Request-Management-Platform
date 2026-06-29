@@ -122,7 +122,7 @@ function NotificationBell() {
           ) : notifications.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-10">
               <Bell size={22} className="text-[#D3D1C7]" />
-              <p className="text-[12px] text-[#B4B2A9]">You're all caught up</p>
+              <p className="text-[12px] text-[#B4B2A9]">You&apos;re all caught up</p>
             </div>
           ) : (
             <div className="divide-y divide-[#F1EFE8]">

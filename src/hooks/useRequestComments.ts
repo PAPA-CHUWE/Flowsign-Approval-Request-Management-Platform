@@ -11,14 +11,12 @@ import {
 
 export function useRequestComments(requestPublicId: string | null) {
   const [comments, setComments] = useState<RequestComment[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
 
   useEffect(() => {
     if (!requestPublicId) return
     let ignore = false
-    setIsLoading(true)
-    setError("")
     listComments(requestPublicId)
       .then((res) => { if (!ignore) setComments(res.responseBody.comments ?? []) })
       .catch((err) => { if (!ignore) setError(err instanceof Error ? err.message : "Could not load comments.") })

@@ -27,9 +27,7 @@ export function useNotifications() {
     if (showLoading) setIsLoading(true)
     try {
       const res = await listNotifications({ limit: 25 })
-      console.log("[notifications] raw response:", JSON.stringify(res, null, 2))
       const { items, unreadCount: newCount } = extractNotifications(res)
-      console.log("[notifications] parsed:", JSON.stringify({ items, newCount }, null, 2))
 
       setNotifications(items)
       setUnreadCount(newCount)
@@ -55,7 +53,20 @@ export function useNotifications() {
   }, [router])
 
   // initial load
-  useEffect(() => { load() }, [load])
+  useEffect(() => {
+    listNotifications({ limit: 25 })
+      .then((res) => {
+        const { items, unreadCount: newCount } = extractNotifications(res)
+        setNotifications(items)
+        setUnreadCount(newCount)
+        setError("")
+        prevCountRef.current = newCount
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : "Could not load notifications.")
+      })
+      .finally(() => setIsLoading(false))
+  }, [])
 
   // pause polling when tab is hidden
   useEffect(() => {

@@ -37,26 +37,33 @@ function Spinner() {
 function OAuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [status, setStatus] = useState<"loading" | "error">("loading");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [status, setStatus] = useState<"loading" | "error">(() => {
+    if (searchParams.get("error")) return "error";
+    if (typeof window === "undefined") return "loading";
+    const hash = window.location.hash.slice(1);
+    const params = new URLSearchParams(hash);
+    if (!params.get("token")) return "error";
+    return "loading";
+  });
+  const [errorMessage, setErrorMessage] = useState(() => {
+    const errorCode = searchParams.get("error");
+    if (errorCode) return getErrorMessage(errorCode);
+    if (typeof window === "undefined") return "";
+    const hash = window.location.hash.slice(1);
+    const params = new URLSearchParams(hash);
+    if (!params.get("token")) return getErrorMessage("oauth_failed");
+    return "";
+  });
 
   useEffect(() => {
     const errorCode = searchParams.get("error");
-    if (errorCode) {
-      setErrorMessage(getErrorMessage(errorCode));
-      setStatus("error");
-      return;
-    }
+    if (errorCode) return;
 
     const hash = window.location.hash.slice(1);
     const params = new URLSearchParams(hash);
     const token = params.get("token");
 
-    if (!token) {
-      setErrorMessage(getErrorMessage("oauth_failed"));
-      setStatus("error");
-      return;
-    }
+    if (!token) return;
 
     window.history.replaceState(null, "", window.location.pathname);
     window.localStorage.setItem(AUTH_TOKEN_KEY, token);

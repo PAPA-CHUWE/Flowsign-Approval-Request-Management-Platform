@@ -381,7 +381,7 @@ export function OnboardingPageContent() {
             <div>
               <h2 className="font-dm-sans text-[14px] font-semibold text-[#2C2C2A]">Invite individuals</h2>
               <p className="mt-0.5 text-[12px] text-[#888780]">
-                Send a direct invite to a specific person. They'll receive an email with a link to set their password.
+                Send a direct invite to a specific person. They&apos;ll receive an email with a link to set their password.
               </p>
             </div>
           </div>

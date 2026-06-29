@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button }   from "@/components/ui/button";
@@ -173,16 +173,12 @@ const SignupForm = () => {
   const [agreed, setAgreed]               = useState(false);
   const [orgSlugEdited, setOrgSlugEdited] = useState(false);
   const [isSubmitting, setIsSubmitting]   = useState(false);
-  const [error, setError]                 = useState("");
+  const [error, setError]                 = useState(() => {
+    const code = searchParams.get("error");
+    return getOAuthSignupError(code);
+  });
   const [oauthOrgError, setOauthOrgError] = useState("");
   const [form, setForm]                   = useState({ name: "", org: "", orgSlug: "", email: "", password: "" });
-
-  useEffect(() => {
-    const code = searchParams.get("error");
-    const msg = getOAuthSignupError(code);
-    if (msg) setError(msg);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const set = (key: keyof typeof form) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {

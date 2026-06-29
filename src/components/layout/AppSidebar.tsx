@@ -23,6 +23,7 @@ import { clearAuthSession, logout as logoutUser } from "@/lib/api/auth";
 import { getUserDisplayName, getUserInitials, getUserRoleLabel, useCurrentUser } from "@/hooks/use-current-user";
 import { USER_ROLE, type UserRole } from "@/constants/role.constants";
 import { navigationItems } from "@/config/navigation.config";
+import { resolveNavRole, filterNavItems } from "@/lib/auth-utils";
 import { useApprovalQueueCount } from "@/hooks/useApprovalQueueCount";
 import {
   DropdownMenu,
@@ -124,23 +125,10 @@ export function AppSidebar({ className }: AppSidebarProps) {
     }
   };
 
-  // Derive nav role from real API user roles when available;
-  // fall back to dev switcher only when no user is loaded yet.
-  function resolveNavRole(): UserRole {
-    if (!user) return role
-    const r = user.roles.map((x) => x.toLowerCase())
-    if (r.includes("org_admin") || r.includes("it_admin")) return USER_ROLE.ADMIN
-    if (r.includes("manager") || r.includes("hr"))         return USER_ROLE.MANAGER
-    return USER_ROLE.EMPLOYEE
-  }
-  const navRole = resolveNavRole()
+  const navRole = resolveNavRole(user, role)
 
   const userPerms = user?.permissions ?? []
-  const items = navigationItems.filter((item) => {
-    if (!(item.roles as UserRole[]).includes(navRole)) return false
-    if (item.permission && !userPerms.includes(item.permission)) return false
-    return true
-  });
+  const items = filterNavItems(navigationItems, navRole, userPerms)
   const approvalCount = useApprovalQueueCount();
 
   return (
@@ -252,21 +240,9 @@ export function MobileDashboardNav() {
   const role = useStoredRole();
   const { user } = useCurrentUser();
 
-  function resolveNavRole(): UserRole {
-    if (!user) return role
-    const r = user.roles.map((x) => x.toLowerCase())
-    if (r.includes("org_admin") || r.includes("it_admin")) return USER_ROLE.ADMIN
-    if (r.includes("manager") || r.includes("hr"))         return USER_ROLE.MANAGER
-    return USER_ROLE.EMPLOYEE
-  }
-
   const userPerms = user?.permissions ?? []
-  const navRole2  = resolveNavRole()
-  const items = navigationItems.filter((item) => {
-    if (!(item.roles as UserRole[]).includes(navRole2)) return false
-    if (item.permission && !userPerms.includes(item.permission)) return false
-    return true
-  });
+  const navRole  = resolveNavRole(user, role)
+  const items = filterNavItems(navigationItems, navRole, userPerms)
 
   return (
     <nav

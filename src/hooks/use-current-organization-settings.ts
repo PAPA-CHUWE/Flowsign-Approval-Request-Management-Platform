@@ -13,10 +13,7 @@ export function useCurrentOrganizationSettings({ enabled = true }: { enabled?: b
   const [error, setError] = useState("")
 
   useEffect(() => {
-    if (!enabled) {
-      setIsLoading(false)
-      return
-    }
+    if (!enabled) return
 
     let ignore = false
 

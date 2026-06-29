@@ -53,13 +53,8 @@ export function GlobalSearchBar() {
 
   // Fetch full search results when debounced query is ready
   useEffect(() => {
-    if (!debouncedQuery || debouncedQuery.length < 2) {
-      setResults([])
-      setUsers([])
-      return
-    }
+    if (!debouncedQuery || debouncedQuery.length < 2) return
     let ignore = false
-    setLoading(true)
     globalSearch({ q: debouncedQuery, types: "requests,users", limit: 10 })
       .then((res) => {
         if (ignore) return
@@ -70,12 +65,6 @@ export function GlobalSearchBar() {
       .finally(() => { if (!ignore) setLoading(false) })
     return () => { ignore = true }
   }, [debouncedQuery])
-
-  // Open dropdown when there's a query
-  useEffect(() => {
-    setOpen(query.trim().length >= 2)
-    setActiveIdx(-1)
-  }, [query])
 
   // Close on click outside
   useEffect(() => {
@@ -129,6 +118,7 @@ export function GlobalSearchBar() {
     setResults([])
     setUsers([])
     setOpen(false)
+    setActiveIdx(-1)
     inputRef.current?.focus()
   }
 
@@ -146,8 +136,14 @@ export function GlobalSearchBar() {
         <input
           ref={inputRef}
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
           onFocus={() => { if (query.trim().length >= 2) setOpen(true) }}
+          onChange={(e) => {
+            const val = e.target.value
+            setQuery(val)
+            const trimmed = val.trim()
+            if (trimmed.length >= 2) { setOpen(true); setActiveIdx(-1); setLoading(true) }
+            else { setOpen(false); setActiveIdx(-1); setResults([]); setUsers([]); setLoading(false) }
+          }}
           onKeyDown={handleKeyDown}
           placeholder="Search..."
           className="min-w-0 flex-1 bg-transparent font-dm-sans text-[13px] text-brand-neutral-dark outline-none placeholder:text-[#B4B2A9]"

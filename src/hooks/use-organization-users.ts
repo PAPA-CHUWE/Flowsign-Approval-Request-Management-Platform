@@ -25,10 +25,7 @@ export function useOrganizationUsers({ enabled = true }: { enabled?: boolean } =
   }, [enabled])
 
   useEffect(() => {
-    if (!enabled) {
-      setIsLoading(false)
-      return
-    }
+    if (!enabled) return
     let ignore = false
 
     listOrganizationUsers()

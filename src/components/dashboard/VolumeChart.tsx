@@ -84,7 +84,6 @@ export function VolumeChart() {
 
   useEffect(() => {
     let ignore = false;
-    setIsLoading(true);
     const { from, to } = dateRange(period);
     getVolumeAnalytics({ period, from, to })
       .then((res) => { if (!ignore) setSeries(res.responseBody.series ?? []) })

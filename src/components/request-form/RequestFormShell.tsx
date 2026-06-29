@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { ArrowLeft, Plus } from "lucide-react"
+import { ArrowLeft, Plus, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 import { Button }   from "@/components/ui/button"
 import { Input }    from "@/components/ui/input"
@@ -13,6 +13,8 @@ import { useRequestTypes } from "@/hooks/requests/useRequestTypes"
 import { Loader } from "@/components/loader-ui/loader"
 import { submitRequest, updateApprovalRequest } from "@/lib/api/requests"
 import type { ApprovalRequest } from "@/lib/api/requests"
+import { aiSuggest } from "@/lib/api/modelApi"
+import type { AIAgentDecision } from "@/lib/api/modelApi"
 
 import { inputCn }             from "./inputCn"
 import { SectionHeading }      from "./SectionHeading"
@@ -97,6 +99,8 @@ export function RequestFormShell({ onRequestCreated, initialType, initialRequest
   )
   const [createTypeOpen, setCreateTypeOpen] = useState(false)
   const [fieldErrors,  setFieldErrors]  = useState<Record<string, string>>({})
+  const [aiLoading,    setAiLoading]    = useState(false)
+  const [aiDecision,   setAiDecision]   = useState<AIAgentDecision | null>(null)
 
   const isEditingDraft = !!initialRequest?.publicId
 
@@ -130,6 +134,44 @@ export function RequestFormShell({ onRequestCreated, initialType, initialRequest
     setType(rt.key)
     setRequestData({})
     setStep(2)
+  }
+
+  async function handleAiSuggest() {
+    if (!title.trim()) {
+      setFieldErrors({ title: "Enter a title before using AI suggest." })
+      return
+    }
+    setAiLoading(true)
+    setAiDecision(null)
+    try {
+      const decision = await aiSuggest({
+        title: title.trim(),
+        description: description.trim() || undefined,
+        data: normalizedData(),
+        requestTypeKey: type,
+      })
+      if (decision?.classification) {
+        const c = decision.classification
+        const matched = requestTypes.find((rt) => rt.key === c.request_type_key)
+        if (matched && !initialType) {
+          setType(matched.key)
+          setRequestData({})
+          setFieldErrors({})
+        }
+        if (c.priority) setPriority(c.priority as Priority)
+        if (c.department) setDepartment(c.department)
+      }
+      setAiDecision(decision)
+      if (!decision) {
+        toast.error("AI suggestion unavailable", { description: "The AI service could not process this request." })
+      } else {
+        toast.success("AI suggestion ready", { description: "Review the suggested type and priority above." })
+      }
+    } catch {
+      toast.error("AI suggestion failed")
+    } finally {
+      setAiLoading(false)
+    }
   }
 
   // ── Payload ───────────────────────────────────────────────────────────────
@@ -348,6 +390,30 @@ export function RequestFormShell({ onRequestCreated, initialType, initialRequest
                 )}
               />
             </FormField>
+
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAiSuggest}
+                disabled={aiLoading || isSubmitting}
+                className="h-8 shrink-0 rounded-[8px] border-[#E8E6DE] px-3 text-[12px] font-semibold text-[#2C2C2A] hover:bg-[#F6F4EF]"
+              >
+                <Sparkles size={14} className="mr-1.5 text-brand-teal" />
+                {aiLoading ? "Analysing…" : "AI Suggest"}
+              </Button>
+
+              {aiDecision?.validation && !aiDecision.validation.valid && (
+                <div className="flex flex-wrap gap-1.5">
+                  {aiDecision.validation.recommendations.slice(0, 2).map((r, i) => (
+                    <span key={i} className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-medium text-amber-700">
+                      {r}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* ── 2. Dynamic type-specific fields ── */}

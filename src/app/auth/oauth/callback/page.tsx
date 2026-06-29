@@ -30,8 +30,23 @@ function Spinner() {
 function OAuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [status, setStatus] = useState<"loading" | "error">("loading");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [status, setStatus] = useState<"loading" | "error">(() => {
+    if (searchParams.get("error")) return "error";
+    if (typeof window === "undefined") return "loading";
+    const hash = window.location.hash.slice(1);
+    const params = new URLSearchParams(hash);
+    if (!params.get("token")) return "error";
+    return "loading";
+  });
+  const [errorMessage, setErrorMessage] = useState(() => {
+    const errorCode = searchParams.get("error");
+    if (errorCode) return getErrorMessage(errorCode);
+    if (typeof window === "undefined") return "";
+    const hash = window.location.hash.slice(1);
+    const params = new URLSearchParams(hash);
+    if (!params.get("token")) return getErrorMessage("oauth_failed");
+    return "";
+  });
   // Guard against React Strict Mode double-invocation in development
   const handled = useRef(false);
 
@@ -41,22 +56,14 @@ function OAuthCallbackContent() {
 
     // Provider-side error forwarded by the backend as ?error=
     const errorCode = searchParams.get("error");
-    if (errorCode) {
-      setErrorMessage(getErrorMessage(errorCode));
-      setStatus("error");
-      return;
-    }
+    if (errorCode) return;
 
     // Extract JWT from URL hash: /auth/oauth/callback#token=<jwt>
     const hash = window.location.hash.slice(1);
     const params = new URLSearchParams(hash);
     const token = params.get("token");
 
-    if (!token) {
-      setErrorMessage(getErrorMessage("oauth_failed"));
-      setStatus("error");
-      return;
-    }
+    if (!token) return;
 
     // Wipe the hash so the token is not bookmarkable or visible in history
     window.history.replaceState(null, "", window.location.pathname);

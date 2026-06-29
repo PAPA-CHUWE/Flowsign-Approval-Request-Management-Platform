@@ -57,9 +57,6 @@ export function useApprovalQueue(params: {
   useEffect(() => {
     let ignore = false
 
-    setIsLoading(true)
-    setError("")
-
     listApprovalQueue({ requestTypeKey, priority, page, limit })
       .then((res) => {
         if (ignore) return
