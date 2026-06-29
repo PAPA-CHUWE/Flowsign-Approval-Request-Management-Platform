@@ -1,4 +1,5 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const DEFAULT_API_BASE_URL = "https://flowsign-approval-request-management-2ss4.onrender.com";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? DEFAULT_API_BASE_URL ;
 const AUTH_TOKEN_KEY = "flowsign_auth_token";
 
 export interface AgentClassification {
