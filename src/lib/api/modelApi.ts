@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 export interface AgentClassification {
   request_type_key: string;
@@ -37,7 +37,7 @@ export interface AISuggestInput {
 
 export async function aiSuggest(input: AISuggestInput): Promise<AIAgentDecision | null> {
   try {
-    const response = await fetch(`${API_BASE}/ai/orchestrate`, {
+    const response = await fetch(`${API_BASE}/api/v1/ai/orchestrate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
