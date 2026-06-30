@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { Clock, CheckCircle2, XCircle, Timer } from "lucide-react";
 import { DashboardStatCard } from "./DashboardStatCard";
+import { AdminSummary } from "./AdminSummary";
 import { WorkflowSetupBanner } from "./WorkflowSetupBanner";
 import { RequestsTable } from "./RequestsTable";
 import { ActivityFeed } from "./ActivityFeed";
@@ -80,6 +81,8 @@ export function AdminDashboard() {
           Welcome back, {firstName}. Here&apos;s your organisation at a glance.
         </p>
       </div>
+
+      <AdminSummary />
 
       <WorkflowSetupBanner />
 
