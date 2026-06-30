@@ -114,27 +114,31 @@ export function RequestFormShell({ onRequestCreated, initialType, initialRequest
   // ── Real-time AI validation on input changes ──────────────────────────────
 
   const validateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const validatingRef = useRef(false)
 
   useEffect(() => {
     if (validateTimer.current) clearTimeout(validateTimer.current)
+    if (validatingRef.current) return
     if (!title.trim() && !description.trim()) {
       setAiDecision(null)
       return
     }
     validateTimer.current = setTimeout(async () => {
+      validatingRef.current = true
       setAiLoading(true)
       try {
         const decision = await aiSuggest({
           title: title.trim(),
           description: description.trim() || undefined,
         })
-        if (decision) {
+        if (decision?.validation) {
           setAiDecision((prev) => prev ? { ...prev, validation: decision.validation } : decision)
         }
       } catch {
         /* silent */
       } finally {
         setAiLoading(false)
+        validatingRef.current = false
       }
     }, 1500)
     return () => { if (validateTimer.current) clearTimeout(validateTimer.current) }

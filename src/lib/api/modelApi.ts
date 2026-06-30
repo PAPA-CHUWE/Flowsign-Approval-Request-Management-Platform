@@ -49,10 +49,8 @@ export async function aiSuggest(input: AISuggestInput): Promise<AIAgentDecision 
       method: "POST",
       body: JSON.stringify(input),
     });
-    console.log("[AI Suggest] response:", JSON.stringify(json, null, 2));
     return json.responseBody?.decision ?? null;
-  } catch (err) {
-    console.warn("[AI Suggest] fetch failed:", err);
+  } catch {
     return null;
   }
 }
