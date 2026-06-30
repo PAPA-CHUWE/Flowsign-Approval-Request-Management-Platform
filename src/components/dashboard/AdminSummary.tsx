@@ -91,17 +91,9 @@ export function AdminSummary() {
 
   if (!summary) return null
 
-  const { pipelineStats, totalRequests, workflowGaps, aiStats, rejectionRate } = summary
+  const { pipelineStats, totalRequests, workflowGaps, aiStats, rejectionRate, volumeData } = summary
   const gaps = workflowGaps.filter((g) => !g.hasActiveWorkflow)
   const hasGaps = gaps.length > 0
-
-  const chartData = [
-    { date: "Mon", submitted: 12, approved: 8, rejected: 1 },
-    { date: "Tue", submitted: 18, approved: 12, rejected: 2 },
-    { date: "Wed", submitted: 15, approved: 10, rejected: 3 },
-    { date: "Thu", submitted: 22, approved: 16, rejected: 2 },
-    { date: "Fri", submitted: 20, approved: 14, rejected: 1 },
-  ]
 
   return (
     <div className="flex flex-col gap-4">
@@ -193,7 +185,7 @@ export function AdminSummary() {
 
       <div className="rounded-[14px] border border-[#E8E6DE] bg-white p-5">
         <h3 className="text-[14px] font-semibold text-brand-neutral-dark mb-3">Request Volume</h3>
-        <VolumeChart data={chartData} />
+        <VolumeChart data={volumeData} />
       </div>
     </div>
   )

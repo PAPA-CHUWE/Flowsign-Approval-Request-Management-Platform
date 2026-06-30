@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { getAnalyticsDashboard, getRejectionRates, getResolutionAnalytics } from "@/lib/api/analytics"
+import { getAnalyticsDashboard, getRejectionRates, getResolutionAnalytics, getVolumeAnalytics } from "@/lib/api/analytics"
 import { listWorkflowRules } from "@/lib/api/workflow-rules"
 import { listRequestTypes } from "@/lib/api/request-types"
 import type { PipelineStats } from "@/lib/mock/dashboard.mock"
@@ -25,6 +25,7 @@ export interface AdminSummary {
   workflowGaps: WorkflowGap[]
   aiStats: AISuggestionStats
   rejectionRate: number
+  volumeData: { date: string; submitted: number; approved: number; rejected: number }[]
 }
 
 function adaptPipelineStats(totals: Record<string, number>): PipelineStats {
@@ -50,8 +51,9 @@ export function useAdminSummary() {
       listRequestTypes(),
       getResolutionAnalytics(),
       getRejectionRates(),
+      getVolumeAnalytics({ period: "daily" }),
     ])
-      .then(([analyticsRes, workflowRes, requestTypesRes, resolutionRes, rejectionRes]) => {
+      .then(([analyticsRes, workflowRes, requestTypesRes, resolutionRes, rejectionRes, volumeRes]) => {
         if (ignore) return
 
         const d = analyticsRes.responseBody.dashboard
@@ -59,6 +61,12 @@ export function useAdminSummary() {
         const requestTypes = requestTypesRes.responseBody.requestTypes
         const resolutionData = resolutionRes.responseBody.byType
         const rejectionData = rejectionRes.responseBody.overall
+        const volumeData = volumeRes.responseBody.series.map((point) => ({
+          date: point.date.split("-").pop() ?? point.date,
+          submitted: point.submitted,
+          approved: point.approved,
+          rejected: point.rejected,
+        }))
 
         const activeWorkflows = rules.filter((r) => r.active)
 
@@ -93,6 +101,7 @@ export function useAdminSummary() {
           workflowGaps,
           aiStats,
           rejectionRate: rejectionData.rate,
+          volumeData,
         })
       })
       .catch((reason) => {

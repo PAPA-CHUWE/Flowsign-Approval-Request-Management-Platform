@@ -12,16 +12,6 @@ import { useCurrentUser, getUserDisplayName } from "@/hooks/use-current-user";
 import { useDashboard } from "@/hooks/use-dashboard";
 import { mockPipelineStats } from "@/lib/mock/dashboard.mock";
 
-const VolumeChart = dynamic(
-  () => import("./VolumeChart").then((m) => ({ default: m.VolumeChart })),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-[320px] animate-pulse rounded-[16px] border border-[#E8E6DE] bg-white" />
-    ),
-  }
-);
-
 const ApprovalPipelineCard = dynamic(
   () => import("./ApprovalPipelineCard").then((m) => ({ default: m.ApprovalPipelineCard })),
   {
@@ -94,8 +84,6 @@ export function AdminDashboard() {
       </div>
 
       <AgentPipeline requestPublicId={requests[0]?.id ?? ""} />
-
-      <VolumeChart />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[5fr_3fr]">
         <RequestsTable title="All Requests" requests={isLoading ? [] : requests} />

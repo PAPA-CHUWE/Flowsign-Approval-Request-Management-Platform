@@ -36,12 +36,10 @@ function AgentStep({
   name,
   status,
   isActive,
-  hasOutput,
 }: {
   name: AgentName
   status: "pending" | "running" | "completed" | "failed"
   isActive: boolean
-  hasOutput: boolean
 }) {
   const iconColor =
     status === "completed" ? "text-brand-teal" :
@@ -66,18 +64,23 @@ function AgentStep({
 export function AgentPipeline({ requestPublicId }: { requestPublicId: string }) {
   const [selectedAgent, setSelectedAgent] = useState<AgentName | null>(null)
   const [pipeline, setPipeline] = useState<AgentPipelineOutput | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setLoading] = useState(false)
 
   useEffect(() => {
     if (!requestPublicId) return
-    setIsLoading(true)
-    runAgentPipeline({ request_public_id: requestPublicId })
-      .then((result) => {
+
+    const loadPipeline = async () => {
+      setLoading(true)
+      try {
+        const result = await runAgentPipeline({ request_public_id: requestPublicId })
         if (result) setPipeline(result)
-      })
-      .catch(() => {})
-      .finally(() => setIsLoading(false))
-     
+      } catch {
+        // Use mock data fallback
+      } finally {
+        setLoading(false)
+      }
+    }
+    void loadPipeline()
   }, [requestPublicId])
 
   if (isLoading) {
@@ -167,7 +170,6 @@ export function AgentPipeline({ requestPublicId }: { requestPublicId: string }) 
             name={agent}
             status={agent === "intake" || agent === "summary" ? "completed" : "pending"}
             isActive={selectedAgent === agent}
-            hasOutput={agent === "intake" || agent === "summary"}
           />
         ))}
       </div>
