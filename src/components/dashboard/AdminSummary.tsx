@@ -1,8 +1,15 @@
 "use client"
 
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { AlertCircle, Bot, Ticket, Workflow } from "lucide-react"
 import { useAdminSummary } from "@/hooks/use-admin-summary"
+import dynamic from "next/dynamic"
+
+const Chart = dynamic(() => import("react-apexcharts"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-32 w-full animate-pulse rounded bg-[#F1EFE8]" />
+  ),
+})
 
 function StatRow({ icon: Icon, label, value, color }: {
   icon: React.ElementType
@@ -36,26 +43,41 @@ function GapItem({ name, suggested }: { name: string; suggested: string }) {
 }
 
 function VolumeChart({ data }: { data: { date: string; submitted: number; approved: number; rejected: number }[] }) {
+  const options = {
+    chart: {
+      type: "area" as const,
+      height: 120,
+      toolbar: { show: false },
+      zoom: { enabled: false },
+    },
+    colors: ["#5E5D57", "#2A9D8F", "#E76F51"],
+    dataLabels: { enabled: false },
+    stroke: { curve: "smooth" as const, width: 2 },
+    markers: { size: 3 },
+    xaxis: {
+      categories: data.map(d => d.date),
+      labels: { style: { fontSize: "10px" }, colors: "#888780" },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+    },
+    yaxis: { labels: { style: { fontSize: "10px" }, colors: "#888780" } },
+    legend: { show: false },
+    grid: { borderColor: "#F1EFE8", strokeDashArray: 3 },
+    tooltip: {
+      theme: "light" as const,
+      style: { fontSize: "12px" },
+    },
+  }
+
+  const series = [
+    { name: "Submitted", data: data.map(d => d.submitted) },
+    { name: "Approved", data: data.map(d => d.approved) },
+    { name: "Rejected", data: data.map(d => d.rejected) },
+  ]
+
   return (
     <div className="h-32 w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 5, right: 5, left: -25, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#F1EFE8" />
-          <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="#888780" />
-          <YAxis tick={{ fontSize: 10 }} stroke="#888780" />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "#fff",
-              border: "1px solid #E8E6DE",
-              borderRadius: "8px",
-              fontSize: "12px",
-            }}
-          />
-          <Area type="monotone" dataKey="submitted" stackId="1" stroke="#5E5D57" fill="#5E5D57" fillOpacity={0.6} />
-          <Area type="monotone" dataKey="approved" stackId="2" stroke="#2A9D8F" fill="#2A9D8F" fillOpacity={0.6} />
-          <Area type="monotone" dataKey="rejected" stackId="3" stroke="#E76F51" fill="#E76F51" fillOpacity={0.6} />
-        </AreaChart>
-      </ResponsiveContainer>
+      <Chart options={options} series={series} height={120} />
     </div>
   )
 }
