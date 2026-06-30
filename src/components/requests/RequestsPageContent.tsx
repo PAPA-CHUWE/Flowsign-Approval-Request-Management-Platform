@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Bookmark, BookmarkPlus, MessageSquare, Plus, Search, Trash2, X } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Bookmark, BookmarkPlus, Plus, Search, Trash2, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -15,9 +15,7 @@ import { Input } from "@/components/ui/input"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { Loader } from "@/components/loader-ui/loader"
 import { RequestFormShell } from "@/components/request-form/RequestFormShell"
-import { SynthesizeDialog } from "@/components/request-form/SynthesizeDialog"
 import { RequestDrawer } from "@/components/requests/RequestDrawer"
-import type { SynthesizeResult } from "@/lib/api/modelApi"
 import { REQUEST_TYPE_LABEL } from "@/constants/requestType.constants"
 import { TICKET_STATUS_LABEL } from "@/constants/ticketStatus.constants"
 import { useApprovalRequests } from "@/hooks/requests/useApprovalRequests"
@@ -134,7 +132,6 @@ export function RequestsPageContent() {
   const [page, setPage] = useState(1)
   const [refreshKey, setRefreshKey] = useState(0)
   const [createOpen, setCreateOpen] = useState(false)
-  const [chatOpen, setChatOpen] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null)
   const [detailsLoading, setDetailsLoading] = useState(false)
@@ -174,16 +171,17 @@ export function RequestsPageContent() {
   }
   const totalPages = Math.max(1, Math.ceil(total / limit))
 
+  useEffect(() => {
+    if (sessionStorage.getItem("flowsign_synthesized")) {
+      setCreateOpen(true)
+    }
+  }, [])
+
   function handleRequestCreated() {
     setCreateOpen(false)
     sessionStorage.removeItem("flowsign_synthesized")
     setPage(1)
     setRefreshKey((current) => current + 1)
-  }
-
-  function handleSynthesizeComplete(result: SynthesizeResult) {
-    sessionStorage.setItem("flowsign_synthesized", JSON.stringify(result))
-    setCreateOpen(true)
   }
 
   async function handleViewInfo(request: ApprovalRequest) {
@@ -265,14 +263,6 @@ export function RequestsPageContent() {
                 Save filter
               </button>
             )}
-            <Button
-              type="button"
-              onClick={() => setChatOpen(true)}
-              className="h-9 rounded-[8px] border border-brand-teal bg-white px-4 text-[12px] font-semibold text-brand-teal hover:bg-[#F5FBF8]"
-            >
-              <MessageSquare size={14} />
-              Chat
-            </Button>
             <Button
               type="button"
               onClick={() => setCreateOpen(true)}
@@ -439,12 +429,6 @@ export function RequestsPageContent() {
           </div>
         </DialogContent>
       </Dialog>
-
-      <SynthesizeDialog
-        open={chatOpen}
-        onOpenChange={setChatOpen}
-        onComplete={handleSynthesizeComplete}
-      />
 
       <RequestDrawer
         request={selectedRequest}

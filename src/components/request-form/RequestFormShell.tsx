@@ -144,6 +144,7 @@ export function RequestFormShell({ onRequestCreated, initialType, initialRequest
       }
       if (data.priority) setPriority(data.priority as Priority)
       if (data.department) setDepartment(data.department)
+      setStep(2)
       if (data.recommended_approver || data.backup_approver) {
         const roleKeys = [data.recommended_approver, data.backup_approver].filter(Boolean) as string[]
         if (roleKeys.length > 0) {
