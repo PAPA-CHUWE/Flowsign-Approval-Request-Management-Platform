@@ -54,3 +54,22 @@ export async function aiSuggest(input: AISuggestInput): Promise<AIAgentDecision 
     return null;
   }
 }
+
+interface GenerateDescriptionResponse {
+  statusCode: string;
+  responseBody: {
+    description: string | null;
+  };
+}
+
+export async function aiGenerateDescription(title: string, requestTypeKey?: string): Promise<string | null> {
+  try {
+    const json = await apiClient<GenerateDescriptionResponse>("/api/v1/ai/generate-description", {
+      method: "POST",
+      body: JSON.stringify({ title, requestTypeKey }),
+    });
+    return json.responseBody?.description ?? null;
+  } catch {
+    return null;
+  }
+}

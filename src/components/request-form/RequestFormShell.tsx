@@ -13,7 +13,7 @@ import { useRequestTypes } from "@/hooks/requests/useRequestTypes"
 import { Loader } from "@/components/loader-ui/loader"
 import { submitRequest, updateApprovalRequest } from "@/lib/api/requests"
 import type { ApprovalRequest } from "@/lib/api/requests"
-import { aiSuggest } from "@/lib/api/modelApi"
+import { aiSuggest, aiGenerateDescription } from "@/lib/api/modelApi"
 import type { AIAgentDecision } from "@/lib/api/modelApi"
 import { listOrganizationUsers } from "@/lib/api/users"
 
@@ -100,8 +100,9 @@ export function RequestFormShell({ onRequestCreated, initialType, initialRequest
   )
   const [createTypeOpen, setCreateTypeOpen] = useState(false)
   const [fieldErrors,  setFieldErrors]  = useState<Record<string, string>>({})
-  const [aiLoading,    setAiLoading]    = useState(false)
-  const [aiDecision,   setAiDecision]   = useState<AIAgentDecision | null>(null)
+  const [aiLoading,       setAiLoading]       = useState(false)
+  const [aiDecision,      setAiDecision]      = useState<AIAgentDecision | null>(null)
+  const [descGenerating,  setDescGenerating]  = useState(false)
 
   const isEditingDraft = !!initialRequest?.publicId
 
@@ -229,6 +230,27 @@ export function RequestFormShell({ onRequestCreated, initialType, initialRequest
       toast.error("AI suggestion failed")
     } finally {
       setAiLoading(false)
+    }
+  }
+
+  async function handleGenerateDescription() {
+    if (!title.trim()) {
+      setFieldErrors({ title: "Enter a title first." })
+      return
+    }
+    setDescGenerating(true)
+    try {
+      const result = await aiGenerateDescription(title.trim(), type)
+      if (result) {
+        setDescription(result)
+        toast.success("Description generated")
+      } else {
+        toast.error("Could not generate description")
+      }
+    } catch {
+      toast.error("Generation failed")
+    } finally {
+      setDescGenerating(false)
     }
   }
 
@@ -432,6 +454,16 @@ export function RequestFormShell({ onRequestCreated, initialType, initialRequest
               />
             </FormField>
             <FormField label="Description" hint="Provide context and any supporting details">
+              <div className="flex items-center gap-1.5 mb-1">
+                <button
+                  type="button"
+                  onClick={handleGenerateDescription}
+                  disabled={descGenerating || isSubmitting || !title.trim()}
+                  className="ml-auto text-[11px] font-medium text-brand-teal hover:text-brand-teal-dark disabled:text-[#B4B2A9] transition-colors"
+                >
+                  {descGenerating ? "Generating…" : "Generate"}
+                </button>
+              </div>
               <Textarea
                 name="description"
                 placeholder="Provide context and any supporting details"
