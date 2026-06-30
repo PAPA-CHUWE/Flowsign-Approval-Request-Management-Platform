@@ -592,7 +592,7 @@ export function RequestFormShell({ onRequestCreated, initialType, initialRequest
               <div className="flex flex-col gap-4">
                 <SectionHeading title="Request details" />
                 {isLoadingDetails && (
-                  <Loader label="Loading fields" size="sm" className="min-h-12 justify-start" />
+                  <Loader label="Loading fields" className="min-h-12 justify-start" />
                 )}
                 {detailsError && (
                   <p className="text-[12px] font-medium text-brand-danger-text">{detailsError}</p>
