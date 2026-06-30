@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { ArrowLeft, Plus, Sparkles } from "lucide-react"
 import { toast } from "sonner"
 import { Button }   from "@/components/ui/button"
@@ -15,6 +15,7 @@ import { submitRequest, updateApprovalRequest } from "@/lib/api/requests"
 import type { ApprovalRequest } from "@/lib/api/requests"
 import { aiSuggest } from "@/lib/api/modelApi"
 import type { AIAgentDecision } from "@/lib/api/modelApi"
+import { listOrganizationUsers } from "@/lib/api/users"
 
 import { inputCn }             from "./inputCn"
 import { SectionHeading }      from "./SectionHeading"
@@ -110,6 +111,35 @@ export function RequestFormShell({ onRequestCreated, initialType, initialRequest
   const dynamicFields       = selectedRequestType?.fields ?? []
   const requiredDynamic     = dynamicFields.filter((f) => f.required)
 
+  // ── Real-time AI validation on input changes ──────────────────────────────
+
+  const validateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    if (validateTimer.current) clearTimeout(validateTimer.current)
+    if (!title.trim() && !description.trim()) {
+      setAiDecision(null)
+      return
+    }
+    validateTimer.current = setTimeout(async () => {
+      setAiLoading(true)
+      try {
+        const decision = await aiSuggest({
+          title: title.trim(),
+          description: description.trim() || undefined,
+        })
+        if (decision) {
+          setAiDecision((prev) => prev ? { ...prev, validation: decision.validation } : decision)
+        }
+      } catch {
+        /* silent */
+      } finally {
+        setAiLoading(false)
+      }
+    }, 1500)
+    return () => { if (validateTimer.current) clearTimeout(validateTimer.current) }
+  }, [title, description])
+
   // ── Handlers ──────────────────────────────────────────────────────────────
 
   async function handleTypeChange(nextType: string) {
@@ -161,11 +191,35 @@ export function RequestFormShell({ onRequestCreated, initialType, initialRequest
         if (c.priority) setPriority(c.priority as Priority)
         if (c.department) setDepartment(c.department)
       }
+
+      if (decision?.routing) {
+        const r = decision.routing
+        const roleKeys = [r.recommended_approver, r.backup_approver].filter(Boolean) as string[]
+        if (roleKeys.length > 0) {
+          try {
+            const { responseBody: { users } } = await listOrganizationUsers()
+            const byRole = (role: string) =>
+              users
+                .filter((u) => u.roles.includes(role))
+                .map((u) => ({
+                  id: u.publicId,
+                  name: `${u.firstName} ${u.lastName}`.trim() || u.email,
+                  role: u.title ?? u.department ?? "",
+                  initials: `${(u.firstName[0] ?? "").toUpperCase()}${(u.lastName[0] ?? "").toUpperCase()}`,
+                }))
+            if (r.recommended_approver) setApprovers(byRole(r.recommended_approver))
+            if (r.backup_approver) setImplementors(byRole(r.backup_approver))
+          } catch {
+            /* silent — manual picker still works */
+          }
+        }
+      }
+
       setAiDecision(decision)
       if (!decision) {
         toast.error("AI suggestion unavailable", { description: "The AI service could not process this request." })
       } else {
-        toast.success("AI suggestion ready", { description: "Review the suggested type and priority above." })
+        toast.success("AI suggestion ready", { description: "Review the suggested type, priority, and approvers above." })
       }
     } catch {
       toast.error("AI suggestion failed")
@@ -386,9 +440,30 @@ export function RequestFormShell({ onRequestCreated, initialType, initialRequest
                   "text-[13px] text-brand-neutral-dark placeholder:text-[#B4B2A9]",
                   "focus-visible:border-brand-teal-mid focus-visible:ring-2",
                   "focus-visible:ring-brand-teal-pale focus-visible:bg-white",
-                  "resize-y min-h-[100px] leading-relaxed transition-all duration-150"
+                  "resize-y min-h-[100px] leading-relaxed transition-all duration-150",
+                  aiDecision?.validation && !aiDecision.validation.valid && "border-amber-300"
                 )}
               />
+              {aiDecision?.validation && !aiDecision.validation.valid && (
+                <div className="mt-2 flex flex-col gap-1.5 rounded-lg border border-amber-200 bg-amber-50/50 px-3 py-2">
+                  {aiDecision.validation.warnings.length > 0 && (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[11px] font-semibold text-amber-800">Warnings</span>
+                      {aiDecision.validation.warnings.map((w, i) => (
+                        <p key={i} className="text-[11px] text-amber-700">&bull; {w}</p>
+                      ))}
+                    </div>
+                  )}
+                  {aiDecision.validation.recommendations.length > 0 && (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[11px] font-semibold text-amber-800">Recommendations</span>
+                      {aiDecision.validation.recommendations.map((r, i) => (
+                        <p key={i} className="text-[11px] text-amber-700">&bull; {r}</p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </FormField>
 
             <div className="flex items-center gap-2">
@@ -403,16 +478,6 @@ export function RequestFormShell({ onRequestCreated, initialType, initialRequest
                 <Sparkles size={14} className="mr-1.5 text-brand-teal" />
                 {aiLoading ? "Analysing…" : "AI Suggest"}
               </Button>
-
-              {aiDecision?.validation && !aiDecision.validation.valid && (
-                <div className="flex flex-wrap gap-1.5">
-                  {aiDecision.validation.recommendations.slice(0, 2).map((r, i) => (
-                    <span key={i} className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-medium text-amber-700">
-                      {r}
-                    </span>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
 
