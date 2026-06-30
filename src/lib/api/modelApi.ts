@@ -75,3 +75,37 @@ export async function aiGenerateDescription(title: string, requestTypeKey?: stri
     return null;
   }
 }
+
+export interface SynthesizeInput {
+  text: string;
+  fieldDefinitions?: Record<string, unknown>[];
+}
+
+export interface SynthesizeResult {
+  title: string;
+  description: string;
+  request_type_key: string;
+  priority: string;
+  department: string | null;
+  suggested_fields?: Record<string, string | number>;
+  recommended_approver: string | null;
+  backup_approver: string | null;
+}
+
+interface SynthesizeResponse {
+  statusCode: string;
+  message: string;
+  responseBody: SynthesizeResult;
+}
+
+export async function aiSynthesize(input: SynthesizeInput): Promise<SynthesizeResult | null> {
+  try {
+    const json = await apiClient<SynthesizeResponse>("/api/v1/ai/synthesize", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+    return json.responseBody ?? null;
+  } catch {
+    return null;
+  }
+}

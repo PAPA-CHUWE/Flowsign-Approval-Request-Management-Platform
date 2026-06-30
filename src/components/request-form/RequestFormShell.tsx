@@ -14,7 +14,7 @@ import { Loader } from "@/components/loader-ui/loader"
 import { submitRequest, updateApprovalRequest } from "@/lib/api/requests"
 import type { ApprovalRequest } from "@/lib/api/requests"
 import { aiSuggest, aiGenerateDescription } from "@/lib/api/modelApi"
-import type { AIAgentDecision } from "@/lib/api/modelApi"
+import type { AIAgentDecision, SynthesizeResult } from "@/lib/api/modelApi"
 import { listOrganizationUsers } from "@/lib/api/users"
 
 import { inputCn }             from "./inputCn"
@@ -111,6 +111,61 @@ export function RequestFormShell({ onRequestCreated, initialType, initialRequest
   const selectedRequestType = requestTypes.find((rt) => rt.key === type)
   const dynamicFields       = selectedRequestType?.fields ?? []
   const requiredDynamic     = dynamicFields.filter((f) => f.required)
+
+  // ── Read synthesized data from chat → create flow ─────────────────────────
+
+  const initialisedRef = useRef(false)
+
+  useEffect(() => {
+    if (initialisedRef.current) return
+    initialisedRef.current = true
+    if (initialRequest) return
+
+    const raw = sessionStorage.getItem("flowsign_synthesized")
+    if (!raw) return
+    sessionStorage.removeItem("flowsign_synthesized")
+
+    try {
+      const data = JSON.parse(raw) as SynthesizeResult
+      if (data.title) setTitle(data.title)
+      if (data.description) setDescription(data.description)
+      if (data.request_type_key) {
+        const matched = requestTypes.find((rt) => rt.key === data.request_type_key)
+        if (matched) {
+          setType(matched.key)
+          if (data.suggested_fields) {
+            const coerced: Record<string, string> = {}
+            for (const [k, v] of Object.entries(data.suggested_fields)) {
+              coerced[k] = String(v)
+            }
+            setRequestData(coerced)
+          }
+        }
+      }
+      if (data.priority) setPriority(data.priority as Priority)
+      if (data.department) setDepartment(data.department)
+      if (data.recommended_approver || data.backup_approver) {
+        const roleKeys = [data.recommended_approver, data.backup_approver].filter(Boolean) as string[]
+        if (roleKeys.length > 0) {
+          listOrganizationUsers().then(({ responseBody: { users } }) => {
+            const byRole = (role: string) =>
+              users
+                .filter((u) => u.roles.includes(role))
+                .map((u) => ({
+                  id: u.publicId,
+                  name: `${u.firstName} ${u.lastName}`.trim() || u.email,
+                  role: u.title ?? u.department ?? "",
+                  initials: `${(u.firstName[0] ?? "").toUpperCase()}${(u.lastName[0] ?? "").toUpperCase()}`,
+                }))
+            if (data.recommended_approver) setApprovers(byRole(data.recommended_approver))
+            if (data.backup_approver) setImplementors(byRole(data.backup_approver))
+          }).catch(() => { /* silent */ })
+        }
+      }
+    } catch {
+      /* ignore bad data */
+    }
+  }, [initialRequest, requestTypes])
 
   // ── Real-time AI validation on input changes ──────────────────────────────
 
