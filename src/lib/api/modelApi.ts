@@ -1,6 +1,4 @@
-const DEFAULT_API_BASE_URL = "https://flowsign-approval-request-management-2ss4.onrender.com";
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? DEFAULT_API_BASE_URL ;
-const AUTH_TOKEN_KEY = "flowsign_auth_token";
+import { apiClient } from "./client";
 
 export interface AgentClassification {
   request_type_key: string;
@@ -37,23 +35,24 @@ export interface AISuggestInput {
   requestTypeKey?: string;
 }
 
+interface AIResponse {
+  statusCode: string;
+  message: string;
+  responseBody: {
+    decision: AIAgentDecision | null;
+  };
+}
+
 export async function aiSuggest(input: AISuggestInput): Promise<AIAgentDecision | null> {
   try {
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
-    const token = typeof window !== "undefined" ? window.localStorage.getItem(AUTH_TOKEN_KEY) : null;
-    if (token) headers["Authorization"] = `Bearer ${token}`;
-
-    const response = await fetch(`${API_BASE}/api/v1/ai/orchestrate`, {
+    const json = await apiClient<AIResponse>("/api/v1/ai/orchestrate", {
       method: "POST",
-      headers,
       body: JSON.stringify(input),
     });
-
-    if (!response.ok) return null;
-
-    const json = await response.json();
-    return json.data?.decision ?? null;
-  } catch {
+    console.log("[AI Suggest] response:", JSON.stringify(json, null, 2));
+    return json.responseBody?.decision ?? null;
+  } catch (err) {
+    console.warn("[AI Suggest] fetch failed:", err);
     return null;
   }
 }
