@@ -4,6 +4,7 @@ export interface AgentClassification {
   request_type_key: string;
   priority: string;
   department: string | null;
+  suggested_fields?: Record<string, string>;
   confidence: number;
   reasoning: string;
 }
@@ -32,6 +33,7 @@ export interface AISuggestInput {
   title: string;
   description?: string;
   data?: Record<string, unknown>;
+  fieldDefinitions?: Record<string, unknown>[];
   requestTypeKey?: string;
 }
 

@@ -183,6 +183,7 @@ export function RequestFormShell({ onRequestCreated, initialType, initialRequest
         title: title.trim(),
         description: description.trim() || undefined,
         data: normalizedData(),
+        fieldDefinitions: dynamicFields as unknown as Record<string, unknown>[],
         requestTypeKey: type,
       })
       if (decision?.classification) {
@@ -190,8 +191,10 @@ export function RequestFormShell({ onRequestCreated, initialType, initialRequest
         const matched = requestTypes.find((rt) => rt.key === c.request_type_key)
         if (matched && !initialType) {
           setType(matched.key)
-          setRequestData({})
+          setRequestData(c.suggested_fields ?? {})
           setFieldErrors({})
+        } else if (c.suggested_fields) {
+          setRequestData((prev) => ({ ...prev, ...c.suggested_fields }))
         }
         if (c.priority) setPriority(c.priority as Priority)
         if (c.department) setDepartment(c.department)
