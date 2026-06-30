@@ -5,7 +5,6 @@ import { getAnalyticsDashboard, getRejectionRates, getResolutionAnalytics } from
 import { listWorkflowRules } from "@/lib/api/workflow-rules"
 import { listRequestTypes } from "@/lib/api/request-types"
 import type { PipelineStats } from "@/lib/mock/dashboard.mock"
-import type { ResolutionByType } from "@/lib/api/analytics"
 
 export interface WorkflowGap {
   requestTypeKey: string
