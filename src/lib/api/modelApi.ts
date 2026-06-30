@@ -1,4 +1,19 @@
 import { apiClient } from "./client";
+import type {
+  AgentPipelineOutput,
+  CreateAgentRunPayload,
+  AgentRunResponse,
+  ClassifierOutput,
+  DocumentUnderstandingOutput,
+  CompletenessOutput,
+  PolicyOutput,
+  ValidationOutput,
+  RiskAssessmentOutput,
+  RoutingOutput,
+  SummaryOutput,
+  AuditEvent,
+  AgentName,
+} from "@/types/agent.types"
 
 export interface AgentClassification {
   request_type_key: string;
@@ -108,4 +123,36 @@ export async function aiSynthesize(input: SynthesizeInput): Promise<SynthesizeRe
   } catch {
     return null;
   }
+}
+
+// ── Agent Pipeline API Functions ─────────────────────────────────────────────────
+
+export function runAgentPipeline(payload: CreateAgentRunPayload): Promise<AgentPipelineOutput | null> {
+  return apiClient<AgentRunResponse>("/api/v1/ai/pipeline", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  }).then((r) => r.responseBody?.pipeline ?? null).catch(() => null)
+}
+
+export function getAgentOutput(
+  requestPublicId: string,
+  agentName: AgentName
+): Promise<ClassifierOutput | DocumentUnderstandingOutput | CompletenessOutput | PolicyOutput | ValidationOutput | RiskAssessmentOutput | RoutingOutput | SummaryOutput | null> {
+  return apiClient<{
+    statusCode: string
+    message: string
+    responseBody: { output: ClassifierOutput | DocumentUnderstandingOutput | CompletenessOutput | PolicyOutput | ValidationOutput | RiskAssessmentOutput | RoutingOutput | SummaryOutput | null }
+  }>(`/api/v1/ai/output/${encodeURIComponent(requestPublicId)}/${agentName}`)
+    .then((r) => r.responseBody?.output ?? null)
+    .catch(() => null)
+}
+
+export function getAuditTrail(requestPublicId: string): Promise<AuditEvent[]> {
+  return apiClient<{
+    statusCode: string
+    message: string
+    responseBody: { events: AuditEvent[] }
+  }>(`/api/v1/audit/${encodeURIComponent(requestPublicId)}`)
+    .then((r) => r.responseBody?.events ?? [])
+    .catch(() => [])
 }

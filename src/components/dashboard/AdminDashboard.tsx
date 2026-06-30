@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { Clock, CheckCircle2, XCircle, Timer } from "lucide-react";
 import { DashboardStatCard } from "./DashboardStatCard";
 import { AdminSummary } from "./AdminSummary";
+import { AgentPipeline } from "./AgentPipeline";
 import { WorkflowSetupBanner } from "./WorkflowSetupBanner";
 import { RequestsTable } from "./RequestsTable";
 import { ActivityFeed } from "./ActivityFeed";
@@ -91,6 +92,8 @@ export function AdminDashboard() {
           <DashboardStatCard key={card.label} {...card} />
         ))}
       </div>
+
+      <AgentPipeline requestPublicId={requests[0]?.id ?? ""} />
 
       <VolumeChart />
 
