@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { MessageSquare, Send, Sparkles, X } from "lucide-react"
+import { MessageSquare, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -10,7 +10,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
 import { aiSynthesize } from "@/lib/api/modelApi"
 import type { SynthesizeResult } from "@/lib/api/modelApi"
 import { Loader } from "@/components/loader-ui/loader"
@@ -76,7 +75,7 @@ export function SynthesizeDialog({ open, onOpenChange, onComplete }: SynthesizeD
         </DialogHeader>
 
         <div className="flex flex-col gap-3">
-          <Textarea
+          <textarea
             ref={textareaRef}
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -84,7 +83,7 @@ export function SynthesizeDialog({ open, onOpenChange, onComplete }: SynthesizeD
             placeholder='e.g. "I need $200 for office supplies" or "Requesting a MacBook Pro for the new backend engineer starting Monday"'
             disabled={loading}
             rows={4}
-            className="min-h-[100px] rounded-[8px] border-[#E8E6DE] bg-[#FAFAF8] text-[13px] placeholder:text-[#B4B2A9] focus-visible:border-brand-teal-mid focus-visible:bg-white focus-visible:ring-2 focus-visible:ring-brand-teal-pale resize-y"
+            className="min-h-[100px] w-full resize-y rounded-[8px] border border-[#D3D1C7] bg-white px-3 py-2.5 text-[13px] text-[#2C2C2A] placeholder:text-[#B4B2A9] outline-none transition-colors focus:border-brand-teal-mid focus:ring-2 focus:ring-brand-teal-pale disabled:cursor-not-allowed disabled:bg-[#F6F4EF] disabled:opacity-60"
           />
 
           {error && (
