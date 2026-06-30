@@ -4,7 +4,7 @@ export interface AgentClassification {
   request_type_key: string;
   priority: string;
   department: string | null;
-  suggested_fields?: Record<string, string>;
+  suggested_fields?: Record<string, string | number>;
   confidence: number;
   reasoning: string;
 }

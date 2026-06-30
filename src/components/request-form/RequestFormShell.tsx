@@ -189,12 +189,21 @@ export function RequestFormShell({ onRequestCreated, initialType, initialRequest
       if (decision?.classification) {
         const c = decision.classification
         const matched = requestTypes.find((rt) => rt.key === c.request_type_key)
+        const coerceFields = (fields: Record<string, string | number> | undefined) => {
+          if (!fields) return {}
+          return Object.fromEntries(
+            Object.entries(fields).map(([k, v]) => [k, String(v)])
+          )
+        }
         if (matched && !initialType) {
           setType(matched.key)
-          setRequestData(c.suggested_fields ?? {})
+          setRequestData(coerceFields(c.suggested_fields))
           setFieldErrors({})
-        } else if (c.suggested_fields) {
-          setRequestData((prev) => ({ ...prev, ...c.suggested_fields }))
+        } else {
+          const coerced = coerceFields(c.suggested_fields)
+          if (Object.keys(coerced).length > 0) {
+            setRequestData((prev) => ({ ...prev, ...coerced }))
+          }
         }
         if (c.priority) setPriority(c.priority as Priority)
         if (c.department) setDepartment(c.department)
