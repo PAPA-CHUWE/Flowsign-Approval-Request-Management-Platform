@@ -77,7 +77,7 @@ export function AgentPipeline({ requestPublicId }: { requestPublicId: string }) 
       })
       .catch(() => {})
       .finally(() => setIsLoading(false))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [requestPublicId])
 
   if (isLoading) {
