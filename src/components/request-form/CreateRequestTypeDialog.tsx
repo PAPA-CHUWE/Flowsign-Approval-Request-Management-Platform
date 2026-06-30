@@ -113,11 +113,11 @@ export function CreateRequestTypeDialog({
       current.map((item) =>
         item.id === id
           ? {
-              ...item,
-              [field]: field === "key" && typeof value === "string"
-                ? slugify(value)
-                : value,
-            }
+            ...item,
+            [field]: field === "key" && typeof value === "string"
+              ? slugify(value)
+              : value,
+          }
           : item
       )
     )
@@ -190,7 +190,11 @@ export function CreateRequestTypeDialog({
         onOpenChange(nextOpen)
       }}
     >
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl"      
+ onPointerDownOutside={(e: Event) => e.preventDefault()}
+ onInteractOutside={(e: Event) => e.preventDefault()}
+ onEscapeKeyDown={(e: KeyboardEvent) => e.preventDefault()}
+>
         <DialogHeader>
           <DialogTitle>Create request type</DialogTitle>
           <DialogDescription>
@@ -310,10 +314,10 @@ export function CreateRequestTypeDialog({
                           current.map((item) =>
                             item.id === field.id
                               ? {
-                                  ...item,
-                                  label,
-                                  key: item.key || slugify(label),
-                                }
+                                ...item,
+                                label,
+                                key: item.key || slugify(label),
+                              }
                               : item
                           )
                         )
