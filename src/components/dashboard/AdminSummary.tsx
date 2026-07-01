@@ -1,6 +1,6 @@
 "use client"
 
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis, ResponsiveContainer, Legend } from "recharts"
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import { AlertCircle, Bot, Ticket, Workflow } from "lucide-react"
 import { useAdminSummary } from "@/hooks/use-admin-summary"
 
@@ -241,14 +241,16 @@ export function AdminSummary() {
         </div>
       </div>
 
-      <div className="rounded-[14px] border border-[#E8E6DE] bg-white p-5">
-        <h3 className="text-[14px] font-semibold text-brand-neutral-dark mb-3">Request Volume</h3>
-        <VolumeChart data={volumeData} />
-      </div>
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+        <div className="rounded-[14px] border border-[#E8E6DE] bg-white p-5">
+          <h3 className="text-[14px] font-semibold text-brand-neutral-dark mb-3">Request Volume</h3>
+          <VolumeChart data={volumeData} />
+        </div>
 
-      <div className="rounded-[14px] border border-[#E8E6DE] bg-white p-5">
-        <h3 className="text-[14px] font-semibold text-brand-neutral-dark mb-3">Requests by Type</h3>
-        <TypeChart data={requestsByType} />
+        <div className="rounded-[14px] border border-[#E8E6DE] bg-white p-5">
+          <h3 className="text-[14px] font-semibold text-brand-neutral-dark mb-3">Requests by Type</h3>
+          <TypeChart data={requestsByType} />
+        </div>
       </div>
     </div>
   )
