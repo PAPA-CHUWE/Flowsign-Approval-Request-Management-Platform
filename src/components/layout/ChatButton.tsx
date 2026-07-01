@@ -2,13 +2,20 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { MessageCircle, Sparkles } from "lucide-react"
+import { MessageCircle, Sparkles, FileText, BarChart3, Ticket, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Loader } from "@/components/loader-ui/loader"
 import { aiSynthesize } from "@/lib/api/modelApi"
 import type { SynthesizeResult } from "@/lib/api/modelApi"
+
+const QUICK_ACTIONS = [
+  { id: "create", label: "Create request", icon: Ticket, prompt: "I need to create a new approval request" },
+  { id: "summary", label: "Get summary", icon: BarChart3, prompt: "Give me a summary of all my requests" },
+  { id: "approvals", label: "My approvals", icon: Users, prompt: "Show me approvals waiting for me" },
+  { id: "tickets", label: "View tickets", icon: FileText, prompt: "Show me all my tickets" },
+]
 
 const MOCK_SYNTHESIZE_PATTERNS: Array<{ pattern: RegExp; type: string; approver: string }> = [
   { pattern: /(leave|vacation|pto|sick|time.?off)/i, type: "leave", approver: "hr" },
@@ -68,7 +75,6 @@ export function ChatButton() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const router = useRouter()
 
-  // Reset form when dialog opens
   useEffect(() => {
     if (open) {
       setText("")
@@ -104,6 +110,30 @@ export function ChatButton() {
     }
   }
 
+  function handleQuickAction(actionId: string) {
+    const action = QUICK_ACTIONS.find((a) => a.id === actionId)
+    if (!action) return
+
+    if (action.id === "summary") {
+      setOpen(false)
+      router.push("/dashboard")
+      return
+    }
+    if (action.id === "approvals") {
+      setOpen(false)
+      router.push("/approvals")
+      return
+    }
+    if (action.id === "tickets") {
+      setOpen(false)
+      router.push("/tickets")
+      return
+    }
+
+    setText(action.prompt)
+    textareaRef.current?.focus()
+  }
+
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
@@ -126,14 +156,29 @@ export function ChatButton() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-[15px]">
               <Sparkles size={16} className="text-brand-teal" />
-              Describe your request
+              What do you need help with?
             </DialogTitle>
             <DialogDescription className="text-[13px]">
-              Tell us what you need in plain English. We&apos;ll pre-fill the form.
+              Pick a quick action or describe your request in plain English.
             </DialogDescription>
           </DialogHeader>
 
           <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap gap-2">
+              {QUICK_ACTIONS.map((action) => (
+                <button
+                  key={action.id}
+                  type="button"
+                  onClick={() => handleQuickAction(action.id)}
+                  disabled={loading}
+                  className="flex items-center gap-1.5 rounded-full border border-[#E8E6DE] bg-white px-3 py-1.5 text-[12px] font-medium text-[#5F5E5A] transition-colors hover:bg-[#F7F6F2] disabled:opacity-50"
+                >
+                  <action.icon size={13} />
+                  {action.label}
+                </button>
+              ))}
+            </div>
+
             <Textarea
               ref={textareaRef}
               value={text}

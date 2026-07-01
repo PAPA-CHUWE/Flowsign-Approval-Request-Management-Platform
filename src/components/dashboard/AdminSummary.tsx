@@ -1,15 +1,8 @@
 "use client"
 
+import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import { AlertCircle, Bot, Ticket, Workflow } from "lucide-react"
 import { useAdminSummary } from "@/hooks/use-admin-summary"
-import dynamic from "next/dynamic"
-
-const Chart = dynamic(() => import("react-apexcharts"), {
-  ssr: false,
-  loading: () => (
-    <div className="h-32 w-full animate-pulse rounded bg-[#F1EFE8]" />
-  ),
-})
 
 function StatRow({ icon: Icon, label, value, color }: {
   icon: React.ElementType
@@ -43,45 +36,62 @@ function GapItem({ name, suggested }: { name: string; suggested: string }) {
 }
 
 function VolumeChart({ data }: { data: { date: string; submitted: number; approved: number; rejected: number }[] }) {
-  const options = {
-    chart: {
-      type: "bar" as const,
-      height: 120,
-      stacked: true,
-      toolbar: { show: false },
-    },
-    colors: ["#5E5D57", "#2A9D8F", "#E76F51"],
-    dataLabels: { enabled: false },
-    plotOptions: {
-      bar: {
-        columnWidth: "50%",
-        borderRadius: 4,
-      },
-    },
-    xaxis: {
-      categories: data.map(d => d.date),
-      labels: { style: { fontSize: "10px" }, colors: "#888780" },
-      axisBorder: { show: false },
-      axisTicks: { show: false },
-    },
-    yaxis: { labels: { style: { fontSize: "10px" }, colors: "#888780" } },
-    legend: { show: false },
-    grid: { borderColor: "#F1EFE8", strokeDashArray: 3 },
-    tooltip: {
-      theme: "light" as const,
-      style: { fontSize: "12px" },
-    },
-  }
-
-  const series = [
-    { name: "Submitted", data: data.map(d => d.submitted) },
-    { name: "Approved", data: data.map(d => d.approved) },
-    { name: "Rejected", data: data.map(d => d.rejected) },
-  ]
-
   return (
-    <div className="h-32 w-full">
-      <Chart options={options} series={series} height={120} />
+    <div className="h-48 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart
+          data={data}
+          margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+        >
+          <defs>
+            <linearGradient id="colorSubmitted" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
+              <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
+            </linearGradient>
+            <linearGradient id="colorApproved" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#2A9D8F" stopOpacity={0.8} />
+              <stop offset="95%" stopColor="#2A9D8F" stopOpacity={0} />
+            </linearGradient>
+            <linearGradient id="colorRejected" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#E76F51" stopOpacity={0.8} />
+              <stop offset="95%" stopColor="#E76F51" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="#F1EFE8" />
+          <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#888780" }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 10, fill: "#888780" }} axisLine={false} tickLine={false} width={30} />
+          <Tooltip
+            contentStyle={{ fontSize: "12px", borderRadius: "8px" }}
+            labelStyle={{ fontSize: "12px" }}
+          />
+          <Area
+            type="monotone"
+            dataKey="submitted"
+            stroke="#8884d8"
+            fillOpacity={1}
+            fill="url(#colorSubmitted)"
+            isAnimationActive={true}
+            animationBegin={200}
+            animationDuration={1300}
+          />
+          <Area
+            type="monotone"
+            dataKey="approved"
+            stroke="#2A9D8F"
+            fillOpacity={1}
+            fill="url(#colorApproved)"
+            isAnimationActive={true}
+          />
+          <Area
+            type="monotone"
+            dataKey="rejected"
+            stroke="#E76F51"
+            fillOpacity={1}
+            fill="url(#colorRejected)"
+            isAnimationActive={true}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
     </div>
   )
 }
