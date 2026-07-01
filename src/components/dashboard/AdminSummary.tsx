@@ -1,6 +1,6 @@
 "use client"
 
-import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis, ResponsiveContainer } from "recharts"
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis, ResponsiveContainer, Legend } from "recharts"
 import { AlertCircle, Bot, Ticket, Workflow } from "lucide-react"
 import { useAdminSummary } from "@/hooks/use-admin-summary"
 
@@ -96,6 +96,28 @@ function VolumeChart({ data }: { data: { date: string; submitted: number; approv
   )
 }
 
+function TypeChart({ data }: { data: { name: string; count: number }[] }) {
+  return (
+    <div className="h-48 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={data}
+          margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke="#F1EFE8" />
+          <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#888780" }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 10, fill: "#888780" }} axisLine={false} tickLine={false} width={30} />
+          <Tooltip
+            contentStyle={{ fontSize: "12px", borderRadius: "8px" }}
+            labelStyle={{ fontSize: "12px" }}
+          />
+          <Bar dataKey="count" fill="#8884d8" radius={[4, 4, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
 export function AdminSummary() {
   const { summary, isLoading, error } = useAdminSummary()
 
@@ -127,7 +149,7 @@ export function AdminSummary() {
 
   if (!summary) return null
 
-  const { pipelineStats, totalRequests, workflowGaps, aiStats, rejectionRate, volumeData } = summary
+  const { pipelineStats, totalRequests, workflowGaps, aiStats, rejectionRate, volumeData, requestsByType } = summary
   const gaps = workflowGaps.filter((g) => !g.hasActiveWorkflow)
   const hasGaps = gaps.length > 0
 
@@ -142,11 +164,11 @@ export function AdminSummary() {
             <h3 className="text-[14px] font-semibold text-brand-neutral-dark">Requests</h3>
           </div>
 
-          <div className="flex items-baseline gap-3">
+          <div className="flex items-baseline gap-2">
             <span className="font-dm-sans text-[28px] font-bold text-brand-neutral-dark tabular-nums">
               {totalRequests}
             </span>
-            <span className="text-[12px] text-brand-neutral-mid">total requests</span>
+            <span className="text-[12px] text-brand-neutral-mid">total</span>
           </div>
 
           <div className="border-t border-[#F1EFE8] pt-2">
@@ -162,14 +184,14 @@ export function AdminSummary() {
             <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-brand-teal-pale">
               <Workflow size={16} className="text-brand-teal" />
             </div>
-            <h3 className="text-[14px] font-semibold text-brand-neutral-dark">Workflow Coverage</h3>
+            <h3 className="text-[14px] font-semibold text-brand-neutral-dark">Workflows</h3>
           </div>
 
-          <div className="flex items-baseline gap-3">
+          <div className="flex items-baseline gap-2">
             <span className="font-dm-sans text-[28px] font-bold text-brand-neutral-dark tabular-nums">
               {workflowGaps.length - gaps.length}
             </span>
-            <span className="text-[12px] text-brand-neutral-mid">of {workflowGaps.length} configured</span>
+            <span className="text-[12px] text-brand-neutral-mid">active</span>
           </div>
 
           <div className="border-t border-[#F1EFE8] pt-2">
@@ -189,7 +211,7 @@ export function AdminSummary() {
                   <Bot size={12} />
                 </div>
                 <span className="text-[12px] font-medium text-brand-neutral-dark">
-                  All workflows active — great coverage!
+                  All workflows active
                 </span>
               </div>
             )}
@@ -201,19 +223,19 @@ export function AdminSummary() {
             <div className="flex h-8 w-8 items-center justify-center rounded-[8px] bg-brand-teal-pale">
               <Bot size={16} className="text-brand-teal" />
             </div>
-            <h3 className="text-[14px] font-semibold text-brand-neutral-dark">AI Automation</h3>
+            <h3 className="text-[14px] font-semibold text-brand-neutral-dark">AI Stats</h3>
           </div>
 
-          <div className="flex items-baseline gap-3">
+          <div className="flex items-baseline gap-2">
             <span className="font-dm-sans text-[28px] font-bold text-brand-neutral-dark tabular-nums">
               {(aiStats.aiAccuracyScore * 100).toFixed(0)}%
             </span>
-            <span className="text-[12px] text-brand-neutral-mid">accuracy score</span>
+            <span className="text-[12px] text-brand-neutral-mid">accuracy</span>
           </div>
 
           <div className="border-t border-[#F1EFE8] pt-2">
-            <StatRow icon={Bot} label="Assisted requests" value={aiStats.totalAssistedRequests} />
-            <StatRow icon={Bot} label="Rejection rate" value={`${(rejectionRate * 100).toFixed(1)}%`} color="text-brand-neutral-mid" />
+            <StatRow icon={Bot} label="Assisted" value={aiStats.totalAssistedRequests} />
+            <StatRow icon={Bot} label="Rejection rate" value={`${(rejectionRate * 100).toFixed(1)}%`} />
             <StatRow icon={Bot} label="Top type" value={aiStats.topSuggestedType ?? "—"} />
           </div>
         </div>
@@ -222,6 +244,11 @@ export function AdminSummary() {
       <div className="rounded-[14px] border border-[#E8E6DE] bg-white p-5">
         <h3 className="text-[14px] font-semibold text-brand-neutral-dark mb-3">Request Volume</h3>
         <VolumeChart data={volumeData} />
+      </div>
+
+      <div className="rounded-[14px] border border-[#E8E6DE] bg-white p-5">
+        <h3 className="text-[14px] font-semibold text-brand-neutral-dark mb-3">Requests by Type</h3>
+        <TypeChart data={requestsByType} />
       </div>
     </div>
   )

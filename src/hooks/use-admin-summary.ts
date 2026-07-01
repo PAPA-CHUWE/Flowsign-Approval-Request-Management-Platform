@@ -26,6 +26,7 @@ export interface AdminSummary {
   aiStats: AISuggestionStats
   rejectionRate: number
   volumeData: { date: string; submitted: number; approved: number; rejected: number }[]
+  requestsByType: { name: string; count: number }[]
 }
 
 function adaptPipelineStats(totals: Record<string, number>): PipelineStats {
@@ -102,6 +103,7 @@ export function useAdminSummary() {
           aiStats,
           rejectionRate: rejectionData.rate,
           volumeData,
+          requestsByType: d.topRequestTypes.map((t) => ({ name: t.name, count: t.count })),
         })
       })
       .catch((reason) => {
