@@ -59,7 +59,7 @@ function mockSynthesize(text: string): SynthesizeResult {
   if (location) suggestedFields.location = location
 
   return {
-    title: text.length > 40 ? text.slice(0, 40) + "…" : text,
+    title: text,
     description: `I am requesting approval for ${text.toLowerCase()}. This request is being submitted to support ongoing operational activities within the organization.`,
     request_type_key: hasFinance ? "finance" : match.type,
     priority: /urgent|asap|immediately|critical|emergency/i.test(text) ? "urgent" : "normal",
