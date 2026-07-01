@@ -21,7 +21,7 @@ const MOCK_SYNTHESIZE_PATTERNS: Array<{ pattern: RegExp; type: string; approver:
   { pattern: /(leave|vacation|pto|sick|time.?off)/i, type: "leave", approver: "hr" },
   { pattern: /(procure|purchase|buy|order|vendor|quote|supplies|office\s+supplies|merchandise)/i, type: "procurement", approver: "manager" },
   { pattern: /(laptop|macbook|monitor|hardware|software|computer|desktop|server|printer)/i, type: "it_equipment", approver: "it_admin" },
-  { pattern: /(budget|fund|finance|payment|invoice|expense|reimburse|billing|cost|usd|\$)/i, type: "finance", approver: "finance" },
+  { pattern: /(budget|fund|finance|payment|invoice|expense|reimburse|billing|cost|usd|\$|zwg|rtgs)/i, type: "finance", approver: "finance" },
   { pattern: /(facility|office\s+space|desk|maintenance|repair|cleaning|furniture|workspace)/i, type: "facilities", approver: "manager" },
   { pattern: /(hiring|recruit|onboard|contract|employee|training)/i, type: "hr", approver: "hr" },
   { pattern: /(travel|flight|hotel|trip|conference|site\s*visit|bulawayo|harare)/i, type: "travel", approver: "manager" },
@@ -33,11 +33,13 @@ const extractAmount = (text: string): number | null => {
     /(\d{1,3}(?:,\d{3})*)\s*(dollars|usd)/i,
     /(\d{1,3}(?:,\d{3})*)\s*usd/i,
     /(\d{1,3}(?:,\d{3})*)\s*USD/i,
+    /(\d+)\s*(zwg|rtgs)/i,
+    /(\d+zwg|rtgs)/i,
     /(?<![a-zA-Z0-9])(\d{3,})(?![a-zA-Z0-9])/,
   ]
   for (const p of patterns) {
     const m = text.match(p)
-    if (m) return parseFloat(m[1].replace(/,/g, ""))
+    if (m) return parseFloat(m[1].replace(/[,zwgrtgsZWGRTGS]/g, ""))
   }
   return null
 }
@@ -51,7 +53,7 @@ const mockSynthesize = (text: string): SynthesizeResult => {
   const match = MOCK_SYNTHESIZE_PATTERNS.find((p) => p.pattern.test(text)) ?? MOCK_SYNTHESIZE_PATTERNS[MOCK_SYNTHESIZE_PATTERNS.length - 1]
   const amount = extractAmount(text)
   const location = extractLocation(text)
-  const hasFinance = /finance|payment|budget|invoice|expense|usd|\$\s*\d/i.test(text) || amount !== null
+  const hasFinance = /finance|payment|budget|invoice|expense|usd|\$|\s*zwg|\s*rtgs/i.test(text) || amount !== null
 
   const suggestedFields: Record<string, string | number> = {}
   if (amount) suggestedFields.amount = amount
