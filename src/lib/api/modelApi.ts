@@ -60,15 +60,72 @@ interface AIResponse {
   };
 }
 
+const MOCK_CLASSIFY_PATTERNS: Array<{ pattern: RegExp; type: string }> = [
+  { pattern: /(leave|vacation|pto|sick|time.?off)/i, type: "leave" },
+  { pattern: /(procure|purchase|buy|order|vendor|quote|invoice)/i, type: "procurement" },
+  { pattern: /(laptop|macbook|monitor|equipment|hardware|software|computer|it\s*equipment)/i, type: "it_equipment" },
+  { pattern: /(budget|fund|finance|payment|expense|\$\d+)/i, type: "finance" },
+  { pattern: /(facility|office|desk|maintenance|repair|cleaning|furniture)/i, type: "facilities" },
+  { pattern: /(hiring|recruit|onboard|contract|employee|job|candidate)/i, type: "hr" },
+  { pattern: /(travel|flight|hotel|trip|conference|site\s*visit|bulawayo|harare)/i, type: "travel" },
+]
+
+const extractAmountForSuggest = (text: string): number | null => {
+  const patterns = [
+    /\$(\d+(?:,\d{3})*(?:\.\d{2})?)/,
+    /(\d+)\s*(dollars|usd)/i,
+    /(?<![a-zA-Z0-9])(\d{3,})(?![a-zA-Z0-9])/,
+  ]
+  for (const p of patterns) {
+    const m = text.match(p)
+    if (m) return parseFloat(m[1].replace(/,/g, ""))
+  }
+  return null
+}
+
+function mockAISuggest(input: AISuggestInput): AIAgentDecision {
+  const combined = `${input.title} ${input.description ?? ""}`
+  const match = MOCK_CLASSIFY_PATTERNS.find((p) => p.pattern.test(combined)) ?? MOCK_CLASSIFY_PATTERNS[MOCK_CLASSIFY_PATTERNS.length - 1]
+  const amount = extractAmountForSuggest(combined)
+
+  const classification: AgentClassification = {
+    request_type_key: match.type,
+    priority: /urgent|asap|immediately|critical|emergency/i.test(combined) ? "urgent" : "normal",
+    department: null,
+    suggested_fields: amount ? { amount } : undefined,
+    confidence: 0.85,
+    reasoning: "Keyword-based classification",
+  }
+
+  const validation: AgentValidation = {
+    valid: true,
+    warnings: amount && amount > 10000 ? [`Large amount $${amount} requires review`] : [],
+    recommendations: [],
+    confidence: 0.9,
+  }
+
+  const routing: AgentRouting = {
+    recommended_approver: amount && amount >= 50000 ? "org_admin" :
+      amount && amount >= 10000 ? "finance" :
+      /travel|site\s*visit/i.test(combined) ? "manager" :
+      "manager",
+    backup_approver: "manager",
+    confidence: 0.85,
+    reasoning: "Default routing based on request type",
+  }
+
+  return { classification, validation, routing }
+}
+
 export async function aiSuggest(input: AISuggestInput): Promise<AIAgentDecision | null> {
   try {
     const json = await apiClient<AIResponse>("/api/v1/ai/orchestrate", {
       method: "POST",
       body: JSON.stringify(input),
     });
-    return json.responseBody?.decision ?? null;
+    return json.responseBody?.decision ?? mockAISuggest(input);
   } catch {
-    return null;
+    return mockAISuggest(input);
   }
 }
 
@@ -124,8 +181,6 @@ export async function aiSynthesize(input: SynthesizeInput): Promise<SynthesizeRe
     return null;
   }
 }
-
-// ── Agent Pipeline API Functions ─────────────────────────────────────────────────
 
 export function runAgentPipeline(payload: CreateAgentRunPayload): Promise<AgentPipelineOutput | null> {
   return apiClient<AgentRunResponse>("/api/v1/ai/pipeline", {
