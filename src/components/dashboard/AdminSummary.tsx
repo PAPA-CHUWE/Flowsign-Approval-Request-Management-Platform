@@ -45,15 +45,19 @@ function GapItem({ name, suggested }: { name: string; suggested: string }) {
 function VolumeChart({ data }: { data: { date: string; submitted: number; approved: number; rejected: number }[] }) {
   const options = {
     chart: {
-      type: "area" as const,
+      type: "bar" as const,
       height: 120,
+      stacked: true,
       toolbar: { show: false },
-      zoom: { enabled: false },
     },
     colors: ["#5E5D57", "#2A9D8F", "#E76F51"],
     dataLabels: { enabled: false },
-    stroke: { curve: "smooth" as const, width: 2 },
-    markers: { size: 3 },
+    plotOptions: {
+      bar: {
+        columnWidth: "50%",
+        borderRadius: 4,
+      },
+    },
     xaxis: {
       categories: data.map(d => d.date),
       labels: { style: { fontSize: "10px" }, colors: "#888780" },
