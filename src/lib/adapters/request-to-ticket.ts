@@ -53,7 +53,7 @@ export function adaptRequestToTicket(r: ApprovalRequest): MockTicket {
   return {
     id:             r.publicId ?? r.id ?? r.requestKey ?? "",
     reference:      r.requestKey ?? r.reference ?? r.requestNumber ?? r.publicId ?? "—",
-    title:          r.title ?? r.summary ?? r.description ?? "Untitled request",
+    title:          r.title ?? r.summary ?? "Untitled request",
     requesterName,
     requestType:    mapRequestType(r),
     status:         mapStatus(r.status),
@@ -62,5 +62,6 @@ export function adaptRequestToTicket(r: ApprovalRequest): MockTicket {
     assignee,
     releasedBy,
     completionDate: r.dueAt ?? r.resolvedAt ?? undefined,
+    description:    r.description ?? r.details ?? undefined,
   }
 }

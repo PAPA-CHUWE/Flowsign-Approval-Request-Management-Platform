@@ -195,7 +195,7 @@ function CommentBubble({
   )
 }
 
-// ─── Comments section ─────────────────────────────────────────────────────────
+// ─── Comments section ───────────────────────────────────────────────────────────
 
 function CommentsSection({ requestPublicId }: { requestPublicId: string }) {
   const { comments, isLoading, error, post, edit, remove } = useRequestComments(requestPublicId)
@@ -432,6 +432,18 @@ export function ApprovalDrawer({
                 </MetaRow>
               )}
             </div>
+
+            {/* Description */}
+            {ticket.description && (
+              <div className="flex flex-col gap-3 border-b border-[#E8E6DE] px-6 py-5">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#B4B2A9]">
+                  Description
+                </p>
+                <p className="text-[13px] leading-relaxed text-[#5F5E5A] whitespace-pre-wrap break-words">
+                  {ticket.description}
+                </p>
+              </div>
+            )}
 
             {/* Decision section */}
             <div className="border-b border-[#E8E6DE] px-6 py-5">

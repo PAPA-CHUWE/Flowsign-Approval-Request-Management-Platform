@@ -36,6 +36,7 @@ function adaptQueueItem(item: ApprovalQueueItem): MockTicket {
     releasedBy:         "",
     completionDate:     item.dueAt ?? undefined,
     assignmentPublicId: item.assignmentPublicId,
+    description:        item.description ?? undefined,
   }
 }
 

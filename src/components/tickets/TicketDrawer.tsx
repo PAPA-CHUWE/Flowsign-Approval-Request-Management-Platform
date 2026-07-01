@@ -209,6 +209,19 @@ export function TicketDrawer({ ticket, open, onClose, onStatusChange }: TicketDr
             </MetaRow>
 
           </div>
+
+          {/* Description */}
+          {ticket.description && (
+            <div className="border-t border-[#E8E6DE] px-6 py-5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[#B4B2A9] mb-2">
+                Description
+              </p>
+              <p className="text-[13px] leading-relaxed text-brand-neutral-dark whitespace-pre-wrap break-words">
+                {ticket.description}
+              </p>
+            </div>
+          )}
+
         </div>
       </SheetContent>
     </Sheet>

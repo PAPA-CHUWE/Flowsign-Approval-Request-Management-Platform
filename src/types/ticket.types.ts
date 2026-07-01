@@ -9,6 +9,7 @@ export interface Ticket {
   requestType: RequestType
   status: TicketStatus
   submittedAt: string
+  description?: string
 }
 
 export interface TicketCardProps {

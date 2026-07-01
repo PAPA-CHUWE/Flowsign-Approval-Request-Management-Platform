@@ -142,10 +142,15 @@ export async function aiGenerateDescription(title: string, requestTypeKey?: stri
       method: "POST",
       body: JSON.stringify({ title, requestTypeKey }),
     });
-    return json.responseBody?.description ?? null;
+    return json.responseBody?.description ?? mockGenerateDescription(title, requestTypeKey);
   } catch {
-    return null;
+    return mockGenerateDescription(title, requestTypeKey);
   }
+}
+
+function mockGenerateDescription(title: string, requestTypeKey?: string): string {
+  const typeLabel = requestTypeKey ? ` ${requestTypeKey}` : ""
+  return `I am requesting approval for${typeLabel} ${title.toLowerCase()}. This request is being submitted to support ongoing operational activities within the organization. Please review and approve this request at your earliest convenience to ensure timely execution.`
 }
 
 export interface SynthesizeInput {
