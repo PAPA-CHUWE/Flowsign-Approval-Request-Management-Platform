@@ -59,6 +59,22 @@ const extractLocation = (text: string): string | null => {
   return m ? m[2] : null
 }
 
+const DESCRIPTION_TEMPLATES: Record<string, string> = {
+  travel: "This request is for {title}. The purpose of this travel is to conduct business activities that require an on-site presence, including stakeholder meetings, operational assessments, or client engagement. Approval is requested to authorize travel arrangements and associated expenses in accordance with the organisation's travel policy. This travel is expected to support business continuity and operational objectives.",
+  finance: "This request pertains to {title}. The funds are required to support operational financial commitments within the organisation. Approval is requested to facilitate the processing of this financial obligation in accordance with the organisation's financial governance framework. Timely approval will ensure continued operational stability.",
+  asset: "This request is for {title}. The item is required to support operational effectiveness and maintain productivity within the team. Approval is requested to authorise the acquisition or allocation of this resource. This will enable the team to perform their duties efficiently.",
+  hr: "This request concerns {title}. The purpose of this request is to facilitate personnel-related administration in line with organisational policy. Approval is requested to ensure compliance with established human resource procedures. Timely processing will support workforce planning and operational requirements.",
+  access: "This request is for {title}. The access or permission is required to enable the individual to perform their job responsibilities effectively. Approval is requested to authorise this access in accordance with the organisation's security and access control policies. This will support operational workflow and role-based requirements.",
+  general: "This request concerns {title}. The purpose of this request is to address an operational requirement within the organisation. Approval is requested to proceed with the outlined activity in accordance with standard operating procedures. This will support the organisation's ongoing business activities and service delivery.",
+  funds: "This request is for {title}. The funds are required to support operational expenditure within the approved budget framework. Approval is requested to release the necessary funds in accordance with financial controls. This will enable the organisation to meet its operational commitments.",
+  vehicle: "This request concerns {title}. The vehicle or transport resource is required to support operational mobility and field-based activities. Approval is requested to authorise the allocation or use of this resource. This will support the organisation's logistical and operational requirements.",
+}
+
+function makeDescription(title: string, typeKey: string): string {
+  const template = DESCRIPTION_TEMPLATES[typeKey] ?? DESCRIPTION_TEMPLATES.general
+  return template.replace("{title}", title.toLowerCase())
+}
+
 function mockSynthesize(text: string): SynthesizeResult {
   const cleaned = cleanText(text)
   const match = MOCK_SYNTHESIZE_PATTERNS.find((p) => p.pattern.test(cleaned)) ?? { pattern: /.*/, type: "general", approver: "manager" }
@@ -72,10 +88,12 @@ function mockSynthesize(text: string): SynthesizeResult {
 
   const shortTitle = cleaned.length > 60 ? cleaned.slice(0, 60).replace(/\s+\S*$/, "") : cleaned
 
+  const typeKey = hasFinance ? "finance" : match.type
+
   return {
     title: shortTitle,
-    description: `I am requesting approval for ${cleaned}. Please review and approve this request to facilitate the outlined business activities.`,
-    request_type_key: hasFinance ? "finance" : match.type,
+    description: makeDescription(shortTitle, typeKey),
+    request_type_key: typeKey,
     priority: /urgent|asap|immediately|critical|emergency/i.test(cleaned) ? "urgent" : "normal",
     department: null,
     suggested_fields: suggestedFields,
