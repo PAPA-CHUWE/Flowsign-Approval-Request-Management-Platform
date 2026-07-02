@@ -144,21 +144,72 @@ function VolumeChart({
 }
 
 function TypeChart({ data }: { data: { name: string; count: number }[] }) {
+  const chartData = [...data]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6)
+
+  if (!chartData.length) {
+    return (
+      <div className="flex h-48 items-center justify-center rounded-[10px] border border-dashed border-[#E8E6DE] bg-[#F7F6F2]">
+        <p className="text-[12px] text-brand-neutral-mid">
+          No request type data available
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className="h-48 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
-          data={data}
-          margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+          data={chartData}
+          layout="vertical"
+          margin={{ top: 5, right: 18, left: 10, bottom: 5 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#F1EFE8" />
-          <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#888780" }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 10, fill: "#888780" }} axisLine={false} tickLine={false} width={30} />
-          <Tooltip
-            contentStyle={{ fontSize: "12px", borderRadius: "8px" }}
-            labelStyle={{ fontSize: "12px" }}
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="#F1EFE8"
+            horizontal={false}
           />
-          <Bar dataKey="count" fill="#000066" radius={[4, 4, 0, 0]} />
+
+          <XAxis
+            type="number"
+            allowDecimals={false}
+            axisLine={false}
+            tickLine={false}
+            tick={{ fontSize: 10, fill: "#888780" }}
+          />
+
+          <YAxis
+            type="category"
+            dataKey="name"
+            width={90}
+            axisLine={false}
+            tickLine={false}
+            tick={{ fontSize: 10, fill: "#888780" }}
+          />
+
+          <Tooltip
+            cursor={{ fill: "rgba(0, 0, 102, 0.04)" }}
+            contentStyle={{
+              fontSize: "12px",
+              borderRadius: "10px",
+              border: "1px solid #E8E6DE",
+              boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+            }}
+            labelStyle={{
+              fontSize: "12px",
+              fontWeight: 600,
+            }}
+          />
+
+          <Bar
+            dataKey="count"
+            name="Requests"
+            fill="#000066"
+            radius={[0, 6, 6, 0]}
+            barSize={16}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>
