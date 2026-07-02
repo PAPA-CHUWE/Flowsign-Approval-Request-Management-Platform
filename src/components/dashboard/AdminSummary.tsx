@@ -3,6 +3,7 @@
 import {
   Area,
   Bar,
+  BarChart,
   CartesianGrid,
   ComposedChart,
   Legend,
