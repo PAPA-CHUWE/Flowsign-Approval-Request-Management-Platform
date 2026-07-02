@@ -1,6 +1,17 @@
 "use client"
 
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis, ResponsiveContainer } from "recharts"
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Tooltip,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  ComposedChart,
+  Line,
+  Legend,
+} from "recharts"
 import { AlertCircle, Bot, Ticket, Workflow } from "lucide-react"
 import { useAdminSummary } from "@/hooks/use-admin-summary"
 
@@ -35,66 +46,83 @@ function GapItem({ name, suggested }: { name: string; suggested: string }) {
   )
 }
 
-function VolumeChart({ data }: { data: { date: string; submitted: number; approved: number; rejected: number }[] }) {
+function VolumeChart({
+  data,
+}: {
+  data: { date: string; submitted: number; approved: number; rejected: number }[]
+}) {
   return (
     <div className="h-48 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart
+        <ComposedChart
           data={data}
-          margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+          margin={{ top: 10, right: 12, left: -20, bottom: 0 }}
         >
-          <defs>
-            <linearGradient id="colorSubmitted" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#000066" stopOpacity={0.85} />
-              <stop offset="95%" stopColor="#000066" stopOpacity={0.05} />
-            </linearGradient>
-            <linearGradient id="colorApproved" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#008000" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#008000" stopOpacity={0.05} />
-            </linearGradient>
-            <linearGradient id="colorRejected" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#ffff99" stopOpacity={0.7} />
-              <stop offset="95%" stopColor="#ffff99" stopOpacity={0.02} />
-            </linearGradient>
-          </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="#F1EFE8" />
-          <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#888780" }} axisLine={false} tickLine={false} />
-          <YAxis domain={[0, 1]} ticks={[0, 0.25, 0.5, 0.75, 1]} tick={{ fontSize: 10, fill: "#888780" }} axisLine={false} tickLine={false} width={30} />
+
+          <XAxis
+            dataKey="date"
+            tick={{ fontSize: 10, fill: "#888780" }}
+            axisLine={false}
+            tickLine={false}
+          />
+
+          <YAxis
+            allowDecimals={false}
+            tick={{ fontSize: 10, fill: "#888780" }}
+            axisLine={false}
+            tickLine={false}
+            width={30}
+          />
+
           <Tooltip
-            contentStyle={{ fontSize: "12px", borderRadius: "8px" }}
-            labelStyle={{ fontSize: "12px" }}
+            cursor={{ fill: "rgba(0, 0, 102, 0.04)" }}
+            contentStyle={{
+              fontSize: "12px",
+              borderRadius: "10px",
+              border: "1px solid #E8E6DE",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+            }}
+            labelStyle={{ fontSize: "12px", fontWeight: 600 }}
           />
-          <Area
-            type="monotone"
+
+          <Legend
+            iconType="circle"
+            wrapperStyle={{
+              fontSize: "11px",
+              color: "#555",
+              paddingTop: "6px",
+            }}
+          />
+
+          <Bar
             dataKey="submitted"
-            stroke="#000066"
-            strokeWidth={2}
-            fillOpacity={1}
-            fill="url(#colorSubmitted)"
-            isAnimationActive={true}
-            animationBegin={200}
-            animationDuration={1300}
+            name="Submitted"
+            fill="#DADAF2"
+            radius={[4, 4, 0, 0]}
+            barSize={22}
           />
-          <Area
+
+          <Line
             type="monotone"
             dataKey="approved"
+            name="Approved"
             stroke="#008000"
-            strokeWidth={2}
-            fillOpacity={1}
-            fill="url(#colorApproved)"
-            isAnimationActive={true}
+            strokeWidth={2.5}
+            dot={{ r: 3, fill: "#008000" }}
+            activeDot={{ r: 5 }}
           />
-          <Area
+
+          <Line
             type="monotone"
             dataKey="rejected"
-            stroke="#a39600"
-            strokeWidth={1.5}
-            strokeDasharray="4 2"
-            fillOpacity={1}
-            fill="url(#colorRejected)"
-            isAnimationActive={true}
+            name="Rejected"
+            stroke="#B42318"
+            strokeWidth={2.5}
+            dot={{ r: 3, fill: "#B42318" }}
+            activeDot={{ r: 5 }}
           />
-        </AreaChart>
+        </ComposedChart>
       </ResponsiveContainer>
     </div>
   )
