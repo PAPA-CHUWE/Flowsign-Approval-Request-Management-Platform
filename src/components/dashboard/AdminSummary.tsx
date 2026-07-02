@@ -1,16 +1,16 @@
 "use client"
 
 import {
+  Area,
   Bar,
-  BarChart,
   CartesianGrid,
+  ComposedChart,
+  Legend,
+  Line,
+  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
-  ResponsiveContainer,
-  ComposedChart,
-  Line,
-  Legend,
 } from "recharts"
 import { AlertCircle, Bot, Ticket, Workflow } from "lucide-react"
 import { useAdminSummary } from "@/hooks/use-admin-summary"
@@ -49,15 +49,27 @@ function GapItem({ name, suggested }: { name: string; suggested: string }) {
 function VolumeChart({
   data,
 }: {
-  data: { date: string; submitted: number; approved: number; rejected: number }[]
+  data: {
+    date: string
+    submitted: number
+    approved: number
+    rejected: number
+  }[]
 }) {
   return (
     <div className="h-48 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart
           data={data}
-          margin={{ top: 10, right: 12, left: -20, bottom: 0 }}
+          margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
         >
+          <defs>
+            <linearGradient id="submittedFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#000066" stopOpacity={0.18} />
+              <stop offset="95%" stopColor="#000066" stopOpacity={0.02} />
+            </linearGradient>
+          </defs>
+
           <CartesianGrid strokeDasharray="3 3" stroke="#F1EFE8" />
 
           <XAxis
@@ -81,36 +93,38 @@ function VolumeChart({
               fontSize: "12px",
               borderRadius: "10px",
               border: "1px solid #E8E6DE",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+              boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
             }}
-            labelStyle={{ fontSize: "12px", fontWeight: 600 }}
+            labelStyle={{
+              fontSize: "12px",
+              fontWeight: 600,
+            }}
           />
 
           <Legend
             iconType="circle"
             wrapperStyle={{
               fontSize: "11px",
-              color: "#555",
               paddingTop: "6px",
             }}
           />
 
-          <Bar
+          <Area
+            type="monotone"
             dataKey="submitted"
             name="Submitted"
-            fill="#DADAF2"
-            radius={[4, 4, 0, 0]}
-            barSize={22}
+            stroke="#000066"
+            strokeWidth={2}
+            fill="url(#submittedFill)"
+            dot={false}
           />
 
-          <Line
-            type="monotone"
+          <Bar
             dataKey="approved"
             name="Approved"
-            stroke="#008000"
-            strokeWidth={2.5}
-            dot={{ r: 3, fill: "#008000" }}
-            activeDot={{ r: 5 }}
+            fill="#008000"
+            radius={[4, 4, 0, 0]}
+            barSize={18}
           />
 
           <Line
