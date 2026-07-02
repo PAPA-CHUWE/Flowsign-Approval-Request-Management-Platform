@@ -130,16 +130,13 @@ export function RequestFormShell({ onRequestCreated, initialType, initialRequest
       if (data.title) setTitle(data.title)
       if (data.description) setDescription(data.description)
       if (data.request_type_key) {
-        const matched = requestTypes.find((rt) => rt.key === data.request_type_key)
-        if (matched) {
-          setType(matched.key)
-          if (data.suggested_fields) {
-            const coerced: Record<string, string> = {}
-            for (const [k, v] of Object.entries(data.suggested_fields)) {
-              coerced[k] = String(v)
-            }
-            setRequestData(coerced)
+        setType(data.request_type_key)
+        if (data.suggested_fields) {
+          const coerced: Record<string, string> = {}
+          for (const [k, v] of Object.entries(data.suggested_fields)) {
+            coerced[k] = String(v)
           }
+          setRequestData(coerced)
         }
       }
       if (data.priority) setPriority(data.priority as Priority)

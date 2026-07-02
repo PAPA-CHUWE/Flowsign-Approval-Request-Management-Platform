@@ -32,13 +32,35 @@ const MOCK_SYNTHESIZE_PATTERNS: Array<{ pattern: RegExp; type: string; approver:
 ]
 
 const cleanText = (text: string): string => {
-  return text
-    .replace(/\bvisiti\b/gi, "visit")
-    .replace(/\breciept\b/gi, "receipt")
-    .replace(/\breimbusement\b/gi, "reimbursement")
-    .replace(/\bexpences\b/gi, "expenses")
-    .replace(/\blaptp\b/gi, "laptop")
-    .replace(/\bto\s+th\b/gi, "to")
+  let t = text
+  t = t.replace(/\bvisiti\b/gi, "visit")
+  t = t.replace(/\breciept\b/gi, "receipt")
+  t = t.replace(/\breimbusement\b/gi, "reimbursement")
+  t = t.replace(/\bexpences\b/gi, "expenses")
+  t = t.replace(/\blaptp\b/gi, "laptop")
+  t = t.replace(/\bbulawayoo\b/gi, "Bulawayo")
+  t = t.replace(/\bbulwayo\b/gi, "Bulawayo")
+  t = t.replace(/\bharare\b/gi, "Harare")
+  t = t.replace(/\bgweru\b/gi, "Gweru")
+  t = t.replace(/\bkwekwe\b/gi, "Kwekwe")
+  t = t.replace(/\bmasvingo\b/gi, "Masvingo")
+  t = t.replace(/\bmutare\b/gi, "Mutare")
+  t = t.replace(/\bkadoma\b/gi, "Kadoma")
+  t = t.replace(/\bchinhoyi\b/gi, "Chinhoyi")
+  t = t.replace(/\bjanuary\b/gi, "January")
+  t = t.replace(/\bfebruary\b/gi, "February")
+  t = t.replace(/\bmarch\b/gi, "March")
+  t = t.replace(/\bapril\b/gi, "April")
+  t = t.replace(/\bjune\b/gi, "June")
+  t = t.replace(/\bjuly\b/gi, "July")
+  t = t.replace(/\baugust\b/gi, "August")
+  t = t.replace(/\bseptember\b/gi, "September")
+  t = t.replace(/\boctober\b/gi, "October")
+  t = t.replace(/\bnovember\b/gi, "November")
+  t = t.replace(/\bdecember\b/gi, "December")
+  t = t.replace(/\bto\s+th\b/gi, "to")
+  t = t.replace(/\bth\s+(\d)/gi, "$1")
+  return t.trim()
 }
 
 const extractAmount = (text: string): number | null => {
@@ -75,6 +97,59 @@ function makeDescription(title: string, typeKey: string): string {
   return template.replace("{title}", title.toLowerCase())
 }
 
+function makeTitle(text: string, typeKey: string): string {
+  const cleaned = cleanText(text)
+
+  if (typeKey === "travel") {
+    const hasSiteVisit = /\bsite\s*visit\b/i.test(cleaned)
+    const location = cleaned.match(/\b(?:to|in|at)\s+(Harare|Bulawayo|Gweru|Kwekwe|Masvingo|Mutare|Kadoma|Chinhoyi)(?:\s+(?:and|to|,\s*)\s+(Harare|Bulawayo|Gweru|Kwekwe|Masvingo|Mutare|Kadoma|Chinhoyi))?/)
+    const dates = cleaned.match(/(\d{1,2}(?:st|nd|rd|th)?\s+(?:January|February|March|April|June|July|August|September|October|November|December)(?:\s+to\s+\d{1,2}(?:st|nd|rd|th)?(?:\s+(?:January|February|March|April|June|July|August|September|October|November|December))?)/)
+    if (hasSiteVisit && location) {
+      const cities = location[0].replace(/^(?:to|in|at)\s+/i, "")
+      const dateStr = dates ? ` (${dates[1]})` : ""
+      return `Site Visit to ${cities}${dateStr}`
+    }
+    if (location) {
+      const cities = location[0].replace(/^(?:to|in|at)\s+/i, "")
+      const dateStr = dates ? ` (${dates[1]})` : ""
+      return `Business Travel to ${cities}${dateStr}`
+    }
+    if (hasSiteVisit) return "Site Visit"
+    return "Business Travel Request"
+  }
+
+  if (typeKey === "asset") {
+    const isPurchase = /\b(buy|purchase|order|procure)\b/i.test(cleaned)
+    const item = cleaned.match(/\b((?:new\s+)?(?:laptop|macbook|computer|monitor|printer|software|license|keyboard|hardware|equipment))\b/i)
+    const action = isPurchase ? "Purchase" : "Request"
+    const what = item ? item[1].replace(/^new\s+/i, "").replace(/\b\w/g, (c) => c.toUpperCase()) : "Equipment"
+    return `${action}: ${what}`
+  }
+
+  if (typeKey === "hr") {
+    const isLeave = /\b(leave|vacation|pto|time\s*off|holiday)\b/i.test(cleaned)
+    if (isLeave) {
+      const dates = cleaned.match(/(\d{1,2}(?:st|nd|rd|th)?\s+(?:January|February|March|April|June|July|August|September|October|November|December)(?:\s+to\s+\d{1,2}(?:st|nd|rd|th)?(?:\s+(?:January|February|March|April|June|July|August|September|October|November|December))?)/)
+      return `Leave Request${dates ? ` (${dates[1]})` : ""}`
+    }
+    return "HR Request"
+  }
+
+  if (typeKey === "finance") {
+    const isReimbursement = /\b(reimburse|expense|receipt)\b/i.test(cleaned)
+    const isBudget = /\b(budget|fund|budgetary)\b/i.test(cleaned)
+    if (isReimbursement) return "Expense Reimbursement Request"
+    if (isBudget) return "Budget Allocation Request"
+    return "Finance Request"
+  }
+
+  const words = cleaned.split(/\s+/).filter(Boolean)
+  const titleWords = words.slice(0, 8)
+  const title = titleWords.join(" ")
+  if (title.length > 70) return title.slice(0, 70).replace(/\s+\S*$/, "")
+  return title || "General Request"
+}
+
 function mockSynthesize(text: string): SynthesizeResult {
   const cleaned = cleanText(text)
   const match = MOCK_SYNTHESIZE_PATTERNS.find((p) => p.pattern.test(cleaned)) ?? { pattern: /.*/, type: "general", approver: "manager" }
@@ -86,13 +161,12 @@ function mockSynthesize(text: string): SynthesizeResult {
   if (amount) suggestedFields.amount = amount
   if (location) suggestedFields.location = location
 
-  const shortTitle = cleaned.length > 60 ? cleaned.slice(0, 60).replace(/\s+\S*$/, "") : cleaned
-
   const typeKey = hasFinance ? "finance" : match.type
+  const title = makeTitle(cleaned, typeKey)
 
   return {
-    title: shortTitle,
-    description: makeDescription(shortTitle, typeKey),
+    title,
+    description: makeDescription(title, typeKey),
     request_type_key: typeKey,
     priority: /urgent|asap|immediately|critical|emergency/i.test(cleaned) ? "urgent" : "normal",
     department: null,
