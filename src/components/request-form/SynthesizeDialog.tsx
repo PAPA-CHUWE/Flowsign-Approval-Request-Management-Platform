@@ -20,15 +20,26 @@ interface SynthesizeDialogProps {
   onComplete: (result: SynthesizeResult) => void
 }
 
+// Backend request types: general, funds, finance, travel, asset, access, hr, vehicle
 const MOCK_SYNTHESIZE_PATTERNS: Array<{ pattern: RegExp; type: string; approver: string }> = [
-  { pattern: /(leave|vacation|pto|sick|time.?off)/i, type: "leave", approver: "hr" },
-  { pattern: /(procure|purchase|buy|order|vendor|quote)/i, type: "procurement", approver: "manager" },
-  { pattern: /(laptop|macbook|monitor|equipment|hardware|software|computer)/i, type: "it_equipment", approver: "it_admin" },
+  { pattern: /(leave|vacation|pto|sick|time.?off)/i, type: "hr", approver: "hr" },
+  { pattern: /(procure|purchase|buy|order|vendor|quote)/i, type: "general", approver: "manager" },
+  { pattern: /(laptop|macbook|monitor|equipment|hardware|software|computer)/i, type: "asset", approver: "it_admin" },
   { pattern: /(budget|fund|finance|payment|invoice|expense)/i, type: "finance", approver: "finance" },
-  { pattern: /(facility|office|desk|maintenance|repair|cleaning)/i, type: "facilities", approver: "manager" },
+  { pattern: /(facility|office|desk|maintenance|repair|cleaning)/i, type: "general", approver: "manager" },
   { pattern: /(hiring|recruit|onboard|contract|employee)/i, type: "hr", approver: "hr" },
   { pattern: /(travel|flight|hotel|trip|conference|site\s*visit|bulawayo|harare)/i, type: "travel", approver: "manager" },
 ]
+
+const cleanText = (text: string): string => {
+  return text
+    .replace(/\bvisiti\b/gi, "visit")
+    .replace(/\breciept\b/gi, "receipt")
+    .replace(/\breimbusement\b/gi, "reimbursement")
+    .replace(/\bexpences\b/gi, "expenses")
+    .replace(/\blaptp\b/gi, "laptop")
+    .replace(/\bto\s+th\b/gi, "to")
+}
 
 const extractAmount = (text: string): number | null => {
   const patterns = [
@@ -49,20 +60,23 @@ const extractLocation = (text: string): string | null => {
 }
 
 function mockSynthesize(text: string): SynthesizeResult {
-  const match = MOCK_SYNTHESIZE_PATTERNS.find((p) => p.pattern.test(text)) ?? MOCK_SYNTHESIZE_PATTERNS[MOCK_SYNTHESIZE_PATTERNS.length - 1]
-  const amount = extractAmount(text)
-  const location = extractLocation(text)
-  const hasFinance = /finance|payment|budget|invoice|expense|for\s+\d+/i.test(text) || amount !== null
+  const cleaned = cleanText(text)
+  const match = MOCK_SYNTHESIZE_PATTERNS.find((p) => p.pattern.test(cleaned)) ?? { pattern: /.*/, type: "general", approver: "manager" }
+  const amount = extractAmount(cleaned)
+  const location = extractLocation(cleaned)
+  const hasFinance = /finance|payment|budget|invoice|expense|for\s+\d+/i.test(cleaned) || amount !== null
 
   const suggestedFields: Record<string, string | number> = {}
   if (amount) suggestedFields.amount = amount
   if (location) suggestedFields.location = location
 
+  const shortTitle = cleaned.length > 60 ? cleaned.slice(0, 60).replace(/\s+\S*$/, "") : cleaned
+
   return {
-    title: text,
-    description: `I am requesting approval for ${text.toLowerCase()}. This request is being submitted to support ongoing operational activities within the organization.`,
+    title: shortTitle,
+    description: `I am requesting approval for ${cleaned}. Please review and approve this request to facilitate the outlined business activities.`,
     request_type_key: hasFinance ? "finance" : match.type,
-    priority: /urgent|asap|immediately|critical|emergency/i.test(text) ? "urgent" : "normal",
+    priority: /urgent|asap|immediately|critical|emergency/i.test(cleaned) ? "urgent" : "normal",
     department: null,
     suggested_fields: suggestedFields,
     recommended_approver: hasFinance ? "finance" : match.approver,
