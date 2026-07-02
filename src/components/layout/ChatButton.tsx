@@ -71,7 +71,7 @@ const makeTitle = (text: string, typeKey: string): string => {
   if (typeKey === "travel") {
     const hasSiteVisit = /\bsite\s*visit\b/i.test(cleaned)
     const location = cleaned.match(/\b(?:to|in|at)\s+(Harare|Bulawayo|Gweru|Kwekwe|Masvingo|Mutare|Kadoma|Chinhoyi)(?:\s+(?:and|to|,\s*)\s+(Harare|Bulawayo|Gweru|Kwekwe|Masvingo|Mutare|Kadoma|Chinhoyi))?/)
-    const dates = cleaned.match(/(\d{1,2}(?:st|nd|rd|th)?\s+(?:January|February|March|April|June|July|August|September|October|November|December)(?:\s+to\s+\d{1,2}(?:st|nd|rd|th)?(?:\s+(?:January|February|March|April|June|July|August|September|October|November|December))?)/)
+    const dates = cleaned.match(/(\d{1,2}(?:st|nd|rd|th)?\s+(?:January|February|March|April|June|July|August|September|October|November|December)(?:\s+to\s+\d{1,2}(?:st|nd|rd|th)?(?:\s+(?:January|February|March|April|June|July|August|September|October|November|December))?)?)/)
     if (hasSiteVisit && location) {
       const cities = location[0].replace(/^(?:to|in|at)\s+/i, "")
       const dateStr = dates ? ` (${dates[1]})` : ""
@@ -99,7 +99,7 @@ const makeTitle = (text: string, typeKey: string): string => {
   if (typeKey === "hr") {
     const isLeave = /\b(leave|vacation|pto|time\s*off|holiday)\b/i.test(cleaned)
     if (isLeave) {
-      const dates = cleaned.match(/(\d{1,2}(?:st|nd|rd|th)?\s+(?:January|February|March|April|June|July|August|September|October|November|December)(?:\s+to\s+\d{1,2}(?:st|nd|rd|th)?(?:\s+(?:January|February|March|April|June|July|August|September|October|November|December))?)/)
+    const dates = cleaned.match(/(\d{1,2}(?:st|nd|rd|th)?\s+(?:January|February|March|April|June|July|August|September|October|November|December)(?:\s+to\s+\d{1,2}(?:st|nd|rd|th)?(?:\s+(?:January|February|March|April|June|July|August|September|October|November|December))?)?)/)
       return `Leave Request${dates ? ` (${dates[1]})` : ""}`
     }
     return "HR Request"

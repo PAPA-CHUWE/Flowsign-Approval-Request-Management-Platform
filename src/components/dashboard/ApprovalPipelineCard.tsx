@@ -17,11 +17,11 @@ import type { TopRequestType } from "@/lib/api/analytics";
 
 // Recharts requires hex values as component props — not inline styles
 const CHART_COLORS = {
-  pending:  "#854F0B",
-  approved: "#0F6E56",
-  rejected: "#791F1F",
-  inReview: "#534AB7",
-  bar:      "#0F6E56",
+  pending:  "#ffff99",
+  approved: "#008000",
+  rejected: "#a39600",
+  inReview: "#000066",
+  bar:      "#000066",
 };
 
 const PIE_CONFIG = [
