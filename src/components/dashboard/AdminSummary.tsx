@@ -45,21 +45,21 @@ function VolumeChart({ data }: { data: { date: string; submitted: number; approv
         >
           <defs>
             <linearGradient id="colorSubmitted" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
+              <stop offset="5%" stopColor="#000066" stopOpacity={0.85} />
+              <stop offset="95%" stopColor="#000066" stopOpacity={0.05} />
             </linearGradient>
             <linearGradient id="colorApproved" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#2A9D8F" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#2A9D8F" stopOpacity={0} />
+              <stop offset="5%" stopColor="#008000" stopOpacity={0.8} />
+              <stop offset="95%" stopColor="#008000" stopOpacity={0.05} />
             </linearGradient>
             <linearGradient id="colorRejected" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#E76F51" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#E76F51" stopOpacity={0} />
+              <stop offset="5%" stopColor="#ffff99" stopOpacity={0.7} />
+              <stop offset="95%" stopColor="#ffff99" stopOpacity={0.02} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="#F1EFE8" />
           <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#888780" }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 10, fill: "#888780" }} axisLine={false} tickLine={false} width={30} />
+          <YAxis domain={[0, 1]} ticks={[0, 0.25, 0.5, 0.75, 1]} tick={{ fontSize: 10, fill: "#888780" }} axisLine={false} tickLine={false} width={30} />
           <Tooltip
             contentStyle={{ fontSize: "12px", borderRadius: "8px" }}
             labelStyle={{ fontSize: "12px" }}
@@ -67,7 +67,8 @@ function VolumeChart({ data }: { data: { date: string; submitted: number; approv
           <Area
             type="monotone"
             dataKey="submitted"
-            stroke="#8884d8"
+            stroke="#000066"
+            strokeWidth={2}
             fillOpacity={1}
             fill="url(#colorSubmitted)"
             isAnimationActive={true}
@@ -77,7 +78,8 @@ function VolumeChart({ data }: { data: { date: string; submitted: number; approv
           <Area
             type="monotone"
             dataKey="approved"
-            stroke="#2A9D8F"
+            stroke="#008000"
+            strokeWidth={2}
             fillOpacity={1}
             fill="url(#colorApproved)"
             isAnimationActive={true}
@@ -85,7 +87,9 @@ function VolumeChart({ data }: { data: { date: string; submitted: number; approv
           <Area
             type="monotone"
             dataKey="rejected"
-            stroke="#E76F51"
+            stroke="#a39600"
+            strokeWidth={1.5}
+            strokeDasharray="4 2"
             fillOpacity={1}
             fill="url(#colorRejected)"
             isAnimationActive={true}
@@ -111,7 +115,7 @@ function TypeChart({ data }: { data: { name: string; count: number }[] }) {
             contentStyle={{ fontSize: "12px", borderRadius: "8px" }}
             labelStyle={{ fontSize: "12px" }}
           />
-          <Bar dataKey="count" fill="#8884d8" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="count" fill="#000066" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>
